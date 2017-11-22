@@ -1,0 +1,11 @@
+﻿<h1>Hi {{vm.user.firstName}}!!</h1>
+<form method="post">
+    <div id='insertNew'>
+        <h2>Inserting new rooms</h2>
+        <input type="text" class="form-control" placeholder="Room name">
+        <input type="text" class="form-control" placeholder="Room Location">     
+        <input type="text" class="form-control" placeholder="Room manager">            
+        <button type="submit" class="btn btn-primary" ng-click="vm.Create(room)">Submit</button>        
+    </div>
+
+</form>

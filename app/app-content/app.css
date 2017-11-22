@@ -1,0 +1,16 @@
+﻿body {
+    padding: 20px 0;
+}
+
+.flash-message {
+    margin-top: 20px;
+}
+
+div#insertNew {
+    margin: 0 auto; 
+    width: 50%;
+}
+
+div#insertNew input {
+    margin: 20px 0;
+}
