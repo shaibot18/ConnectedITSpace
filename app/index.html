@@ -1,35 +1,134 @@
 ﻿<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <title>Connected IT Space</title>
 
-    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Bootstrap -->
+    <link href="/vendors/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome --> 
+	<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"  crossorigin="anonymous">                 	
+     <!--<link href="../vendors/font-awesome/css/font-awesome.min.css" rel="stylesheet" crossorigin="anonymous">-->
+    <!-- NProgress -->
+    <link href="/vendors/nprogress/nprogress.css" rel="stylesheet">
+    
+    <!-- <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" /> -->
     <link href="app-content/app.css" rel="stylesheet" />
-</head>
-<body class="container">
-    <!-- header -->
-    <header>
-        <ul class="nav nav-tabs">
-            <li ng-class="{active: activeTab === 'home'}"><a ui-sref="home">Home</a></li>
-            <li ng-class="{active: activeTab === 'account'}"><a ui-sref="account">Account</a></li>
-            <li><a href="/login" target="_self">Logout</a></li>
-        </ul>
-        <div class="flash-message" ng-if="flash">
-            <div class="{{'alert alert-' + flash.type}}" ng-bind="flash.message"></div>
+
+    <!-- Custom Theme Style -->
+    <link href="/Contents/custom.min.css" rel="stylesheet">
+	
+  </head>
+
+  <body class="nav-md">
+    <div class="container body">
+      <div class="main_container">
+	  
+	  <div class='nav_menu'>
+			<div class="nav toggle" id="menuicon">
+                <a id="menu_toggle"><i class="fa fa-bars"></i></a>
+			</div>
+			<div class="site_titleimg" id="myiconuse">
+				<svg t="1511763568232" class="icon icon1" style="" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="24595" xmlns:xlink="http://www.w3.org/1999/xlink" width="32" height="32"><defs><style type="text/css"></style></defs><path d="M815.344 513.1650000000001c-3.552713678800501e-15 9.933-3.5070000000000103 19.286-10.519000000000007 26.297l-264.7450000000001 264.74499999999983c-7.011000000000003 7.011999999999998-16.365000000000002 10.520999999999994-26.299000000000007 10.52099999999999s-19.285000000000004-3.5050000000000106-26.29699999999999-10.521000000000013l-53.18299999999996-53.18200000000004c-7.011999999999994-7.013000000000004-11.103999999999989-16.366000000000007-11.10399999999999-26.301000000000005s4.091000000000015-19.283 11.104000000000013-26.296999999999993l110.45600000000002-110.45799999999996-293.38-5.684341886080802e-14c-20.454-7.105427357601002e-15-37.40299999999999-16.949000000000005-37.402999999999984-37.40300000000002l4.263256414560601e-14-74.80799999999999c7.105427357601002e-15-20.454 16.949000000000005-37.400999999999996 37.402000000000015-37.400999999999975l293.379 1.1368683772161603e-13-110.45699999999994-110.45700000000004c-7.011999999999994-7.013000000000004-10.518999999999991-16.362000000000002-10.519999999999992-26.298000000000002 3.552713678800501e-15-9.936 3.5040000000000093-19.287 10.519000000000009-26.29999999999999l53.183000000000035-53.18199999999996c7.012000000000004-7.012999999999995 16.362000000000002-10.518999999999991 26.297000000000004-10.518999999999988s19.287 3.5040000000000093 26.29999999999999 10.519000000000009l264.74499999999995 264.74200000000013c7.011999999999996 7.014000000000006 10.518999999999991 16.365000000000002 10.51899999999999 26.302000000000003zM962.0340000000001 513.1650000000002c1.2789769243681803e-13-247.79399999999998-201.0419999999998-448.837-448.83499999999975-448.8370000000001-247.79599999999996-1.1368683772161603e-13-448.8360000000002 201.0419999999998-448.83600000000024 448.8369999999996-1.2789769243681803e-13 247.79299999999998 201.0399999999998 448.83500000000015 448.8359999999998 448.8350000000002 247.79299999999998 1.2789769243681803e-13 448.8350000000001-201.0419999999998 448.8350000000001-448.8349999999997z" p-id="24596" fill="#ffffff"></path></svg>
+				<svg t="1511242740220" class="icon icon2" style="" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="13465" xmlns:xlink="http://www.w3.org/1999/xlink" width="32" height="32"><defs><style type="text/css"></style></defs><path d="M699.760905 528.404954l-119.93538 150.95315c-0.551427 0.689284-0.827141 1.929995-0.41357 3.032849 0.275714 1.102854 0.964997 1.792138 1.654281 1.792138l80.921917 0 0 112.353258c0 8.960689 5.789984 16.680668 13.785676 19.57566 0.827141 0.827141 1.792138 1.240711 2.894992 1.240711l49.628433 0c0.964997 0 2.067851-0.41357 2.894992-1.240711 7.995692-2.894992 13.785676-10.61497 13.785676-19.57566l0-112.353258 80.921917 0c0.689284 0 1.378568-0.689284 1.654281-1.792138 0.275714-1.102854 0.137857-2.205708-0.41357-3.032849l-119.93538-150.95315c-0.964997-1.378568-2.343565-2.205708-3.722132-2.205708C702.10447 526.199246 700.725902 527.026387 699.760905 528.404954L699.760905 528.404954 699.760905 528.404954zM643.239634 534.470652c-14.337103-8.684976-29.225633-16.267097-45.07916-22.332795 48.249865-32.947765 79.95692-88.641896 79.95692-152.056004 0-102.565428-83.816909-186.24448-186.658051-186.24448-102.841142 0-185.279483 83.541195-185.279483 185.00377 0 63.276252 31.707054 119.108239 79.95692 152.056004C277.092084 553.908454 200.857297 659.093161 200.857297 781.923533l51.971998 0c0-121.589661 92.639742-222.914378 210.645127-236.837911 1.240711 0 32.947765-2.481422 59.691976 0l2.481422 0c20.954227 3.032849 41.081314 8.822833 59.96769 16.818525C602.847604 550.324179 622.285407 541.087776 643.239634 534.470652L643.239634 534.470652 643.239634 534.470652zM491.5972 498.214324c-77.475498 0-139.648896-62.035541-139.648896-139.373183 0-77.199785 62.173398-139.373183 139.648896-139.373183 77.475498 0 139.648896 62.035541 139.648896 139.373183C631.246096 436.178783 568.934841 498.214324 491.5972 498.214324L491.5972 498.214324 491.5972 498.214324zM491.5972 498.214324" p-id="13466" fill="#ffffff"></path><path d="M512 0C229.255789 0 0 229.255789 0 512S229.255789 1024 512 1024s512-229.255789 512-512S794.744211 0 512 0L512 0zM512 974.647281C256.551427 974.647281 49.490576 767.448573 49.490576 512c0-255.448573 207.060851-462.647281 462.647281-462.647281S974.647281 256.551427 974.647281 512C974.647281 767.448573 767.448573 974.647281 512 974.647281L512 974.647281zM512 974.647281" p-id="13467" fill="#ffffff"></path></svg>
+			</div>
+			<div class="myboss">
+				<div class="mybosstext">
+					<div><i class="fa fa-envelope"></i>Doe.John@cn.bosch.com</div>
+					<div><i class="fa fa-phone"></i>2188-1111</div>
+				</div>
+				<div class="site_titleimg2">
+					<img src="/images/picture.jpg" alt="..." class="img-circle2">
+				</div>
+			</div>
+			<div class="navbar nav_title" style="border: 0;">
+              <a href="#" class="site_title"><img src="/images/itspaceLOGO.png" ><span>Connected IT Space</span></a>
+            </div>
+			
+			
+	  </div>
+	  <div class='nav_menu mycontent_bar'>
+	  
+        <div class="col-md-3 left_col">
+          <div class="left_col scroll-view">
+            
+
+            <div class="clearfix"></div>
+
+            <!-- menu profile quick info -->
+            <div class="profile clearfix">
+              <div class="profile_pic">
+                <img src="/images/img.jpg" alt="..." class="img-circle profile_img">
+              </div>
+              <div class="profile_info">
+                <span>Milo Masson</span>
+                <h2>CI/CWR2.5-AP</h2>
+              </div>
+			  <div class="profile_login">
+				<i class="fa fa-power-off"></i>
+			  </div>
+              <div class="clearfix"></div>
+            </div>
+            <!-- /menu profile quick info -->
+
+            <br />
+              <div class="menu_section">
+                <ul class="nav side-menu">
+                  <li class='leftbtclick'>
+				  <a href="manager_room_all.html">
+				  <svg t="1511750296141" class="icon" style="" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2152" xmlns:xlink="http://www.w3.org/1999/xlink" width="26" height="26"><defs><style type="text/css"></style></defs><path d="M929.295 852.142h-865.391v-642.213c0-15.452 12.484-27.936 27.936-27.936s27.936 12.484 27.936 27.936v586.342h809.622c15.452 0 27.936 12.484 27.936 27.936-0.102 15.452-12.586 27.936-28.038 27.936v0zM845.59 740.399h-55.871c-30.801 0-55.871-24.968-55.871-55.871v-334.921c0-30.801 24.968-55.871 55.871-55.871h55.871c30.801 0 55.871 24.968 55.871 55.871v335.023c0 30.801-25.070 55.769-55.871 55.769v0zM566.439 740.399h-55.871c-30.801 0-55.871-24.968-55.871-55.871v-502.432c0-30.801 24.968-55.871 55.871-55.871h55.871c30.801 0 55.871 24.968 55.871 55.871v502.535c-0.102 30.801-25.070 55.769-55.871 55.769v0zM287.185 740.399h-55.871c-30.801 0-55.871-24.968-55.871-55.871v-223.281c0-30.801 24.968-55.871 55.871-55.871h55.871c30.801 0 55.871 24.968 55.871 55.871v223.383c0 30.801-24.968 55.769-55.871 55.769v0z" p-id="2153" fill="#9d9ca4"></path></svg>
+				  My Room Data</a>
+                  </li>
+                </ul>
+              </div>
+
+            <!-- /menu footer buttons -->
+          </div>
         </div>
-    </header>
+ <!-- page content -->
+ <div class="right_col" role="main">
+        <div class="">
+          <div class="page-title">
+      
+            <div class="row">
+             
+      
+            </div>
+          </div>
+        </div>
+      
+      
+      <!-- /page content -->
 
-    <!-- main -->
-    <main ui-view></main>
-
-    <!-- footer -->
-    <footer></footer>
-
-    <!-- external scripts -->
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
+      </div>
+	  </div>
+   </div>
+    
+   <!-- external scripts -->
+    <!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script> -->
+    <!-- <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script> -->
+    <!-- <script src="//apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script> -->
+    <script src="//apps.bdimg.com/libs/angular.js/1.4.6/angular.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js"></script>
+
+
+	<!-- jQuery -->
+    <script src="/vendors/jquery/dist/jquery.min.js"></script>
+    <!-- Bootstrap -->
+    <script src="/vendors/bootstrap/dist/js/bootstrap.min.js"></script>
+    <!-- NProgress -->
+    <script src="/vendors/nprogress/nprogress.js"></script>
+	 <!-- morris.js -->
+	<script src="/vendors/raphael/raphael.min.js"></script>
+    <script src="/vendors/morris.js/morris.min.js"></script>
+    
+    <!-- Custom Theme Scripts -->
+    <script src="/scripts/custom.min.js"></script>
 
     <!-- application scripts -->
     <script src="app.js"></script>
@@ -38,5 +137,22 @@
     <script src="app-services/room.service.js"></script>    
     <script src="home/index.controller.js"></script>
     <script src="account/index.controller.js"></script>
-</body>
+        
+	<script type="text/javascript">
+	$(document).ready(function(){
+		$(".icon1").click(
+			function(){
+			$(".myboss").css("display","none");
+			$(".icon2").css("display","inline");
+			$(".icon1").css("display","none");},
+		);
+		$(".icon2").click(
+			function(){
+			$(".myboss").css("display","inline");
+			$(".icon1").css("display","inline");
+			$(".icon2").css("display","none");},
+		);
+	});
+</script>
+  </body>
 </html>

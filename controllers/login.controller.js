@@ -10,7 +10,6 @@ router.get('/', function (req, res) {
     // move success message into local variable so it only appears once (single read)
     var viewData = { success: req.session.success };
     delete req.session.success;
-
     res.render('login', viewData);
 });
 
@@ -34,6 +33,7 @@ router.post('/', function (req, res) {
 
         // redirect to returnUrl
         var returnUrl = req.query.returnUrl && decodeURIComponent(req.query.returnUrl) || '/';
+        console.log(returnUrl);
         res.redirect(returnUrl);
     });
 });

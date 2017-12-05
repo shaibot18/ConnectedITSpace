@@ -1,3 +1,44 @@
-﻿
+﻿<!-- jQuery -->
+<script type="text/javascript" src="vendors/jquery/dist/jquery.js"></script>
+<script type="text/javascript">
+    $(document).ready(function(){
+        //login
+        $("#myiconuse").click(
+            function(){
+            if($(".mylogin_box").css("display")=="none"){
+                $(".mylogin_box").show();
+            }else{
+            $(".mylogin_box").hide();}
+            }
+        );
+        $(".loginbutton").click(
+            function(){
+            $(".mylogin_box").css("display","none");}
+        );
+        
+        
+        
+        $(".iconchinasgh").hover(
+            function (e) {
+                var pageX=e.pageX+20;
+                $(".iconchinasgh_box").css("left",pageX);
+                $(".iconchinasgh_box").css("display","inline");
+            },
+            
+            function (e) {
+                var pageX=e.pageX+20;
+                $(".iconchinasgh_box").css("left",pageX);
+                $(".iconchinasgh_box").css("display","none");
+            },
+        );	
+    });
+    </script>
+<!-- Bootstrap -->
+<script src="vendors/bootstrap/dist/js/bootstrap.min.js"></script>
+<!-- NProgress -->
+<script src="vendors/nprogress/nprogress.js"></script>
+
+<!-- Custom Theme Scripts -->
+<script src="scripts/custom.min.js"></script>
 </body>
 </html>
