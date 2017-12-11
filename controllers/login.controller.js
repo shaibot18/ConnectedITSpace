@@ -2,10 +2,12 @@
 var router = express.Router();
 var request = require('request');
 var config = require('config.json');
+var jwt = require('jsonwebtoken');
 
 router.get('/', function (req, res) {
     // log user out
     delete req.session.token;
+    delete req.session.user;
 
     // move success message into local variable so it only appears once (single read)
     var viewData = { success: req.session.success };
@@ -29,7 +31,11 @@ router.post('/', function (req, res) {
         }
 
         // save JWT token in the session to make it available to the angular app
+        // req.session.token = jwt.verify(body.token,config.secret);
         req.session.token = body.token;
+        req.session.user = jwt.verify(body.token,config.secret);
+        // var decoded = jwt.verify(body.token,config.secret);
+        // console.log(decoded);
 
         // redirect to returnUrl
         var returnUrl = req.query.returnUrl && decodeURIComponent(req.query.returnUrl) || '/';
