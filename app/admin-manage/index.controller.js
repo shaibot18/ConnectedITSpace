@@ -11,6 +11,7 @@
         vm.user = null;
         vm.saveUser = saveUser;
         vm.deleteUser = deleteUser;
+        vm.createUser = createUser;
 
         initController();
 
@@ -20,6 +21,20 @@
                 vm.user = user;
             });
         }
+
+        function createUser() {
+            console.log('Function called');
+            console.log(vm.user);
+            UserService.Create(vm.user)
+                .then(function () {
+                    FlashService.Success('User created');
+                    window.history.go(-1);//todo modify condition
+                })
+                .catch(function (error) {
+                    FlashService.Error(error);
+                });
+        }
+
 
         function saveUser() {
             UserService.Update(vm.user)

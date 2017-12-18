@@ -81,7 +81,7 @@
               <div class="menu_section">
                 <ul class="nav side-menu">
                     <li ng-if="user.role == 2">
-                      <a ui-sref="home">
+                      <a ui-sref="manager-all-rooms">
                       <svg t="1511750296141" class="icon" style="" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2152" xmlns:xlink="http://www.w3.org/1999/xlink" width="26" height="26"><defs><style type="text/css"></style></defs><path d="M929.295 852.142h-865.391v-642.213c0-15.452 12.484-27.936 27.936-27.936s27.936 12.484 27.936 27.936v586.342h809.622c15.452 0 27.936 12.484 27.936 27.936-0.102 15.452-12.586 27.936-28.038 27.936v0zM845.59 740.399h-55.871c-30.801 0-55.871-24.968-55.871-55.871v-334.921c0-30.801 24.968-55.871 55.871-55.871h55.871c30.801 0 55.871 24.968 55.871 55.871v335.023c0 30.801-25.070 55.769-55.871 55.769v0zM566.439 740.399h-55.871c-30.801 0-55.871-24.968-55.871-55.871v-502.432c0-30.801 24.968-55.871 55.871-55.871h55.871c30.801 0 55.871 24.968 55.871 55.871v502.535c-0.102 30.801-25.070 55.769-55.871 55.769v0zM287.185 740.399h-55.871c-30.801 0-55.871-24.968-55.871-55.871v-223.281c0-30.801 24.968-55.871 55.871-55.871h55.871c30.801 0 55.871 24.968 55.871 55.871v223.383c0 30.801-24.968 55.769-55.871 55.769v0z" p-id="2153" fill="#9d9ca4"></path></svg>
                         My Room Data
                       </a>
@@ -149,7 +149,8 @@
     <script src="app-services/user.service.js"></script>
     <script src="app-services/flash.service.js"></script>
     <script src="app-services/room.service.js"></script>    
-    <script src="home/index.controller.js"></script>
+    <script src="manager-one-room/index.controller.js"></script>
+    <script src="manager-all-rooms/index.controller.js"></script>
     <script src="account/index.controller.js"></script>
     <script src="admin-manage/index.controller.js"></script>
     <script src="admin-home/index.controller.js"></script>

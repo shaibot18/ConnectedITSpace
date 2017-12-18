@@ -55,7 +55,7 @@ function getById(_id) {
 
 function create(userParam) {
     var deferred = Q.defer();
-
+    console.log(userParam);
     // validation
     db.users.findOne(
         { username: userParam.username },

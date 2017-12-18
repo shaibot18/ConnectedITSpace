@@ -19,17 +19,24 @@
             $urlRouterProvider.when("/","/admin-home");
         }
         else if (window.user.role == 2) {
-            $urlRouterProvider.when("/","/home");
+            $urlRouterProvider.when("/","/manager-all-rooms");
         }
 
 
         $stateProvider
-            .state('home', {
-                url: '/home',
-                templateUrl: 'home/index.html',
-                controller: 'Home.IndexController',
+            .state('manager-all-rooms', {
+                url: '/manager-all-rooms',
+                templateUrl: 'manager-all-rooms/index.html',
+                controller: 'Manager-all-rooms.IndexController',
                 controllerAs: 'vm',
-                data: { activeTab: 'home' }
+                data: { activeTab: 'manager-all-rooms' }
+            })
+            .state('manager-one-room', {
+                url: '/manager-one-room',
+                templateUrl: 'manager-one-room/index.html',
+                controller: 'Manager-one-room.IndexController',
+                controllerAs: 'vm',
+                data: { activeTab: 'manager-one-room' }
             })
             .state('admin-home', {
                 url: '/admin-home',
