@@ -5,19 +5,19 @@ app.get('/',function(req,res){
     res.send('Hello world');
 })
 
-app.post('/roomdata',function(req,res){
+app.post('/api/roomdata',function(req,res){
     console.log('Received post');
     console.log(req.body);
-    res.send('Received post');
+    return res.send('Received post');
 })
 
-app.get('/roomdata',function(req,res){
+app.get('/api/roomdata',function(req,res){
     console.log('Received get');
     console.log(req.body);
-    res.send('Received get');
+    return res.send('Received get');
 })
 
-var server = app.listen(80,"192.168.43.111", function () {
+var server = app.listen(80,'0.0.0.0', function () {
     console.log('Server listening at http://' + server.address().address + ':' + server.address().port);
 });
 
