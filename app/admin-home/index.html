@@ -85,4 +85,56 @@
             </div>
         </div>
     </div>
+
+    <div class="x_panel">
+            <div class="x_title">
+                <h2>Room data table</h2>
+            </div>
+            <div class="x_content">
+                <div class="x_content">
+                    <table id="testtable" class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Mac Address</th>
+                                <th>Time </th>
+                                <th>Direction</th>
+                                <th>Time Zone</th>
+                                <th id="noicon"></th>
+                            </tr>
+                        </thead>
+    
+    
+                        <tbody>
+                            <tr ng-repeat="roomdata in vm.roomdataList">
+                                <td>{{roomdata.MacAddress}}</td>
+                                <td>{{roomdata.Time}}</td>
+                                <td>{{roomdata.Direction}}</td>
+                                <td>{{roomdata.TimeZone}}</td>
+                                <td>
+                                    <div class="predelet">
+                                        <i class="fa fa-trash-o"></i>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- <tr>
+                                <td>China,shanghai,sgh201,4F</td>
+                                <td>Milo Masson(CI/CWR2.5-AP)</td>
+                                <td>400</td>
+                                <td>63</td>
+                                <td>
+                                    <div class="predelet">
+                                        <i class="fa fa-trash-o"></i>
+                                    </div>
+                                    <div class="postdelet">
+                                        <div class="deleticon">Yes</div>
+                                        <div class="nodeleticon">No</div>
+                                    </div>
+                                </td>
+    
+                            </tr> -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 </div>

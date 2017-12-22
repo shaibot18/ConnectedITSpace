@@ -108,6 +108,9 @@
  <div class="right_col" role="main">
         <div class="">
           <div class="page-title">
+              <div class="flash-message" ng-if="flash">
+                  <div class="{{'alert alert-' + flash.type}}" ng-bind="flash.message"></div>
+              </div>
             <div class="row">
                 <main ui-view></main>                
              
@@ -149,6 +152,7 @@
     <script src="app-services/user.service.js"></script>
     <script src="app-services/flash.service.js"></script>
     <script src="app-services/room.service.js"></script>    
+    <script src="app-services/roomdata.service.js"></script>    
     <script src="manager-one-room/index.controller.js"></script>
     <script src="manager-all-rooms/index.controller.js"></script>
     <script src="account/index.controller.js"></script>

@@ -14,7 +14,7 @@ app.use(session({ secret: config.secret, resave: false, saveUninitialized: true 
 app.use(express.static(__dirname+'/public'));
 
 // use JWT auth to secure the api
-app.use('/api', expressJwt({ secret: config.secret }).unless({ path: ['/api/users/authenticate', '/api/users/register'] }));
+// app.use('/api', expressJwt({ secret: config.secret }).unless({ path: ['/api/users/authenticate', '/api/users/register'] }));
 
 // routes
 app.use('/login', require('./controllers/login.controller'));
@@ -22,6 +22,7 @@ app.use('/register', require('./controllers/register.controller'));
 app.use('/app', require('./controllers/app.controller'));
 app.use('/api/users', require('./controllers/api/users.controller'));
 app.use('/api/rooms', require('./controllers/api/rooms.controller'));
+app.use('/api/roomdata',require('./controllers/api/roomdata.controller'));
 
 
 // make '/app' default route
