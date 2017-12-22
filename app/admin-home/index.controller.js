@@ -5,19 +5,27 @@
         .module('app')
         .controller('Admin-home.IndexController', Controller);
 
-    function Controller($window, UserService, FlashService) {
+    function Controller($window, UserService, FlashService, RoomdataService) {
         var vm = this;
 
         vm.user = null;
         vm.saveUser = saveUser;
         vm.deleteUser = deleteUser;
 
-        initController();
+        // initController();
+        getRoomdata();
 
         function initController() {
             // get current user
             UserService.GetCurrent().then(function (user) {
                 vm.user = user;
+            });
+        }
+
+        function getRoomdata() {
+            RoomdataService.GetAll().then(function (roomdataList) {
+                vm.roomdataList = roomdataList;
+                console.log(roomdataList);
             });
         }
 

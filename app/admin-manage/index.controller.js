@@ -9,6 +9,7 @@
         var vm = this;
 
         vm.user = null;
+        vm.newUser = null;
         vm.saveUser = saveUser;
         vm.deleteUser = deleteUser;
         vm.createUser = createUser;
@@ -24,11 +25,12 @@
 
         function createUser() {
             console.log('Function called');
-            console.log(vm.user);
-            UserService.Create(vm.user)
+            console.log(vm.newUser);
+            UserService.Create(vm.newUser)
                 .then(function () {
                     FlashService.Success('User created');
-                    window.history.go(-1);//todo modify condition
+                    console.log('User created successfully');
+                    window.open('#/admin-home','_self');//todo modify condition
                 })
                 .catch(function (error) {
                     FlashService.Error(error);
