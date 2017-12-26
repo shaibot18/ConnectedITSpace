@@ -3,17 +3,18 @@
 
     angular
         .module('app')
-        .controller('Admin-home.IndexController', Controller);
+        .controller('AddManager.AdminController', Controller);
 
-    function Controller($window, UserService, FlashService, RoomdataService) {
+    function Controller($window, UserService, FlashService) {
         var vm = this;
 
         vm.user = null;
+        vm.newUser = null;
         vm.saveUser = saveUser;
         vm.deleteUser = deleteUser;
+        vm.createUser = createUser;
 
-        // initController();
-        getRoomdata();
+        initController();
 
         function initController() {
             // get current user
@@ -22,12 +23,20 @@
             });
         }
 
-        function getRoomdata() {
-            RoomdataService.GetAll().then(function (roomdataList) {
-                vm.roomdataList = roomdataList;
-                console.log(roomdataList);
-            });
+        function createUser() {
+            console.log('Function called');
+            console.log(vm.newUser);
+            UserService.Create(vm.newUser)
+                .then(function () {
+                    FlashService.Success('User created');
+                    console.log('User created successfully');
+                    window.open('#/admin-home','_self');//todo modify condition
+                })
+                .catch(function (error) {
+                    FlashService.Error(error);
+                });
         }
+
 
         function saveUser() {
             UserService.Update(vm.user)

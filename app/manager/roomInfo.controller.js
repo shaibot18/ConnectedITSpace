@@ -3,7 +3,7 @@
 
     angular
         .module('app')
-        .controller('Manager-one-room.IndexController', Controller);
+        .controller('RoomInfo.ManagerController', Controller);
 
     function Controller(UserService,RoomService) {
         var vm = this;

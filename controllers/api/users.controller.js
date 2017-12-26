@@ -7,6 +7,7 @@ var userService = require('services/user.service');
 router.post('/authenticate', authenticateUser);
 router.post('/register', registerUser);
 router.get('/current', getCurrentUser);
+router.get('/',getUserList);
 router.put('/:_id', updateUser);
 router.delete('/:_id', deleteUser);
 
@@ -39,17 +40,34 @@ function registerUser(req, res) {
 }
 
 function getCurrentUser(req, res) {
-    userService.getById(req.user.sub)
-        .then(function (user) {
-            if (user) {
-                res.send(user);
-            } else {
-                res.sendStatus(404);
-            }
-        })
-        .catch(function (err) {
-            res.status(400).send(err);
-        });
+    // userService.getById(req.user.sub)
+    //     .then(function (user) {
+    //         if (user) {
+    //             res.send(user);
+    //         } else {
+    //             res.sendStatus(404);
+    //         }
+    //     })
+    //     .catch(function (err) {
+    //         res.status(400).send(err);
+    //     });
+    res.send(req.session.user);
+    console.log("User in session is ");
+    console.log(req.session.user);
+}
+
+function getUserList(req,res){
+    userService.getAll().then(function(userList){
+        if(userList){
+            res.send(userList);
+        }
+        else {
+            res.sendStatus(404);
+        }
+    })
+    .catch(function(err){
+        res.sendStatus(400).send(err);
+    });   
 }
 
 function updateUser(req, res) {

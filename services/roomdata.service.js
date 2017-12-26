@@ -1,12 +1,27 @@
+
 var config = require('config.json');
 var _ = require('lodash');
 var jwt = require('jsonwebtoken');
 var bcrypt = require('bcryptjs');
 var Q = require('q');
-var mongo = require('mongoskin');
-var db = mongo.db(config.connectionString, { native_parser: true });
-db.bind('roomdata');
-
+var mongoose = require('mongoose');
+var connectionString = config.connectionString;
+var connectionOptions = {
+    useMongoClient: true
+}
+mongoose.connect(connectionString,connectionOptions);
+mongoose.Promise = global.Promise;
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+var Schema = mongoose.Schema;
+var roomdataSchema = new Schema({
+    _roomID: Schema.Types.ObjectId,
+    macAddress: String,
+    Time: Date,
+    TimeZone: String, 
+    Direction: Boolean
+});
+var Roomdata = mongoose.model('Roomdata',roomdataSchema);
 var service = {};
 
 service.getAll = getAll;
@@ -19,7 +34,7 @@ module.exports = service;
 function getAll(){
     var deferred = Q.defer();
 
-    db.roomdata.find({}).toArray(function (err, roomdataList) {
+    Roomdata.find({},function (err, roomdataList) {
         if (err) deferred.reject(err.name + ': ' + err.message);
 
         if (roomdataList) {
@@ -37,7 +52,7 @@ function getAll(){
 function getById(_id) {
     var deferred = Q.defer();
 
-    db.users.findById(_id, function (err, user) {
+    Roomdata.findById(_id, function (err, user) {
         if (err) deferred.reject(err.name + ': ' + err.message);
 
         if (user) {
@@ -52,14 +67,11 @@ function getById(_id) {
     return deferred.promise;
 }
 
-function add(roomdata) {
+function add(roomdataParams) {
     var deferred = Q.defer();
-    console.log(roomdata);
     // validation
-    
-    db.roomdata.insert(
-        roomdata,
-        function (err, doc) {
+    var roomdata = new Roomdata(roomdataParams);
+    roomdata.save(function (err, doc) {
             if (err) deferred.reject(err.name + ': ' + err.message);
             deferred.resolve();
             console.log('Roomdata received');
@@ -72,7 +84,7 @@ function add(roomdata) {
 function _delete(_id) {
     var deferred = Q.defer();
 
-    db.users.remove(
+    Roomdata.remove(
         { _id: mongo.helper.toObjectID(_id) },
         function (err) {
             if (err) deferred.reject(err.name + ': ' + err.message);

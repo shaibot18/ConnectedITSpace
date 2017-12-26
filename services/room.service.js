@@ -3,152 +3,98 @@ var _ = require('lodash');
 var jwt = require('jsonwebtoken');
 var bcrypt = require('bcryptjs');
 var Q = require('q');
-var mongo = require('mongoskin');
-var db = mongo.db(config.connectionString, { native_parser: true });
-db.bind('users');
+var mongoose = require('mongoose');
+var connectionString = config.connectionString;
+var connectionOptions = {
+    useMongoClient: true
+}
+mongoose.connect(connectionString,connectionOptions);
+mongoose.Promise = global.Promise;
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+var Schema = mongoose.Schema;
+var roomSchema = new Schema({
+    country: String, 
+    city: String,
+    building: String,
+    _userID: Schema.Types.ObjectId,
+    macAddress: String
+});
+var Room = mongoose.model('Room',roomSchema);
 
 var service = {};
 
-service.authenticate = authenticate;
 service.getById = getById;
+service.getByUserId = getByUserId;
 service.create = create;
 service.update = update;
 service.delete = _delete;
 
 module.exports = service;
 
-function authenticate(username, password) {
+
+function getByUserId(_userID){
     var deferred = Q.defer();
-
-    db.users.findOne({ username: username }, function (err, user) {
+    Room.find({_userID : _userID},function (err,res){
         if (err) deferred.reject(err.name + ': ' + err.message);
-
-        if (user && bcrypt.compareSync(password, user.hash)) {
-            // authentication successful
-            deferred.resolve(jwt.sign({ sub: user._id }, config.secret));
+        if (res) {
+            deferred.resolve(res);
         } else {
-            // authentication failed
             deferred.resolve();
         }
-    });
-
+    })
     return deferred.promise;
 }
 
+
 function getById(_id) {
     var deferred = Q.defer();
-
-    db.users.findById(_id, function (err, user) {
+    Room.findById(_id, function (err, room) {
         if (err) deferred.reject(err.name + ': ' + err.message);
-
-        if (user) {
+        if (room) {
             // return user (without hashed password)
-            deferred.resolve(_.omit(user, 'hash'));
+            deferred.resolve(room);
         } else {
             // user not found
             deferred.resolve();
         }
     });
-
     return deferred.promise;
 }
 
-function create(userParam) {
+function create(roomParam) {
     var deferred = Q.defer();
-
-    // validation
-    db.users.findOne(
-        { username: userParam.username },
-        function (err, user) {
+    var room = new Room(roomParam);
+    room.save(function (err, room) {
             if (err) deferred.reject(err.name + ': ' + err.message);
-
-            if (user) {
-                // username already exists
-                deferred.reject('Username "' + userParam.username + '" is already taken');
-            } else {
-                createUser();
-            }
-        });
-
-    function createUser() {
-        // set user object to userParam without the cleartext password
-        var user = _.omit(userParam, 'password');
-
-        // add hashed password to user object
-        user.hash = bcrypt.hashSync(userParam.password, 10);
-
-        db.users.insert(
-            user,
-            function (err, doc) {
-                if (err) deferred.reject(err.name + ': ' + err.message);
-
-                deferred.resolve();
-            });
-    }
-
+            deferred.resolve();
+    });
     return deferred.promise;
 }
 
-function update(_id, userParam) {
+function update(_id, roomParam) {
     var deferred = Q.defer();
-
     // validation
-    db.users.findById(_id, function (err, user) {
-        if (err) deferred.reject(err.name + ': ' + err.message);
+    // fields to update
+    var set = roomParam;
 
-        if (user.username !== userParam.username) {
-            // username has changed so check if the new username is already taken
-            db.users.findOne(
-                { username: userParam.username },
-                function (err, user) {
-                    if (err) deferred.reject(err.name + ': ' + err.message);
-
-                    if (user) {
-                        // username already exists
-                        deferred.reject('Username "' + req.body.username + '" is already taken')
-                    } else {
-                        updateUser();
-                    }
-                });
-        } else {
-            updateUser();
-        }
-    });
-
-    function updateUser() {
-        // fields to update
-        var set = {
-            firstName: userParam.firstName,
-            lastName: userParam.lastName,
-            username: userParam.username,
-        };
-
-        // update password if it was entered
-        if (userParam.password) {
-            set.hash = bcrypt.hashSync(userParam.password, 10);
-        }
-
-        db.users.update(
-            { _id: mongo.helper.toObjectID(_id) },
-            { $set: set },
-            function (err, doc) {
-                if (err) deferred.reject(err.name + ': ' + err.message);
-
-                deferred.resolve();
-            });
-    }
-
+    Room.update(
+        { _id: mongo.helper.toObjectID(_id) },
+        { $set: set },
+        function (err, doc) {
+            if (err) deferred.reject(err.name + ': ' + err.message);
+            deferred.resolve();
+        });
     return deferred.promise;
 }
 
 function _delete(_id) {
     var deferred = Q.defer();
 
-    db.users.remove(
+    Room.remove(
         { _id: mongo.helper.toObjectID(_id) },
         function (err) {
             if (err) deferred.reject(err.name + ': ' + err.message);
-
             deferred.resolve();
         });
 

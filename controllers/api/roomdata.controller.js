@@ -10,6 +10,9 @@ router.post('/',addRoomdata);
 router.get('/',getRoomdata);
 
 function addRoomdata(req,res){
+    console.log('Received post');
+    // console.log(req);
+    console.log(req.body);
     roomdataService.add(req.body)
     .then(function () {
         res.sendStatus(200);

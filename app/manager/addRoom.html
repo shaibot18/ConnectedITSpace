@@ -1,0 +1,58 @@
+<div class="col-md-12 col-sm-12 col-xs-12">
+    <div class="x_panel">
+        <div class="x_title">
+            <h2>Add Room</h2>
+        </div>
+        <div class="x_content">
+            <br />
+            <form class="form-horizontal form-label-left input_mask">
+                <div class="form-input-middle">
+                    <div class="col-xs-12 form-group has-feedback">
+                        <input type="text" class="form-control has-feedback-left" ng-model="vm.newRoom.country" placeholder="Country" required="required">
+                        <span class="required"></span>
+                        <span class="fa fa-user form-control-feedback left" aria-hidden="true"></span>
+                    </div>
+
+                    <div class="col-xs-12 form-group has-feedback">
+                        <input type="text" class="form-control has-feedback-left" ng-model="vm.newRoom.city" placeholder="City" required="required">
+                        <span class="required"></span>
+                        <span class="fa fa-user fxzorm-control-feedback left" aria-hidden="true"></span>
+                    </div>
+
+                    <div class="col-xs-12 form-group has-feedback">
+                        <input type="text" class="form-control has-feedback-left" ng-model="vm.newRoom.building" placeholder="Building" required="required">
+                        <span class="required"></span>
+                        <span class="fa fa-user form-control-feedback left" aria-hidden="true"></span>
+                    </div>
+
+                    <div class="col-xs-12 form-group has-feedback">
+                        <input type="text" class="form-control has-feedback-left" ng-model="vm.newRoom.macAddress" placeholder="Mac Address" required="required">
+                        <span class="required"></span>
+                        <span class="fa fa-institution form-control-feedback left" aria-hidden="true"></span>
+                    </div>
+
+
+                    <div class="col-xs-12 form-group has-feedback">
+                        <select class="form-control has-feedback-left" ng-model="vm.newRoom._userID" required="required">
+                            <option value="{{user._id}}" ng-repeat="user in vm.userList">{{user.lastName}}</option>
+                        </select>
+                        <span class="required"></span>
+                    </div>
+
+                </div>
+
+
+                <div class="ln_solid"></div>
+                <div class="form-group">
+                    <div class="col-md-9 col-sm-9 col-xs-12 col-md-offset-3">
+                        <button ng-click="vm.createRoom()" class="btn btn-success2" >
+                            <i class="fa fa-plus"></i>Add</button>
+                        <button class="btn btn-primary2" type="reset">
+                            <i class="fa fa-repeat"></i>Reset</button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
