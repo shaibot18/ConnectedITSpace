@@ -19,6 +19,8 @@
         return service;
 
         function GetCurrent() {
+            console.log('$http.user is');
+            console.log($http.user);
             return $http.get('/api/users/current').then(handleSuccess, handleError);
         }
 

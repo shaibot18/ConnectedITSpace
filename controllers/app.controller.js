@@ -17,6 +17,8 @@ router.get('/token', function (req, res) {
 
 router.get('/user',function (req,res){
     res.send(req.session.user);
+    console.log("User in session is ");
+    console.log(req.session.user);
 })
 
 // serve angular app files from the '/app' route

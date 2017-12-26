@@ -87,9 +87,11 @@
                 <button type="submit" class="btn savegreen2">save</button>
             </li>
             <li class="x_content_middle">
-                <span class="middleadd1">
-                    <i class="fa fa-plus"></i>
-                </span>
+                <a ui-sref="addRoom">
+                    <span class="middleadd1">
+                            <i class="fa fa-plus"></i>
+                    </span>
+                </a>
                 <span class="middleadd2">
                     <i class="fa fa-minus"></i>
                 </span>
@@ -136,11 +138,11 @@
 		
 		
 		//add room button
-		$(".middleadd1").click(
-			function(){
-			$(this).parent("li").parent("ul").children(".x_content_title").children(".btsaveiput2").css("display","inline");
-			$(this).parent("li").parent("ul").children(".x_content_title").children(".savegreen2").css("display","block");},
-		);
+		// $(".middleadd1").click(
+		// 	function(){
+		// 	$(this).parent("li").parent("ul").children(".x_content_title").children(".btsaveiput2").css("display","inline");
+		// 	$(this).parent("li").parent("ul").children(".x_content_title").children(".savegreen2").css("display","block");},
+		// );
 		$(".savegreen2").click(
 			function(){
 			$(this).css("display","none");
@@ -148,14 +150,14 @@
 		);
 		
 		//delet room button		
-		$(".middleadd2").click(
-			function(){
-			if($(".triangle_display").css("display")=="none"){
-				$(".triangle_display").show();
-			}else{
-			$(".triangle_display").hide();}
-			}
-		);
+		// $(".middleadd2").click(
+		// 	function(){
+		// 	if($(".triangle_display").css("display")=="none"){
+		// 		$(".triangle_display").show();
+		// 	}else{
+		// 	$(".triangle_display").hide();}
+		// 	}
+		// );
 		
 		
 	});

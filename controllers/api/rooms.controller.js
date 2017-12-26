@@ -4,37 +4,35 @@ var router = express.Router();
 var roomService = require('services/room.service');
 
 // routes
-router.post('/authenticate', authenticateUser);
-router.post('/register', registerUser);
+router.post('/',create);
 router.get('/current', getCurrentUser);
 router.put('/:_id', updateUser);
 router.delete('/:_id', deleteUser);
+router.get('/roomlist/:_id',getRoomList);
 
 module.exports = router;
 
-function authenticateUser(req, res) {
-    userService.authenticate(req.body.username, req.body.password)
-        .then(function (token) {
-            if (token) {
-                // authentication successful
-                res.send({ token: token });
-            } else {
-                // authentication failed
-                res.status(401).send('Username or password is incorrect');
-            }
+function create(req,res){
+    roomService.create(req.body)
+        .then(function(){
+            res.sendStatus(200);
         })
-        .catch(function (err) {
+        .catch(function(err){
             res.status(400).send(err);
         });
 }
 
-function registerUser(req, res) {
-    userService.create(req.body)
-        .then(function () {
-            res.sendStatus(200);
+function getRoomList(req,res){
+    roomService.getByUserId(req.params._id)
+        .then(function(roomList){
+            if(roomList){
+                res.send(roomList);
+            } else{
+                res.sendStatus(404);
+            }
         })
-        .catch(function (err) {
-            res.status(400).send(err);
+        .catch(function(err){
+            res.status(400).send(err);            
         });
 }
 

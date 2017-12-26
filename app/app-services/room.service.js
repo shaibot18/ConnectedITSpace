@@ -9,17 +9,17 @@
         var service = {};
 
         service.GetCurrent = GetCurrent;
+        service.GetRoomList = GetRoomList;
         service.GetAll = GetAll;
         service.GetById = GetById;
         service.GetByUsername = GetByUsername;
         service.Update = Update;
         service.Delete = Delete;
-
-        service.CreateRoom = CreateRoom;
+        service.Create = Create;
 
         return service;
 
-        function CreateRoom(room) {
+        function Create(room) {
             return $http.post('/api/rooms',room).then(handleSuccess, handleError);
         }
 
@@ -27,6 +27,10 @@
 
         function GetCurrent() {
             return $http.get('/api/users/current').then(handleSuccess, handleError);
+        }
+
+        function GetRoomList(_id) {
+            return $http.get('/api/rooms/roomlist/'+_id).then(handleSuccess,handleError);
         }
 
         function GetAll() {

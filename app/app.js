@@ -17,41 +17,49 @@
 
         if (window.user.role == 1) {
             $urlRouterProvider.when("/","/admin-home");
+            $stateProvider
+                .state('home', {
+                    url: '/admin',
+                    templateUrl: 'admin/index.html',
+                    controller: 'Index.AdminController',
+                    controllerAs: 'vm',
+                    data: { activeTab: 'home' }
+                })
+                .state('addManager', {
+                    url: '/admin/addManager',
+                    templateUrl: 'admin/addManager.html',
+                    controller: 'AddManager.AdminController',
+                    controllerAs: 'vm',
+                    data: { activeTab: 'addManager' }
+                });            
         }
         else if (window.user.role == 2) {
             $urlRouterProvider.when("/","/manager-all-rooms");
+            $stateProvider
+                .state('home', {
+                    url: '/manager',
+                    templateUrl: 'manager/index.html',
+                    controller: 'Index.ManagerController',
+                    controllerAs: 'vm',
+                    data: { activeTab: 'home' }
+                })
+                .state('roomInfo',{
+                    url: '/manager/roomInfo',
+                    templateUrl: 'manager/roomInfo.html',
+                    controller: 'RoomInfo.ManagerController',
+                    data:{ activeTab: 'roomInfo'}
+                })
+                .state('addRoom', {
+                    url: '/manager/addRoom',
+                    templateUrl: 'manager/addRoom.html',
+                    controller: 'AddRoom.ManagerController',
+                    controllerAs: 'vm',
+                    data: { activeTab: 'addRoom' }
+                });
         }
 
 
-        $stateProvider
-            .state('manager-all-rooms', {
-                url: '/manager-all-rooms',
-                templateUrl: 'manager-all-rooms/index.html',
-                controller: 'Manager-all-rooms.IndexController',
-                controllerAs: 'vm',
-                data: { activeTab: 'manager-all-rooms' }
-            })
-            .state('manager-one-room', {
-                url: '/manager-one-room',
-                templateUrl: 'manager-one-room/index.html',
-                controller: 'Manager-one-room.IndexController',
-                controllerAs: 'vm',
-                data: { activeTab: 'manager-one-room' }
-            })
-            .state('admin-home', {
-                url: '/admin-home',
-                templateUrl: 'admin-home/index.html',
-                controller: 'Admin-home.IndexController',
-                controllerAs: 'vm',
-                data: { activeTab: 'admin-home' }
-            })
-            .state('admin-manage', {
-                url: '/admin-manage',
-                templateUrl: 'admin-manage/index.html',
-                controller: 'Admin-manage.IndexController',
-                controllerAs: 'vm',
-                data: { activeTab: 'admin-manage' }
-            });
+        
     }
 
     function run($http, $rootScope, $window) {
@@ -63,6 +71,7 @@
         $rootScope.$on('$stateChangeSuccess', function (event, toState, toParams, fromState, fromParams) {
             $rootScope.activeTab = toState.data.activeTab;
         });
+        $http.user = $window.user;
         $rootScope.user = $window.user;            
     }
 
@@ -72,7 +81,8 @@
         console.log("Manual function run");
         $.get('/app/user',function(user){
             window.user = user;
-            console.log(user.role);
+            console.log("window.user is ")
+            console.log(user);
             $('#userName').html(user.firstName);            
         })
         $.get('/app/token', function (token) {
