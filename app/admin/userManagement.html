@@ -7,32 +7,42 @@
 <link href="/vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css" rel="stylesheet">
 <link href="/vendors/datatables.net-scroller-bs/css/scroller.bootstrap.min.css" rel="stylesheet">
 
-
+<button type='button' ui-sref="addManager" class="btn btn-primary">Add Manager</button>
 
 <div class="col-md-12 col-sm-12 col-xs-12">
     <div class="x_panel">
         <div class="x_title">
-            <h2>Room Data</h2>
+            <h2>User Data</h2>
         </div>
         <div class="x_content">
             <div class="x_content">
                 <table id="datatable" class="table table-striped table-bordered">
                     <thead>
                         <tr>
-                            <th>Location</th>
-                            <th>Manager</th>
-                            <th>Mac Address</th>
-                            <th>Average People/d</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Department</th>
+                            <th id="noicon"></th>
                         </tr>
                     </thead>
 
 
                     <tbody>
-                        <tr ng-repeat="room in roomList" ng-init="$last && renderTable()">
-                            <td>{{room.country+','+room.city+','+room.building}}</td>
-                            <td>{{room.username}}</td>
-                            <td>{{room.macAddress}}</td>
-                            <td>63</td>
+                        <tr ng-repeat="user in userList" ng-init="$last && renderTable()">
+                            <!-- <td>{{user.firstName + ' ' + user.lasName}}</td> -->
+                            <td>{{user.firstName + ' ' + user.lastName}}</td>
+                            <td>{{user.email}}</td>
+                            <td>{{user.department}}</td>
+                            <td>
+                                <div class="predelet" ng-click="deleteUser(user._id)">
+                                    <i class="fa fa-trash-o"></i>
+                                </div>
+                                <div class="postdelet">
+                                    <div class="deleticon">Yes</div>
+                                    <div class="nodeleticon">No</div>
+                                </div>
+                            </td>
+
                         </tr>
                         
                     </tbody>

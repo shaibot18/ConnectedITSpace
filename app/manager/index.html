@@ -1,164 +1,50 @@
-<div class="col-md-4 col-sm-12 col-xs-12">
-    <div class="x_panel">
-        <ul class="x_content">
-            <li class="x_content_title">
-                <input type="text" name="country" value="Chnina,Shanghai,sgh201,4F" readonly="readonly" class="btsaveiput1" />
-                <i class="fa fa-ellipsis-h"></i>
-                <button type="submit" class="btn savegreen">save</button>
-            </li>
-            <li class="x_content_middle">
-                <a ui-sref="manager-one-room">
-                    <h1>400</h1>
-                    <div>Total people</div>
-                </a>
-            </li>
-            <li class="x_content_di">
-                <div class="out_pic">
-                    <img src="images/img.jpg" alt="..." class="box_pic">
-                </div>
-                <span>Milo Masson(CI/CWR2.5-AP)</span>
-            </li>
-        </ul>
-    </div>
-    <div id="triangle-bottomright" class="triangle_display">
-        <i class="fa fa-minus"></i>
-    </div>
-</div>
+<style>
+    a {
+        color: #485275;
+    }
+</style>
 
-<div class="col-md-4 col-sm-12 col-xs-12">
-    <div class="x_panel">
-        <ul class="x_content">
-            <li class="x_content_title">
-                <input type="text" name="country" value="Chnina,Shanghai,sgh202,2F" readonly="readonly" class="btsaveiput1" />
-                <i class="fa fa-ellipsis-h"></i>
-                <button type="submit" class="btn savegreen">save</button>
-            </li>
-            <li class="x_content_middle">
-                <a href="#">
-                    <h1>300</h1>
-                    <div>Total people</div>
-                </a>
-            </li>
-            <li class="x_content_di">
-                <div class="out_pic">
-                    <img src="images/img.jpg" alt="..." class="box_pic">
-                </div>
-                <span>Milo Masson(CI/CWR2.5-AP)</span>
-            </li>
-        </ul>
+<div class="container" id="content">
+    <div class="col-md-4 col-sm-12 col-xs-12" ng-repeat="room in roomList">
+        <div class="x_panel">
+            <ul class="x_content">
+                <li class="x_content_title">
+                    <a href='#/manager/roomInfo/{{room._id}}'><h3>{{room.country + ', '+ room.city + ', ' + room.building}}</h3></a>        
+                </li>
+                <li class="x_content_middle">
+                        <h1>0</h1>
+                        <div>Total people</div>
+                </li>
+            </ul>
+        </div>
+        <div id="triangle-bottomright" ng-click='deleteRoom(room._id)' class="triangle_display"><i class="fa fa-minus"></i></div>                    
     </div>
-    <div id="triangle-bottomright" class="triangle_display">
-        <i class="fa fa-minus"></i>
-    </div>
-</div>
 
-<div class="col-md-4 col-sm-12 col-xs-12">
-    <div class="x_panel">
-        <ul class="x_content">
-            <li class="x_content_title">
-                <input type="text" name="country" value="Chnina,Suzhou,sgh203,1F" readonly="readonly" class="btsaveiput1" />
-                <i class="fa fa-ellipsis-h"></i>
-                <button type="submit" class="btn savegreen">save</button>
-            </li>
-            <li class="x_content_middle">
-                <a href="#">
-                    <h1>350</h1>
-                    <div>Total people</div>
-                </a>
-            </li>
-            <li class="x_content_di">
-                <div class="out_pic">
-                    <img src="images/img.jpg" alt="..." class="box_pic">
-                </div>
-                <span>Milo Masson(CI/CWR2.5-AP)</span>
-            </li>
-        </ul>
-    </div>
-    <div id="triangle-bottomright" class="triangle_display">
-        <i class="fa fa-minus"></i>
-    </div>
-</div>
 
-<div class="col-md-4 col-sm-12 col-xs-12">
-    <div class="x_panel">
-        <ul class="x_content forblank">
-            <li class="x_content_title">
-                <input type="text" name="country" value="Chnina,Shanghai,sgh201,4F" class="btsaveiput2" />
-                <button type="submit" class="btn savegreen2">save</button>
-            </li>
-            <li class="x_content_middle">
-                <a ui-sref="addRoom">
+
+    <div class="col-md-4 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <ul class="x_content forblank">
+                <li class="x_content_title">
+                </li>
+                <li class="x_content_middle">
+                    <a ui-sref="addRoom">
                     <span class="middleadd1">
                             <i class="fa fa-plus"></i>
                     </span>
-                </a>
-                <span class="middleadd2">
+                    </a>
+                    <span class="middleadd2">
                     <i class="fa fa-minus"></i>
                 </span>
-            </li>
-            <li class="x_content_di"></li>
-        </ul>
+                </li>
+            </ul>
+        </div>
     </div>
 </div>
+
 <!--my room-->
 
-<script type="text/javascript">
-	$(document).ready(function(){
-	
-		//dispaly boss name
-		$(".icon1").click(
-			function(){
-			$(".myboss").css("display","none");
-			$(".icon2").css("display","inline");
-			$(".icon1").css("display","none");},
-		);
-		$(".icon2").click(
-			function(){
-			$(".myboss").css("display","inline");
-			$(".icon1").css("display","inline");
-			$(".icon2").css("display","none");},
-		);
-		
-		
-		//change room name button
-		$(".x_content_title i").click(
-			function(){
-			$(this).css("display","none");
-			$(this).parent("li").children(".savegreen").css("display","block");
-			$(this).parent("li").children("input").removeAttr("readonly");
-			$(this).parent("li").children("input").removeClass("btsaveiput1").addClass("btsaveiput2");},
-		);
-		$(".savegreen ").click(
-			function(){
-			$(this).css("display","none");
-			$(this).parent("li").children("i").css("display","block");
-			$(this).parent("li").children("input").removeClass("btsaveiput2").addClass("btsaveiput1").attr("readonly","readonly");},
-		);
-		
-		
-		
-		//add room button
-		// $(".middleadd1").click(
-		// 	function(){
-		// 	$(this).parent("li").parent("ul").children(".x_content_title").children(".btsaveiput2").css("display","inline");
-		// 	$(this).parent("li").parent("ul").children(".x_content_title").children(".savegreen2").css("display","block");},
-		// );
-		$(".savegreen2").click(
-			function(){
-			$(this).css("display","none");
-			$(this).parent("li").children("input").css("display","none");},
-		);
-		
-		//delet room button		
-		// $(".middleadd2").click(
-		// 	function(){
-		// 	if($(".triangle_display").css("display")=="none"){
-		// 		$(".triangle_display").show();
-		// 	}else{
-		// 	$(".triangle_display").hide();}
-		// 	}
-		// );
-		
-		
-	});
+<script type="text/template" id="newRoom">
+    
 </script>
+

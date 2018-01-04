@@ -17,3 +17,7 @@ div#insertNew input {
 .x_title h2 {
     overflow: visible;
 }
+
+.triangle_display{cursor:pointer;display:none;}
+#triangle-bottomright {position:relative;width: 0;height: 0;border-bottom: 50px solid red;border-left: 55px solid transparent;margin-top:-66px;float:right;}
+#triangle-bottomright i{font-size:20px; color:#fff;margin-left:-22px;margin-top:23px;}

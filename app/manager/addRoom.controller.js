@@ -20,14 +20,15 @@
             UserService.GetCurrent().then(function (user) {
                 vm.user = user;
             });
-            UserService.GetAll().then(function(userList){
-                vm.userList = userList;
-                console.log('User list is ');
-                console.log(userList);
-            })
+            // UserService.GetAll().then(function(userList){
+            //     vm.userList = userList;
+            //     console.log('User list is ');
+            //     console.log(userList);
+            // })
         }
 
         function createRoom() {
+            vm.newRoom._userID = vm.user.sub;
             RoomService.Create(vm.newRoom)
                 .then(function () {
                     FlashService.Success('Room created');

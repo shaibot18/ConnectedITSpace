@@ -4,15 +4,7 @@ var _ = require('lodash');
 var jwt = require('jsonwebtoken');
 var bcrypt = require('bcryptjs');
 var Q = require('q');
-var mongoose = require('mongoose');
-var connectionString = config.connectionString;
-var connectionOptions = {
-    useMongoClient: true
-}
-mongoose.connect(connectionString,connectionOptions);
-mongoose.Promise = global.Promise;
-var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
+var mongoose = require('services/mongooseCon');// pack mongoose connection into one module
 var Schema = mongoose.Schema;
 var userSchema = new Schema({
     username: String,
@@ -176,12 +168,10 @@ function _delete(_id) {
     var deferred = Q.defer();
 
     User.remove(
-        { _id: mongo.helper.toObjectID(_id) },
+        { _id: _id },
         function (err) {
             if (err) deferred.reject(err.name + ': ' + err.message);
-
             deferred.resolve();
         });
-
     return deferred.promise;
 }

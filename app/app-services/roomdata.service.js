@@ -3,14 +3,13 @@
 
     angular
         .module('app')
-        .factory('RoomdataService', Service);
+        .factory('RoomDataService', Service);
 
     function Service($http, $q) {
         var service = {};
 
         service.GetAll = GetAll;
-        service.GetById = GetById;
-        service.GetByUsername = GetByUsername;
+        service.GetByTimeRange = GetByTimeRange;
 
         return service;
 
@@ -20,16 +19,12 @@
             return $http.get('/api/roomdata').then(handleSuccess, handleError);
         }
 
-        function GetById(_id) {
-            return $http.get('/api/users/' + _id).then(handleSuccess, handleError);
+        function GetByTimeRange(_RoomId){
+            var start = arguments[1];
+            var end = arguments[2] || Date.parse(Date());
+            return $http.get('/api/roomdata/' + _RoomId + '?startTime=' + start + '&endTime=' + end).then(handleSuccess,handleError);
         }
 
-        function GetByUsername(username) {
-            return $http.get('/api/users/' + username).then(handleSuccess, handleError);
-        }
-
-
-       
 
         function Delete(_id) {
             return $http.delete('/api/users/' + _id).then(handleSuccess, handleError);
