@@ -16,7 +16,7 @@
         $urlRouterProvider.otherwise("/");        
 
         if (window.user.role == 1) {
-            $urlRouterProvider.when("/","/admin-home");
+            $urlRouterProvider.when("/","/admin");
             $stateProvider
                 .state('home', {
                     url: '/admin',
@@ -31,10 +31,17 @@
                     controller: 'AddManager.AdminController',
                     controllerAs: 'vm',
                     data: { activeTab: 'addManager' }
-                });            
+                })
+                .state('userManagement', {
+                    url: '/admin/userManagement',
+                    templateUrl: 'admin/userManagement.html',
+                    controller: 'UserManagement.AdminController',
+                    controllerAs: 'vm',
+                    data: { activeTab: 'userManagement' }
+                })      
         }
         else if (window.user.role == 2) {
-            $urlRouterProvider.when("/","/manager-all-rooms");
+            $urlRouterProvider.when("/","/manager");
             $stateProvider
                 .state('home', {
                     url: '/manager',
@@ -44,7 +51,7 @@
                     data: { activeTab: 'home' }
                 })
                 .state('roomInfo',{
-                    url: '/manager/roomInfo',
+                    url: '/manager/roomInfo/:roomId',
                     templateUrl: 'manager/roomInfo.html',
                     controller: 'RoomInfo.ManagerController',
                     data:{ activeTab: 'roomInfo'}

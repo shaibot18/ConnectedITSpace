@@ -5,28 +5,49 @@
         .module('app')
         .controller('Index.AdminController', Controller);
 
-    function Controller($window, UserService, FlashService, RoomdataService) {
+    function Controller($scope, $window, UserService, FlashService, RoomService, RoomDataService) {
         var vm = this;
 
         vm.user = null;
         vm.saveUser = saveUser;
         vm.deleteUser = deleteUser;
+        
 
-        // initController();
-        getRoomdata();
+        initController();
+
+         $scope.renderTable = function(){
+            $('#datatable').DataTable();                                        
+         }      
 
         function initController() {
             // get current user
             UserService.GetCurrent().then(function (user) {
                 vm.user = user;
-            });
-        }
+            }); 
+           
+            // RoomService.GetAll()
+            //     .then(function(roomList){
+            //         $scope.roomList = roomList;
+            //     })
+            //     .catch(function(err){
+            //        console.log(err); 
+            //     });
 
-        function getRoomdata() {
-            RoomdataService.GetAll().then(function (roomdataList) {
-                vm.roomdataList = roomdataList;
-                console.log(roomdataList);
-            });
+            var up = UserService.GetAll();
+            var rp = RoomService.GetAll();
+            Promise.all([up,rp]).then(function(values){
+                $scope.userList = values[0];
+                $scope.roomList = values[1];
+                $.each($scope.roomList,function(ind1,Room){
+                    $.each($scope.userList,function(ind2,User){
+                        if(User._id == Room._userID){
+                            $scope.roomList[ind1]["username"] = User.firstName + ' ' + User.lastName;
+                        }
+                    })
+                });
+                $scope.$apply();
+                console.log($scope.roomList);
+            })    
         }
 
         function saveUser() {

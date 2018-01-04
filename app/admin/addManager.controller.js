@@ -11,7 +11,6 @@
         vm.user = null;
         vm.newUser = null;
         vm.saveUser = saveUser;
-        vm.deleteUser = deleteUser;
         vm.createUser = createUser;
 
         initController();
@@ -26,11 +25,12 @@
         function createUser() {
             console.log('Function called');
             console.log(vm.newUser);
+            vm.newUser.role = "2";
             UserService.Create(vm.newUser)
                 .then(function () {
                     FlashService.Success('User created');
-                    console.log('User created successfully');
-                    window.open('#/admin-home','_self');//todo modify condition
+                    // console.log('User created successfully');
+                    window.open('#/admin/userManagement','_self');//todo modify condition
                 })
                 .catch(function (error) {
                     FlashService.Error(error);
@@ -42,17 +42,6 @@
             UserService.Update(vm.user)
                 .then(function () {
                     FlashService.Success('User updated');
-                })
-                .catch(function (error) {
-                    FlashService.Error(error);
-                });
-        }
-
-        function deleteUser() {
-            UserService.Delete(vm.user._id)
-                .then(function () {
-                    // log user out
-                    $window.location = '/login';
                 })
                 .catch(function (error) {
                     FlashService.Error(error);

@@ -14,8 +14,9 @@
         service.GetById = GetById;
         service.GetByUsername = GetByUsername;
         service.Update = Update;
-        service.Delete = Delete;
         service.Create = Create;
+        service.Delete = Delete;
+        
 
         return service;
 
@@ -23,6 +24,9 @@
             return $http.post('/api/rooms',room).then(handleSuccess, handleError);
         }
 
+        function Delete(_id) {
+            return $http.delete('/api/rooms/' + _id).then(handleSuccess, handleError);
+        }
 
 
         function GetCurrent() {
@@ -34,7 +38,7 @@
         }
 
         function GetAll() {
-            return $http.get('/api/users').then(handleSuccess, handleError);
+            return $http.get('/api/rooms/roomlist/').then(handleSuccess, handleError);
         }
 
         function GetById(_id) {
@@ -50,9 +54,7 @@
             return $http.put('/api/users/' + user._id, user).then(handleSuccess, handleError);
         }
 
-        function Delete(_id) {
-            return $http.delete('/api/users/' + _id).then(handleSuccess, handleError);
-        }
+        
 
         // private functions
 

@@ -3,6 +3,7 @@ var _ = require('lodash');
 var jwt = require('jsonwebtoken');
 var bcrypt = require('bcryptjs');
 var Q = require('q');
+<<<<<<< HEAD
 var mongoose = require('mongoose');
 var vcap_services = JSON.parse(process.env.VCAP_SERVICES);
 var connectionString;
@@ -20,6 +21,9 @@ mongoose.connect(connectionString,connectionOptions);
 mongoose.Promise = global.Promise;
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
+=======
+var mongoose = require('services/mongooseCon');
+>>>>>>> 5b6835059e8a34eeac0f5c76bf61a7d7aaa257b9
 var Schema = mongoose.Schema;
 var roomSchema = new Schema({
     country: String, 
@@ -34,9 +38,12 @@ var service = {};
 
 service.getById = getById;
 service.getByUserId = getByUserId;
+service.getIdByMacAddress = getIdByMacAddress;
+service.getAll = getAll;
 service.create = create;
-service.update = update;
 service.delete = _delete;
+
+service.update = update;
 
 module.exports = service;
 
@@ -50,10 +57,39 @@ function getByUserId(_userID){
         } else {
             deferred.resolve();
         }
-    })
+    });
     return deferred.promise;
 }
 
+function getIdByMacAddress(macAddress) {
+    var deferred = Q.defer();
+    Room.find({macAddress: macAddress})
+        .select('')
+        .exec(function (err,res) {
+            if (err) deferred.reject(err.name + ': ' + err.message);
+            if (res) {
+                deferred.resolve(res);
+            } else {
+                deferred.resolve();
+            }
+        });
+    return deferred.promise;
+}
+
+function getAll() {
+    var deferred = Q.defer();
+    Room.find({},function (err, roomList) {
+        if (err) deferred.reject(err.name + ': ' + err.message);
+
+        if (roomList) {
+            deferred.resolve(roomList);
+        } else {
+            // user not found
+            deferred.resolve();
+        }
+    });
+    return deferred.promise;
+}
 
 function getById(_id) {
     var deferred = Q.defer();
@@ -80,6 +116,17 @@ function create(roomParam) {
     return deferred.promise;
 }
 
+function _delete(_id) {
+    var deferred = Q.defer();
+    Room.remove(
+        { _id: _id },
+        function (err) {
+            if (err) deferred.reject(err.name + ': ' + err.message);
+            deferred.resolve();
+        });
+    return deferred.promise;
+}
+
 function update(_id, roomParam) {
     var deferred = Q.defer();
     // validation
@@ -96,15 +143,3 @@ function update(_id, roomParam) {
     return deferred.promise;
 }
 
-function _delete(_id) {
-    var deferred = Q.defer();
-
-    Room.remove(
-        { _id: mongo.helper.toObjectID(_id) },
-        function (err) {
-            if (err) deferred.reject(err.name + ': ' + err.message);
-            deferred.resolve();
-        });
-
-    return deferred.promise;
-}

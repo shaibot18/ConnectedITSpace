@@ -16,7 +16,6 @@
     "jsonwebtoken": "^5.0.2",
     "lodash": "^3.10.0",
     "mongodb": "^2.1.16",
-    "mongoose": "^3.10.10",
     "q": "^1.4.1",
     "request": "^2.58.0",
     "rootpath": "^0.1.2"
