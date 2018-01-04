@@ -5,7 +5,15 @@ var jwt = require('jsonwebtoken');
 var bcrypt = require('bcryptjs');
 var Q = require('q');
 var mongoose = require('mongoose');
-var connectionString = config.connectionString;
+var vcap_services = JSON.parse(process.env.VCAP_SERVICES);
+var connectionString;
+if (process.env.VCAP_SERVICES){
+    var vcap_services = JSON.parse(process.env.VCAP_SERVICES);
+    connectionString = vcap_services["MongoDB-Service"][0].credentials.uri;
+}
+else{
+    connectionString = config.connectionString;
+}
 var connectionOptions = {
     useMongoClient: true
 }
