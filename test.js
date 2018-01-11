@@ -5,19 +5,21 @@ app.get('/',function(req,res){
     res.send('Hello world');
 })
 
-app.post('/api/roomdata',function(req,res){
+app.post('/dataport.aspx',function(req,res){
     console.log('Received post');
-    console.log(req.body);
+    console.log(req.query);
+    console.log(req.originalUrl);
+    // console.log(req);
     return res.send('Received post');
 })
 
-app.get('/api/roomdata',function(req,res){
+app.get('/dataport.aspx',function(req,res){
     console.log('Received get');
     console.log(req.body);
     return res.send('Received get');
 })
 
-var server = app.listen(80,'0.0.0.0', function () {
+var server = app.listen(1080,'0.0.0.0', function () {
     console.log('Server listening at http://' + server.address().address + ':' + server.address().port);
 });
 

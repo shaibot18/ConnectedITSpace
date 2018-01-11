@@ -88,7 +88,9 @@ function getByTimeRange(_RoomId,startTime,endTime){
 function add(roomdataParams) {
     var deferred = Q.defer();
     // validation
-    var MacAddress = roomdataParams.MacAddress
+    var MacAddress = roomdataParams.MacAddress;
+    console.log('roomdataParams');
+    console.log(roomdataParams);
     var room = roomService.getIdByMacAddress(MacAddress);
     roomService.getIdByMacAddress(MacAddress)
         .then(function(_RoomId){
