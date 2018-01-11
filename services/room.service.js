@@ -3,7 +3,27 @@ var _ = require('lodash');
 var jwt = require('jsonwebtoken');
 var bcrypt = require('bcryptjs');
 var Q = require('q');
+<<<<<<< HEAD
+var mongoose = require('mongoose');
+var vcap_services = JSON.parse(process.env.VCAP_SERVICES);
+var connectionString;
+if (process.env.VCAP_SERVICES){
+    var vcap_services = JSON.parse(process.env.VCAP_SERVICES);
+    connectionString = vcap_services["MongoDB-Service"][0].credentials.uri;
+}
+else{
+    connectionString = config.connectionString;
+}
+var connectionOptions = {
+    useMongoClient: true
+}
+mongoose.connect(connectionString,connectionOptions);
+mongoose.Promise = global.Promise;
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+=======
 var mongoose = require('services/mongooseCon');
+>>>>>>> 5b6835059e8a34eeac0f5c76bf61a7d7aaa257b9
 var Schema = mongoose.Schema;
 var roomSchema = new Schema({
     country: String, 
