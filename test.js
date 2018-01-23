@@ -5,19 +5,19 @@ var crc = require('crc');
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.get('/',function(req,res){
-    res.send('Hello world');
-})
-var counter = 0;
+var openTime = padLeft((10).toString(16).toUpperCase()) + padLeft((0).toString(16).toUpperCase());
+var closeTime = padLeft((20).toString(16).toUpperCase()) + padLeft((30).toString(16).toUpperCase());
+
+
 
 function crcEncrypt(resultString){
-    var buffer = new ArrayBuffer(resultString.length/2);
-    var v8 = new Int8Array(buffer);
-    var resultArray = resultString.match(/[\w]{2}/g);
+    let buffer = new ArrayBuffer(resultString.length/2);
+    let v8 = new Int8Array(buffer);
+    let resultArray = resultString.match(/[\w]{2}/g);
     for (var i = 0; i < resultArray.length; i++){
         v8[i] = parseInt(resultArray[i],16);
     }
-    return crc.crc16modbus(v8).toString(16).toUpperCase();      
+    return padLeft(crc.crc16modbus(v8).toString(16).toUpperCase(),2);      
 }
 
 var TEST = { 
@@ -29,26 +29,28 @@ var TEST = {
 
 // this function is used to parse time string in the format 'yymmddhhmmss'
 function parseTime(timeString){
-    var timeArray =  timeString.match(/[\w]{2}/g).map(element => parseInt(element,16));
-    console.log(timeArray);
+    let timeArray =  timeString.match(/[\w]{2}/g).map(element => parseInt(element,16));
     return new Date(2000+timeArray[0],timeArray[1]-1,timeArray[2],timeArray[3],timeArray[4],timeArray[5]);
 }
 
 function genTimeString(date){
-    var year = padLeft((date.getYear() - 100).toString(16)).toUpperCase();
-    var month = padLeft((date.getMonth() + 1).toString(16)).toUpperCase();
-    var day = padLeft(date.getDate().toString(16)).toUpperCase();
-    var hour = padLeft(date.getHours().toString(16)).toUpperCase();
-    var min = padLeft(date.getMinutes().toString(16)).toUpperCase();
-    var sec = padLeft(date.getSeconds().toString(16)).toUpperCase();
+    let year = padLeft((date.getYear() - 100).toString(16)).toUpperCase();
+    let month = padLeft((date.getMonth() + 1).toString(16)).toUpperCase();
+    let day = padLeft(date.getDate().toString(16)).toUpperCase();
+    let hour = padLeft(date.getHours().toString(16)).toUpperCase();
+    let min = padLeft(date.getMinutes().toString(16)).toUpperCase();
+    let sec = padLeft(date.getSeconds().toString(16)).toUpperCase();
     return year + month + day + hour + min + sec; 
 }
 
-function padLeft(int){
-    return ('00' + int).slice(-2);
+function padLeft(){
+    let string = arguments[0];
+    if (arguments[1]){
+        let nOfBytes = arguments[1];
+        return ('0000' + string).slice((-2)*nOfBytes);
+    }
+    return ('00' + string).slice(-2);
 }
-
-
 
 function parseSetting(data){
     var resultObj = {
@@ -73,53 +75,96 @@ function parseSetting(data){
         crcCheck: crcEncrypt(data.slice(0,-4)) == data.slice(-4),
     }
     resultObj.timeCheck = Math.abs(resultObj.systemTime - new Date()) < 60000;
-    console.log(resultObj.systemTime);
-    console.log(new Date());
-    console.log(Math.abs(resultObj.systemTime - new Date()));
     return resultObj
+}
+
+
+function parseData(body){
+    let status = body.status; 
+    let data = typeof body.data == 'string'? [body.data]:body.data; 
+    let resultObj = {};
+    resultObj.data = [];
+    if (status.length != 28){
+        return {err: 'Status length is not valid'}
+    }
+    if (crcEncrypt(status.slice(0,-4)) != status.slice(-4)){
+        return {err: 'Status CrcCheck failed' + status}        
+    }
+    
+    for (let i = 0; i < data.length; i++){
+        let cur = data[i];
+        if(cur.length != 34){
+            return {err: 'Data length is not valid' + data[i]}
+        }
+        if (cur.slice(-4) != crcEncrypt(cur.slice(0,-4))){
+            return {err: 'Data CrcCheck failed' + cur}                                
+        }
+        resultObj.data.push({
+            time: parseTime(cur.slice(0,12)),//datetime
+            in: parseInt(cur.slice(14,22).match(/[\w]{2}/g).reverse().join(''),16),
+            out: parseInt(cur.slice(22,30).match(/[\w]{2}/g).reverse().join(''),16),            
+        })
+    }
+    resultObj.status =  {
+        version: status.slice(0,4),
+        sn: status.slice(4,12).match(/[\w]{2}/g).reverse().join(''),
+        focus: status.slice(12,14) == '00',//'00' for normal '01' for failure
+        voltage: parseInt(status.slice(16,18) + status.slice(14,16),16) / 1000,
+        battery: parseInt(status.slice(18,20),16),
+        charged: status.slice(-8,-4) == '0000',
+    };
+    return resultObj;
 }
 
 
 app.post('/dataport.aspx',function(req,res){
     console.log('Receive');
     console.log(req.body);
-    var cmd = req.body.cmd;
+    let cmd = req.body.cmd;
+    res.set('Content-Type','application/x-www-form-urlencoded');                        
+    let systemTimeWeek = genTimeString(new Date()) + '00';            
+    let flag = req.body.flag;
+    let resFlag = flag.substr(2,2) + flag.substr(0,2);
+    let data,cmdType;    
     switch(cmd){
         case 'getsetting':
-            var flag = req.body.flag;
-            var resFlag = flag.substr(2,2) + flag.substr(0,2);        
-            var data = parseSetting(req.body.data);
+            data = parseSetting(req.body.data);
             if (data.crcCheck){
                 console.log('CrcCheck successful');
-                res.set('Content-Type','application/x-www-form-urlencoded');                    
                 if(data.timeCheck){
                     console.log('Time check successful');
-                    var cmdType = '05';//confirm parameters
+                    cmdType = '05';//confirm parameters
                 }
                 else{
                     console.log('Time check failed');
-                    var cmdType = '04'//reset parameters
+                    cmdType = '04'//reset parameters
                 }
-                var recordPeriod = padLeft((10).toString(16).toUpperCase());//default 10
-                console.log('Record period is ' + recordPeriod);
-                var uploadPeriod = padLeft((120).toString(16).toUpperCase());// default 120
-                var openTime = padLeft((10).toString(16).toUpperCase()) + padLeft((0).toString(16).toUpperCase());
-                var closeTime = padLeft((20).toString(16).toUpperCase()) + padLeft((30).toString(16).toUpperCase());
-                var resultString = cmdType + resFlag + '000000000300' 
+                let recordPeriod = padLeft((2).toString(16).toUpperCase());//default 10
+                let uploadPeriod = padLeft((4).toString(16).toUpperCase());// default 120, 0 for real-time
+                let resultString = cmdType + resFlag + '000000000300' 
                     + recordPeriod + uploadPeriod
                     + '0000000000000000000002000000000000000000000000000000000000000000'
-                    + genTimeString(new Date()) + '00' 
-                    + openTime + closeTime + '0000';
+                    + systemTimeWeek + openTime + closeTime + '0000';
                 res.status(200).send('result=' + resultString + crcEncrypt(resultString));
-                console.log(resultString + crcEncrypt(resultString));
                 res.end();
             }
             break;
         case 'cache': 
-            var flag = req.body.flag;
-            var resFlag = flag.substr(2,2) + flag.substr(0,2);        
-            
-            
+            data = parseData(req.body);
+            console.log(data);
+            let resType;
+            if(data.err) {
+                console.log(data.err);
+                resType = '02';//data uploading check failed     
+            }
+            else {
+                console.log('CrcCheck successful');                
+                resType = '01';//data uploading check successful 
+            }
+            cmdType = '03';//check both system time and open/close time 
+            let resultString = resType + resFlag + cmdType + systemTimeWeek + openTime + closeTime;
+            res.status(200).send('result=' + resultString + crcEncrypt(resultString));
+            res.end();                
             break;
     }
 });
