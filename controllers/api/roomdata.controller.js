@@ -5,16 +5,17 @@ var router = express.Router();
 var crc = require('crc');
 var roomService = require('services/room.service');
 var roomdataService = require('services/roomdata.service');
-// router.use(bodyParser.json()); // support json encoded bodies
-// router.use(bodyParser.urlencoded({ extended: true }));
+var Q = require('q');
 
 var openTime = padLeft((10).toString(16).toUpperCase()) + padLeft((0).toString(16).toUpperCase());
 var closeTime = padLeft((20).toString(16).toUpperCase()) + padLeft((30).toString(16).toUpperCase());
 
 // routes
-// router.post('/',add);
+// router.post('/',add);c
 router.get('/:roomId',getByTimeRange);
-router.post('/',function(req,res){
+router.post('/',handlePost);
+
+function handlePost(req,res){
     console.log('Receive');
     console.log(req.body);
     let cmd = req.body.cmd;
@@ -50,6 +51,7 @@ router.post('/',function(req,res){
         case 'cache': 
             data = parseData(req.body);
             console.log(data);
+            saveRoomData(data);
             let resType;
             if(data.err) {
                 console.log(data.err);
@@ -65,8 +67,21 @@ router.post('/',function(req,res){
             res.end();                
             break;
     }
-});
-//router.get('/',get);
+}
+
+function saveRoomData(body){
+    var deferred = Q.defer();
+    body.data.forEach(element => {
+        roomdataService.add(element)
+            .then(function () {
+                deferred.resolve();
+            })
+            .catch(function (err) {
+                deferred.reject(err);
+            });
+    });
+    return deferred.promise;
+}
 
 function padLeft(){
     let string = arguments[0];
@@ -103,8 +118,6 @@ function genTimeString(date){
     return year + month + day + hour + min + sec; 
 }
 
-
-
 function parseSetting(data){
     var resultObj = {
         sn: data.slice(0,8).match(/[\w]{2}/g).reverse().join(''),//string
@@ -131,7 +144,6 @@ function parseSetting(data){
     return resultObj
 }
 
-
 function parseData(body){
     let status = body.status; 
     let data = typeof body.data == 'string'? [body.data]:body.data; 
@@ -153,6 +165,7 @@ function parseData(body){
             return {err: 'Data CrcCheck failed' + cur}                                
         }
         resultObj.data.push({
+            sn: status.slice(4,12).match(/[\w]{2}/g).reverse().join(''),            
             time: parseTime(cur.slice(0,12)),//datetime
             in: parseInt(cur.slice(14,22).match(/[\w]{2}/g).reverse().join(''),16),
             out: parseInt(cur.slice(22,30).match(/[\w]{2}/g).reverse().join(''),16),            
@@ -167,22 +180,6 @@ function parseData(body){
         charged: status.slice(-8,-4) == '0000',
     };
     return resultObj;
-}
-
-
-
-
-function add(req,res){
-    // console.log('Received post');
-    // console.log(req);
-    // console.log(req.body);
-    roomdataService.add(req.body)
-    .then(function () {
-        res.sendStatus(200);
-    })
-    .catch(function (err) {
-        res.status(400).send(err);
-    });
 }
 
 function getByTimeRange(req,res){

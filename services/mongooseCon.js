@@ -1,6 +1,5 @@
 var config = require('config.json');
 var mongoose = require('mongoose');
-var vcap_services = JSON.parse(process.env.VCAP_SERVICES);
 var connectionString;
 if (process.env.VCAP_SERVICES){
     var vcap_services = JSON.parse(process.env.VCAP_SERVICES);
