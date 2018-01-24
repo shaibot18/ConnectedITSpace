@@ -9,6 +9,7 @@
   "dependencies": {
     "bcryptjs": "^2.1.0",
     "body-parser": "^1.13.2",
+    "crc": "^3.5.0",
     "ejs": "^2.3.3",
     "express": "^4.13.0",
     "express-jwt": "^3.0.1",
@@ -16,6 +17,7 @@
     "jsonwebtoken": "^5.0.2",
     "lodash": "^3.10.0",
     "mongodb": "^2.1.16",
+    "mongoose": "^4.13.9",
     "q": "^1.4.1",
     "request": "^2.58.0",
     "rootpath": "^0.1.2"

@@ -17,7 +17,7 @@ g #g4575 {cursor:pointer;}
 .container{height:100%;}
 .main_container{height:100%;}
 html, body{ margin:0; height:100%;}
-#worldmapall{width:auto;height:91.5%;text-align:center;min-height:400px;}
+/* #worldmapall{width:auto;height:91.5%;text-align:center;min-height:400px;} */
 /*#worldmapall{width:auto;height:92%;background:url(../../production/images/world.jpg) no-repeat center;background-size:auto 100%;text-align:center}*/
 .numberleft{float:left;position:relative;}
 .numberleftmargin{float:left;position:relative;margin-left:10px;margin-top:6px;}

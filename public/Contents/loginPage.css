@@ -1,0 +1,11 @@
+button.mapboxgl-ctrl-icon.mapboxgl-ctrl-geolocate {
+    margin: 0 auto;
+}
+
+.marker {
+    display: block;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    padding: 0;
+}

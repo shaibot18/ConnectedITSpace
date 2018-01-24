@@ -1,38 +1,114 @@
 ﻿<!-- jQuery -->
 <script type="text/javascript" src="vendors/jquery/dist/jquery.js"></script>
+<script>
+    var geojson = {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "properties": {
+                    "message": "Baz",
+                },
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [121.355249, 31.230112]// localtion for Bosch Shanghai
+                }
+            }
+        ]
+    };
+    mapboxgl.accessToken =
+        'pk.eyJ1IjoiZXZzY2hlbiIsImEiOiJjamM1c3d2Z2owcndrMnF0OGJ3b3o1MWkyIn0.oDhmygyuNxXmvq2CqIDFIw';
+    var map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v10',
+        center: [121.355249, 31.230112],
+        maxZoom: 10,
+        minZoom: 3
+    });
+    map.addControl(new mapboxgl.GeolocateControl({
+        positionOptions: {
+            enableHighAccuracy: true
+        },
+        trackUserLocation: true
+    }));
+    var geocoder = new MapboxGeocoder({
+        accessToken: mapboxgl.accessToken,
+    });
+    map.addControl(geocoder, 'top-left');
+    map.on('load',function(){
+        geocoder.on('result', function(ev) {
+            console.log('Result is ');
+            console.log(ev.result.geometry);
+        });
+    });
+
+    
+    var popupHTML = $('#sgh_box').html();
+
+    geojson.features.forEach(function(marker) {
+    // create a DOM element for the marker
+        var el = document.createElement('div');
+        el.innerHTML = '<i class="fa fa-map-marker fa-3x" aria-hidden="true"></i>';
+        el.className = 'marker';
+        el.style.width = '40px';
+        el.style.height = '40px';
+        // el.style.backgroundImage = 'url(https://placekitten.com/g/' + marker.properties.iconSize.join('/') + '/)';
+        // el.style.backgroundColor = 'black';
+        var popup = new mapboxgl.Popup({
+                closeButton: false,
+                closeOnClick: false
+            });
+        el.addEventListener('mouseover', function() {        
+            popup.setLngLat(marker.geometry.coordinates)
+                .setHTML(popupHTML)
+                .addTo(map);        
+        });
+        el.addEventListener('mouseleave', function() {        
+            popup.remove();      
+        });
+        // add marker to map
+        new mapboxgl.Marker(el)
+            .setLngLat(marker.geometry.coordinates)
+            .addTo(map);
+    });
+</script>
 <script type="text/javascript">
-    $(document).ready(function(){
+    $(document).ready(function () {
         //login
         $("#myiconuse").click(
-            function(){
-            if($(".mylogin_box").css("display")=="none"){
-                $(".mylogin_box").show();
-            }else{
-            $(".mylogin_box").hide();}
+            function () {
+                if ($(".mylogin_box").css("display") == "none") {
+                    $('#map').css('z-index', -1);
+                    $(".mylogin_box").show();
+                } else {
+                    $('#map').css('z-index', 'auto');
+                    $(".mylogin_box").hide();
+                }
             }
         );
         $(".loginbutton").click(
-            function(){
-            $(".mylogin_box").css("display","none");}
+            function () {
+                $(".mylogin_box").css("display", "none");
+            }
         );
-        
-        
-        
+
+
+
         $(".iconchinasgh").hover(
             function (e) {
-                var pageX=e.pageX+20;
-                $(".iconchinasgh_box").css("left",pageX);
-                $(".iconchinasgh_box").css("display","inline");
+                var pageX = e.pageX + 20;
+                $(".iconchinasgh_box").css("left", pageX);
+                $(".iconchinasgh_box").css("display", "inline");
             },
-            
+
             function (e) {
-                var pageX=e.pageX+20;
-                $(".iconchinasgh_box").css("left",pageX);
-                $(".iconchinasgh_box").css("display","none");
+                var pageX = e.pageX + 20;
+                $(".iconchinasgh_box").css("left", pageX);
+                $(".iconchinasgh_box").css("display", "none");
             },
-        );	
+        );
     });
-    </script>
+</script>
 <!-- Bootstrap -->
 <script src="vendors/bootstrap/dist/js/bootstrap.min.js"></script>
 <!-- NProgress -->
@@ -41,4 +117,5 @@
 <!-- Custom Theme Scripts -->
 <script src="scripts/custom.min.js"></script>
 </body>
+
 </html>
