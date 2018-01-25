@@ -10,23 +10,20 @@ var roomSchema = new Schema({
     city: String,
     building: String,
     _userID: Schema.Types.ObjectId,
-    macAddress: String
+    SN: String,
 });
 var Room = mongoose.model('Room',roomSchema);
-
 var service = {};
 
+service.create = create;
 service.getById = getById;
 service.getByUserId = getByUserId;
-service.getIdByMacAddress = getIdByMacAddress;
+service.getRoomBySN = getRoomBySN;
 service.getAll = getAll;
-service.create = create;
 service.delete = _delete;
-
 service.update = update;
 
 module.exports = service;
-
 
 function getByUserId(_userID){
     var deferred = Q.defer();
@@ -41,20 +38,21 @@ function getByUserId(_userID){
     return deferred.promise;
 }
 
-function getIdByMacAddress(macAddress) {
+function getRoomBySN(SN){
     var deferred = Q.defer();
-    Room.find({macAddress: macAddress})
+    Room.find({SN: SN})
         .select('')
-        .exec(function (err,res) {
+        .exec(function(err,res) {
             if (err) deferred.reject(err.name + ': ' + err.message);
             if (res) {
                 deferred.resolve(res);
             } else {
                 deferred.resolve();
             }
-        });
+        })
     return deferred.promise;
 }
+
 
 function getAll() {
     var deferred = Q.defer();

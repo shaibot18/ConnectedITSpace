@@ -7,13 +7,9 @@
 
     function Service($http, $q) {
         var service = {};
-
         service.GetAll = GetAll;
         service.GetByTimeRange = GetByTimeRange;
-
         return service;
-
-
       
         function GetAll() {
             return $http.get('/api/roomdata').then(handleSuccess, handleError);
@@ -25,20 +21,15 @@
             return $http.get('/api/roomdata/' + _RoomId + '?startTime=' + start + '&endTime=' + end).then(handleSuccess,handleError);
         }
 
-
         function Delete(_id) {
             return $http.delete('/api/users/' + _id).then(handleSuccess, handleError);
         }
 
-        // private functions
-
         function handleSuccess(res) {
             return res.data;
         }
-
         function handleError(res) {
             return $q.reject(res.data);
         }
     }
-
 })();

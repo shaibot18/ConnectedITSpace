@@ -7,17 +7,13 @@
 
     function Service($http, $q) {
         var service = {};
-
         service.GetCurrent = GetCurrent;
         service.GetRoomList = GetRoomList;
         service.GetAll = GetAll;
         service.GetById = GetById;
         service.GetByUsername = GetByUsername;
-        service.Update = Update;
         service.Create = Create;
-        service.Delete = Delete;
-        
-
+        service.Delete = Delete;        
         return service;
 
         function Create(room) {
@@ -27,7 +23,6 @@
         function Delete(_id) {
             return $http.delete('/api/rooms/' + _id).then(handleSuccess, handleError);
         }
-
 
         function GetCurrent() {
             return $http.get('/api/users/current').then(handleSuccess, handleError);
@@ -48,13 +43,6 @@
         function GetByUsername(username) {
             return $http.get('/api/users/' + username).then(handleSuccess, handleError);
         }
-
-
-        function Update(user) {
-            return $http.put('/api/users/' + user._id, user).then(handleSuccess, handleError);
-        }
-
-        
 
         // private functions
 

@@ -10,9 +10,7 @@ var Q = require('q');
 var openTime = padLeft((10).toString(16).toUpperCase()) + padLeft((0).toString(16).toUpperCase());
 var closeTime = padLeft((20).toString(16).toUpperCase()) + padLeft((30).toString(16).toUpperCase());
 
-// routes
-// router.post('/',add);c
-router.get('/:roomId',getByTimeRange);
+router.get('/:_RoomId',getByTimeRange);
 router.post('/',handlePost);
 
 function handlePost(req,res){
@@ -164,12 +162,14 @@ function parseData(body){
         if (cur.slice(-4) != crcEncrypt(cur.slice(0,-4))){
             return {err: 'Data CrcCheck failed' + cur}                                
         }
-        resultObj.data.push({
-            sn: status.slice(4,12).match(/[\w]{2}/g).reverse().join(''),            
-            time: parseTime(cur.slice(0,12)),//datetime
-            in: parseInt(cur.slice(14,22).match(/[\w]{2}/g).reverse().join(''),16),
-            out: parseInt(cur.slice(22,30).match(/[\w]{2}/g).reverse().join(''),16),            
-        })
+        let dataObj = {
+            SN: status.slice(4,12).match(/[\w]{2}/g).reverse().join(''),            
+            Time: parseTime(cur.slice(0,12)),//datetime
+            In: parseInt(cur.slice(14,22).match(/[\w]{2}/g).reverse().join(''),16),
+            Out: parseInt(cur.slice(22,30).match(/[\w]{2}/g).reverse().join(''),16),            
+        };
+        roomdataService.add(dataObj);
+        resultObj.data.push(dataObj);
     }
     resultObj.status =  {
         version: status.slice(0,4),
@@ -186,7 +186,7 @@ function getByTimeRange(req,res){
     var query = req.query;
     if(req.params.roomId){
         if(query.startTime && query.endTime){
-            roomdataService.getByTimeRange(req.params.roomId,parseInt(query.startTime),parseInt(query.endTime))
+            roomdataService.getByTimeRange(req.params._RoomId,parseInt(query.startTime),parseInt(query.endTime))
                 .then(function(roomdataList){
                     if(roomdataList){
                         res.send(roomdataList);
@@ -202,30 +202,5 @@ function getByTimeRange(req,res){
         }
     }
 }
-
-function get(req,res){
-    var query = req.query;
-    if (JSON.stringify(query) == "{}"){
-        roomdataService.getAll()
-            .then(function(roomdataList){
-                if(roomdataList){
-                    res.send(roomdataList);
-                }
-                else{
-                    res.sendStatus(404);
-                }
-            })
-            .catch(function (err) {
-                res.status(400).send(err);
-            });  
-        return
-    }
-    else{
-        res.sendStatus(404).send({
-            error: "Unsupported query"
-        });
-    }
-}
-
 
 module.exports = router;

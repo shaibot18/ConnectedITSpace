@@ -6,39 +6,25 @@
         .module('app')
         .controller('RoomInfo.ManagerController', Controller);
 
-
-
     function Controller(UserService,RoomService,FlashService,RoomDataService,$stateParams,$scope) {
         initController();
         var vm = this;
-
         vm.user = null;
         var roomId = $stateParams.roomId;
-        var period = 1000;
-        
         var total = 0;
-        initCount();
-        var now = +new Date();
-
-
         var data = [];
-        // data.push({
-        //     name: new Date(now - period).toString(),
-        //     value: total
-        // });
-        var oneMinute = 60*1000;
-        var oneDay = 24 * 3600 * 1000;
-        // var value = Math.random() * 1000;
-        
-        // for (var i = 0; i < 1000; i++) {
-        //     data.push(randomData());
-        // }
-
-
-        var option1 = {
-            // title: {
-            //     text: '动态数据 + 时间坐标轴'
-            // },
+        var now = +new Date();
+        initCount();
+        const period = 1000;
+        const oneMinute = 60*1000, oneHour = 60*oneMinute, oneDay = 24 * oneHour;
+        var today = new Date();
+        today.setHours(0);
+        today.setMinutes(0);
+        today.setSeconds(0);
+        today.setMilliseconds(0);
+        console.log('Today is');
+        console.log(today.toLocaleString());
+        var realTimeOption = {
             tooltip: {
                 trigger: 'axis',
                 formatter: function (params) {
@@ -72,20 +58,28 @@
             }]
         };
 
-        var histoX = [];
+        let histoX = [], inData = [], outData = []; 
         for (var i = 8; i <= 17; i++){
             histoX.push(i + ':00 - ' + (i+1) +':00');
+            let inSum = 0, outSum = 0; 
+            let zeroTime = Date.parse(today);
+            RoomDataService.GetByTimeRange(roomId,zeroTime + i*oneHour,zeroTime + (i+1)*oneHour)
+                .then(function(dataList){
+                    console.log(dataList);
+                    $.each(dataList,function(index,element){
+                        inSum += element.In; 
+                        outSum += element.Out;
+                    });
+                })
+                .catch(function(err){
+                    FlashService.Error(err);
+                });
+                inData[i-8] = inSum;
+                outData[i-8] = outSum;
+                totalData[i-8] = inSum - outSum;
         }
-
-        var inData =  [32, 32, 31, 34, 30, 45, 42, 24, 26, 10];
-        var outData = [-20, -23, -10, -33, -40, -43, -27, -36, -33, -30];
-        // var totalData = inData.map(function(val,index){
-        //     return val + outData[index]
-        // }); 
-        var totalData = [12,21,42,43,33,35,50,38,31,11];
-
-
-        var histogramOption = {
+        
+        var historyOption = {
             tooltip : {
                 trigger: 'axis',
                 axisPointer : {            // 坐标轴指示器，坐标轴触发有效
@@ -110,7 +104,7 @@
             ],
             yAxis : [
                 {
-                    type : 'value'                    
+                    type : 'value'
                 }
             ],
             series : [
@@ -145,24 +139,24 @@
             ]
         };
 
-        var myChart = echarts.init(document.getElementById('graph_area'));
-        var histogram = echarts.init(document.getElementById('histogram'));
-        myChart.setOption(option1);
-        histogram.setOption(histogramOption);
-        var start = now - period; 
+        let realTime = echarts.init(document.getElementById('real-time'))
+            .setOption(realTimeOption);        
+        let history = echarts.init(document.getElementById('history'))
+            .setOption(historyOption);
+        let start = now - period; 
+        let interval = setInterval(updateRealTime(), period);
+        $scope.$on('$destroy', function() {
+            // Make sure that the interval is destroyed too
+            clearInterval(interval);
+          });
 
-        var interval = setInterval(function () {
+        function updateRealTime() {
             console.log(start);
             RoomDataService.GetByTimeRange(roomId,start,start + period)
                 .then(function(dataList){
                     console.log(dataList);
                     $.each(dataList,function(index,element){
-                        if (element.Direction){
-                            total = total + 1;
-                        }
-                        else{
-                            total = total - 1;
-                        }
+                        total = total + element.In - element.Out;
                     });
                 })
                 .catch(function(err){
@@ -176,11 +170,6 @@
             });
             $('#totalPeople').text(total.toString());
             start = start + period; 
-            // for (var i = 0; i < 5; i++) {
-            //     data.shift();
-            //     data.push(randomData());
-            // }
-
             myChart.setOption({
                 series: [{
                     data: data
@@ -188,51 +177,21 @@
             });
             console.log(data);
             console.log('Total is ' + total);
-        }, period);
-
-        $scope.$on('$destroy', function() {
-            // Make sure that the interval is destroyed too
-            clearInterval(interval);
-          });
-
-        function randomData() {
-            now = new Date(+now + oneDay);
-            value = value + Math.random() * 21 - 10;
-            return {
-                name: now.toString(),
-                value: [
-                    [now.getFullYear(), now.getMonth() + 1, now.getDate()].join('/'),
-                    Math.round(value)
-                ]
-            }
         }
 
         function initController() {
-            // get current user
             UserService.GetCurrent().then(function (user) {
                 vm.user = user;
             });
         }
 
         function initCount(){
-            var today = new Date();
-            today.setHours(0);
-            today.setMinutes(0);
-            today.setSeconds(0);
-            today.setMilliseconds(0);
-            console.log('Today is');
-            console.log(today.toLocaleString());
             RoomDataService.GetByTimeRange(roomId,Date.parse(today),now - period)
                 .then(function(dataList){
                     console.log('Init data list');
                     console.log(dataList);
                     $.each(dataList,function(index,element){
-                        if (element.Direction){
-                            total = total + 1;
-                        }
-                        else{
-                            total = total - 1;
-                        }
+                        total = total + element.In - element.Out;
                     });
                     console.log('Init count is ' + total);
                 })
@@ -240,6 +199,5 @@
                     FlashService.Error(err);
                 });
         }
-
     }
 })();

@@ -7,47 +7,64 @@ var Q = require('q');
 var mongoose = require('services/mongooseCon');
 var Schema = mongoose.Schema;
 var roomdataSchema = new Schema({
+    SN: String,
     _RoomId: Schema.Types.ObjectId,
-    MacAddress: String,
     Time: {
         type: Date,
         default: Date.now
     },
-    TimeZone: String,
-    Direction: Boolean
-});
+    TimeZone:{
+        type: String,
+        default: "+0800"
+    },
+    In: Number,
+    Out: Number
+})
 roomdataSchema.index({Time: -1});
 var Roomdata = mongoose.model('Roomdata',roomdataSchema);
 var service = {};
 
-service.getAll = getAll;
+service.add = add; 
 service.getById = getById;
 service.getByTimeRange = getByTimeRange;
-service.add = add;
 service.delete = _delete;
-
 module.exports = service;
 
-
-function getAll(){
-    var deferred = Q.defer();
-    Roomdata.find({},function (err, roomdataList) {
-        if (err) deferred.reject(err.name + ': ' + err.message);
-
-        if (roomdataList) {
-            deferred.resolve(roomdataList);
-        } else {
-            // user not found
-            deferred.resolve();
-        }
-    });
+function add(roomdataParams) {
+    let deferred = Q.defer();
+    // validation
+    let SN = roomdataParams.SN;
+    roomService.getRoomBySN(SN)
+        .then(function(room){
+            if(room.length == 0){
+                deferred.reject('Invalid post: no existing room matches this SN ' + SN);
+            }
+            else if (room.length > 1){
+                deferred.reject('Invalid post: this SN '+ SN + 'matches too many rooms');                
+            }
+            else{
+                roomdataParams._RoomId = Room._id; 
+                saveRoom(roomdataParams);                
+            }
+        })
+        .catch(function(err){
+            deferred.reject(err.name + ': ' + err.message);
+        })
     return deferred.promise;
+    
+    function saveRoom(roomdataParams){
+        var roomdata = new Roomdata(roomdataParams);
+        console.log(roomdata);
+        roomdata.save(function (err, doc) {
+                if (err) deferred.reject(err.name + ': ' + err.message);
+                deferred.resolve();
+                console.log('Roomdata received');
+            });
+    }   
 }
-
 
 function getById(_id) {
     var deferred = Q.defer();
-
     Roomdata.findById(_id, function (err, user) {
         if (err) deferred.reject(err.name + ': ' + err.message);
 
@@ -63,12 +80,12 @@ function getById(_id) {
     return deferred.promise;
 }
 
-function getByTimeRange(_RoomId,startTime,endTime){
+function getByTimeRange(SN,startTime,endTime){
     console.log('Start time is ' + startTime);
     console.log('End time is ' + endTime);
     var deferred = Q.defer();
     Roomdata.find({ 
-        _RoomId: _RoomId,
+        SN: _RoomId,
         Time:{
             "$gte": startTime,
             "$lt": endTime
@@ -81,51 +98,6 @@ function getByTimeRange(_RoomId,startTime,endTime){
     });
     return deferred.promise;
 }
-
-
-// function add(roomdataParams) {
-//     var deferred = Q.defer();
-//     // validation
-//     var MacAddress = roomdataParams.MacAddress;
-//     console.log('roomdataParams');
-//     console.log(roomdataParams);
-//     var room = roomService.getIdByMacAddress(MacAddress);
-//     roomService.getIdByMacAddress(MacAddress)
-//         .then(function(_RoomId){
-//             if(_RoomId.length == 0){
-//                 deferred.reject('Invalid post: no existing room matches this mac address ' + MacAddress);
-//             }
-//             else if (_RoomId.length > 1){
-//                 deferred.reject('Invalid post: this mac address '+ MacAddress + 'matches too many rooms');                
-//             }
-//             else{
-//                 roomdataParams._RoomId = _RoomId[0]; 
-//                 saveRoom(roomdataParams);                
-//             }
-//         })
-//         .catch(function(err){
-//             deferred.reject(err.name + ': ' + err.message);
-//         })
-//     return deferred.promise;
-    
-//     function saveRoom(roomdataParams){
-//         var roomdata = new Roomdata({
-//             // MacAddress: roomdataParams.MacAddress,
-//             _RoomId: roomdataParams._RoomId,
-//             Time: new Date(parseInt(roomdataParams.Time)),
-//             TimeZone: roomdataParams.TimeZone,
-//             Direction: (roomdataParams.Direction == "In") ? true : false
-//         });
-//         console.log(roomdata);
-//         roomdata.save(function (err, doc) {
-//                 if (err) deferred.reject(err.name + ': ' + err.message);
-//                 deferred.resolve();
-//                 // console.log(doc);
-//                 console.log('Roomdata received');
-//             });
-//     }   
-// }
-
 
 
 function _delete(_id) {
