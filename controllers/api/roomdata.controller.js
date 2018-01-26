@@ -10,12 +10,36 @@ var Q = require('q');
 var openTime = padLeft((10).toString(16).toUpperCase()) + padLeft((0).toString(16).toUpperCase());
 var closeTime = padLeft((20).toString(16).toUpperCase()) + padLeft((30).toString(16).toUpperCase());
 
-router.get('/:_RoomId',getByTimeRange);
+router.get('/:RoomId',getByTimeRange);
+router.get('/',function(){
+    console.log('get');
+})
 router.post('/',handlePost);
 
+function getByTimeRange(req,res){
+    var query = req.query;
+    // console.log()
+    if(req.params.RoomId){
+        if(query.startTime && query.endTime){
+            roomdataService.getByTimeRange(req.params.RoomId,parseInt(query.startTime),parseInt(query.endTime))
+                .then(function(roomdataList){
+                    if(roomdataList){
+                        res.send(roomdataList);
+                    }
+                    else{
+                        res.sendStatus(404);
+                    }
+                })
+                .catch(function (err) {
+                    res.status(400).send(err);
+                });
+        }
+    }
+}
+
 function handlePost(req,res){
-    console.log('Receive');
-    console.log(req.body);
+    // console.log('Receive');
+    // console.log(req.body);
     let cmd = req.body.cmd;
     res.set('Content-Type','application/x-www-form-urlencoded');                        
     let systemTimeWeek = genTimeString(new Date()) + '00';            
@@ -35,28 +59,27 @@ function handlePost(req,res){
                     console.log('Time check failed');
                     cmdType = '04'//reset parameters
                 }
-                let recordPeriod = padLeft((2).toString(16).toUpperCase());//default 10
-                let uploadPeriod = padLeft((4).toString(16).toUpperCase());// default 120, 0 for real-time
+                let recordPeriod = padLeft((0).toString(16).toUpperCase());//default 10
+                let uploadPeriod = padLeft((0).toString(16).toUpperCase());// default 120, 0 for real-time
                 let resultString = cmdType + resFlag + '000000000300' 
                     + recordPeriod + uploadPeriod
                     + '0000000000000000000002000000000000000000000000000000000000000000'
                     + systemTimeWeek + openTime + closeTime + '0000';
                 res.status(200).send('result=' + resultString + crcEncrypt(resultString));
-                console.log('Result string is ' + resultString + crcEncrypt(resultString));
                 res.end();
             }
             break;
         case 'cache': 
             data = parseData(req.body);
-            console.log(data);
-            saveRoomData(data);
+            // console.log(data);
+            // saveRoomData(data);
             let resType;
             if(data.err) {
                 console.log(data.err);
                 resType = '02';//data uploading check failed     
             }
             else {
-                console.log('CrcCheck successful');                
+                // console.log('CrcCheck successful');                
                 resType = '01';//data uploading check successful 
             }
             cmdType = '03';//check both system time and open/close time 
@@ -67,19 +90,19 @@ function handlePost(req,res){
     }
 }
 
-function saveRoomData(body){
-    var deferred = Q.defer();
-    body.data.forEach(element => {
-        roomdataService.add(element)
-            .then(function () {
-                deferred.resolve();
-            })
-            .catch(function (err) {
-                deferred.reject(err);
-            });
-    });
-    return deferred.promise;
-}
+// function saveRoomData(body){
+//     var deferred = Q.defer();
+//     body.data.forEach(element => {
+//         roomdataService.add(element)
+//             .then(function () {
+//                 deferred.resolve();
+//             })
+//             .catch(function (err) {
+//                 deferred.reject(err);
+//             });
+//     });
+//     return deferred.promise;
+// }
 
 function padLeft(){
     let string = arguments[0];
@@ -168,7 +191,13 @@ function parseData(body){
             In: parseInt(cur.slice(14,22).match(/[\w]{2}/g).reverse().join(''),16),
             Out: parseInt(cur.slice(22,30).match(/[\w]{2}/g).reverse().join(''),16),            
         };
-        roomdataService.add(dataObj);
+        roomdataService.add(dataObj)
+            .then(function(data){
+                console.log('Add data successful');
+            })
+            .catch(function(err){
+                console.log(err);
+            });
         resultObj.data.push(dataObj);
     }
     resultObj.status =  {
@@ -180,27 +209,6 @@ function parseData(body){
         charged: status.slice(-8,-4) == '0000',
     };
     return resultObj;
-}
-
-function getByTimeRange(req,res){
-    var query = req.query;
-    if(req.params.roomId){
-        if(query.startTime && query.endTime){
-            roomdataService.getByTimeRange(req.params._RoomId,parseInt(query.startTime),parseInt(query.endTime))
-                .then(function(roomdataList){
-                    if(roomdataList){
-                        res.send(roomdataList);
-                    }
-                    else{
-                        res.sendStatus(404);
-                    }
-                })
-                .catch(function (err) {
-                    res.status(400).send(err);
-                });
-            return;             
-        }
-    }
 }
 
 module.exports = router;

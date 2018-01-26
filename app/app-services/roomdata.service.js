@@ -18,7 +18,8 @@
         function GetByTimeRange(_RoomId){
             var start = arguments[1];
             var end = arguments[2] || Date.parse(Date());
-            return $http.get('/api/roomdata/' + _RoomId + '?startTime=' + start + '&endTime=' + end).then(handleSuccess,handleError);
+            // console.log('/api/roomdata/' + _RoomId + '?startTime=' + start + '&endTime=' + end);
+            return $http.get('/api/roomdata/' + _RoomId + '?startTime=' + start + '&endTime=' + end,{timeout: 3000}).then(handleSuccess,handleError)
         }
 
         function Delete(_id) {

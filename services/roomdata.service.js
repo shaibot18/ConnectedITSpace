@@ -37,13 +37,15 @@ function add(roomdataParams) {
     roomService.getRoomBySN(SN)
         .then(function(room){
             if(room.length == 0){
+                console.log('Invalid post: no existing room matches this SN ' + SN);
                 deferred.reject('Invalid post: no existing room matches this SN ' + SN);
             }
             else if (room.length > 1){
+                console.log('Invalid post: this SN '+ SN + 'matches too many rooms');
                 deferred.reject('Invalid post: this SN '+ SN + 'matches too many rooms');                
             }
             else{
-                roomdataParams._RoomId = Room._id; 
+                roomdataParams._RoomId = room[0]._id; 
                 saveRoom(roomdataParams);                
             }
         })
@@ -53,12 +55,13 @@ function add(roomdataParams) {
     return deferred.promise;
     
     function saveRoom(roomdataParams){
-        var roomdata = new Roomdata(roomdataParams);
-        console.log(roomdata);
+        let roomdata = new Roomdata(roomdataParams);
+        console.log('Saving roomdata ...');
+        console.log('In is ' + roomdata.In + ' Out is' + roomdata.Out);
+        console.log('Time is ' + Date.parse(roomdata.Time));
         roomdata.save(function (err, doc) {
                 if (err) deferred.reject(err.name + ': ' + err.message);
                 deferred.resolve();
-                console.log('Roomdata received');
             });
     }   
 }
@@ -80,12 +83,12 @@ function getById(_id) {
     return deferred.promise;
 }
 
-function getByTimeRange(SN,startTime,endTime){
+function getByTimeRange(_RoomId,startTime,endTime){
     console.log('Start time is ' + startTime);
     console.log('End time is ' + endTime);
     var deferred = Q.defer();
     Roomdata.find({ 
-        SN: _RoomId,
+        _RoomId: _RoomId,
         Time:{
             "$gte": startTime,
             "$lt": endTime

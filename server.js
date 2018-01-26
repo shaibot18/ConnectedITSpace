@@ -22,6 +22,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 // app.use(unless('/dataport.aspx',session({ secret: config.secret, resave: false, saveUninitialized: true })));
 app.use(unless('/api/roomdata',session({ secret: config.secret, resave: false, saveUninitialized: true })));
+// app.use(session({ secret: config.secret, resave: false, saveUninitialized: true }));
 app.use(express.static(__dirname+'/public'));
 
 // use JWT auth to secure the api
