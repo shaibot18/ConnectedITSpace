@@ -9,6 +9,7 @@ var roomSchema = new Schema({
     country: String, 
     city: String,
     building: String,
+    timeZone: String, 
     _userID: Schema.Types.ObjectId,
     SN: String,
 });
