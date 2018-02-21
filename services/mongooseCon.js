@@ -8,11 +8,16 @@ if (process.env.VCAP_SERVICES){
 else{
     connectionString = config.connectionString;
 }
+
 var connectionOptions = {
     // useMongoClient: true
 }
-mongoose.connect(connectionString,connectionOptions);
-mongoose.Promise = global.Promise;
+mongoose.connect(connectionString,connectionOptions,function(err){
+    console.error.bind(console, 'connection error:');
+});
+
+
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
+mongoose.Promise = global.Promise;
 module.exports = mongoose;

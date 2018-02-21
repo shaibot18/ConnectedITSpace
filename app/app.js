@@ -18,6 +18,13 @@
         if (window.user.role == 1) {
             $urlRouterProvider.when("/","/admin");
             $stateProvider
+                .state('editManager',{
+                    url: '/admin/editManager',
+                    templateUrl: 'admin/editManager.html',
+                    controller: 'EditManager.AdminController',
+                    controllerAs: 'vm',
+                    data: {activeTab: 'new'}
+                })
                 .state('home', {
                     url: '/admin',
                     templateUrl: 'admin/index.html',
@@ -63,6 +70,7 @@
                     controllerAs: 'vm',
                     data: { activeTab: 'addRoom' }
                 });
+
         }
 
 

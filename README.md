@@ -1,5 +1,5 @@
-# Connected IT Space
+# mean-stack-registration-login-example
 
-This web app is used to show and monitor the people flow of Bosch IT Space around the world, combined with hardware installation. 
+MEAN Stack User Registration and Login Example & Tutorial
 
-The basis of the app is from http://jasonwatmore.com/post/2015/12/09/mean-stack-user-registration-and-login-example-tutorial.
+To see a demo and further details go to http://jasonwatmore.com/post/2015/12/09/mean-stack-user-registration-and-login-example-tutorial

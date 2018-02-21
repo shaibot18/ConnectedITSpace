@@ -5,23 +5,12 @@ var session = require('express-session');
 var bodyParser = require('body-parser');
 var expressJwt = require('express-jwt');
 var config = require('config.json');
-var crc = require('crc');
-var unless = function(path, middleware) {
-    return function(req, res, next) {
-        if (path === req.path) {
-            return next();
-        } else {
-            return middleware(req, res, next);
-        }
-    };
-};
 
 app.set('view engine', 'ejs');
 app.set('views', __dirname + '/views');
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-// app.use(unless('/dataport.aspx',session({ secret: config.secret, resave: false, saveUninitialized: true })));
-app.use(unless('/api/roomdata',session({ secret: config.secret, resave: false, saveUninitialized: true })));
+app.use(session({ secret: config.secret, resave: false, saveUninitialized: true }));
 app.use(express.static(__dirname+'/public'));
 
 // use JWT auth to secure the api
@@ -34,6 +23,7 @@ app.use('/app', require('./controllers/app.controller'));
 app.use('/api/users', require('./controllers/api/users.controller'));
 app.use('/api/rooms', require('./controllers/api/rooms.controller'));
 app.use('/api/roomdata',require('./controllers/api/roomdata.controller'));
+
 
 // make '/app' default route
 app.get('/', function (req, res) {
