@@ -1,19 +1,20 @@
 ﻿require('rootpath')();
-var express = require('express');
-var app = express();
-var session = require('express-session');
-var bodyParser = require('body-parser');
-var expressJwt = require('express-jwt');
-var config = require('config.json');
-var crc = require('crc');
-var unless = function(path, middleware) {
-    return function(req, res, next) {
+const express = require('express');
+
+const app = express();
+const session = require('express-session');
+const bodyParser = require('body-parser');
+// const expressJwt = require('express-jwt');
+const config = require('config.json');
+// const crc = require('crc');
+function unless(path, middleware) {
+  return function (req, res, next) {
         if (path === req.path) {
             return next();
         } else {
             return middleware(req, res, next);
         }
-    };
+    }
 };
 
 app.set('view engine', 'ejs');
@@ -34,7 +35,7 @@ app.use('/register', require('./controllers/register.controller'));
 app.use('/app', require('./controllers/app.controller'));
 app.use('/api/users', require('./controllers/api/users.controller'));
 app.use('/api/rooms', require('./controllers/api/rooms.controller'));
-app.use('/api/roomdata',require('./controllers/api/roomdata.controller'));
+app.use('/api/roomdata', require('./controllers/api/roomdata.controller'));
 
 // make '/app' default route
 app.get('/', function (req, res) {
