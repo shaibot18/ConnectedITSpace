@@ -20,14 +20,11 @@ app.set('view engine', 'ejs');
 app.set('views', __dirname + '/views');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-// app.use(unless('/dataport.aspx',session({ secret: config.secret, resave: false, saveUninitialized: true })));
 app.use(unless('/api/roomdata',session({ secret: config.secret, resave: false, saveUninitialized: true })));
-// app.use(session({ secret: config.secret, resave: false, saveUninitialized: true }));
 app.use(express.static(__dirname+'/public'));
 
 // use JWT auth to secure the api
 // app.use('/api', expressJwt({ secret: config.secret }).unless({ path: ['/api/users/authenticate', '/api/users/register'] }));
-
 // routes
 app.use('/login', require('./controllers/login.controller'));
 app.use('/register', require('./controllers/register.controller'));
@@ -41,7 +38,19 @@ app.get('/', function (req, res) {
     return res.redirect('/app');
 });
 
-// start server
-var server = app.listen(3000,'0.0.0.0', function () {
-    console.log('Server listening at http://' + server.address().address + ':' + server.address().port);
+app.post('/',function(req,res){
+    console.log(req.body);
+    return res.send('received post');
 });
+
+// start server
+if (process.env.PORT){
+    var server = app.listen(process.env.PORT, function () {
+        console.log('Server listening at http://' + server.address().address + ':' + server.address().port);
+    });
+}
+else {
+    var server = app.listen(3000, '0.0.0.0', function () {
+        console.log('Server listening at http://' + server.address().address + ':' + server.address().port);
+    });
+}

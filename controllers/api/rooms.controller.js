@@ -1,4 +1,3 @@
-var config = require('config.json');
 var express = require('express');
 var router = express.Router();
 var roomService = require('services/room.service');
@@ -8,8 +7,6 @@ router.post('/',create);
 router.delete('/:_id', _delete);
 router.get('/roomlist/:_id', getRoomList);
 router.get('/roomlist/', getAll);
-
-
 
 module.exports = router;
 

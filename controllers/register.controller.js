@@ -2,6 +2,8 @@
 var router = express.Router();
 var request = require('request');
 var config = require('config.json');
+var baseApiUrl = process.env.PORT? config.apiUrl:config.localUrl;
+console.log(baseApiUrl);
 
 router.get('/', function (req, res) {
     res.render('register');
@@ -10,12 +12,13 @@ router.get('/', function (req, res) {
 router.post('/', function (req, res) {
     // register using api to maintain clean separation between layers
     request.post({
-        url: config.apiUrl + '/users/register',
+        url: baseApiUrl + '/users/register',
         form: req.body,
         json: true
     }, function (error, response, body) {
         if (error) {
-            return res.render('register', { error: 'An error occurred' });
+            console.log(error);
+            return res.render('register', { error: error });
         }
 
         if (response.statusCode !== 200) {

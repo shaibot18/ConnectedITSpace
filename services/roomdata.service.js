@@ -19,7 +19,7 @@ var roomdataSchema = new Schema({
     },
     In: Number,
     Out: Number
-})
+});
 roomdataSchema.index({Time: -1});
 var Roomdata = mongoose.model('Roomdata',roomdataSchema);
 var service = {};
@@ -27,8 +27,20 @@ var service = {};
 service.add = add; 
 service.getById = getById;
 service.getByTimeRange = getByTimeRange;
+service.getAllById = getAllById;
 service.delete = _delete;
 module.exports = service;
+
+function getAllById(_RoomId) {
+    let deferred = Q.defer();
+    Roomdata.find({ 
+        _RoomId: _RoomId,
+    },function(err,res){
+        if (err) deferred.reject(err.name + ': ' + err.message);
+        deferred.resolve(res);    
+    });
+    return deferred.promise;
+}
 
 function add(roomdataParams) {
     let deferred = Q.defer();
@@ -101,7 +113,6 @@ function getByTimeRange(_RoomId,startTime,endTime){
     });
     return deferred.promise;
 }
-
 
 function _delete(_id) {
     var deferred = Q.defer();
