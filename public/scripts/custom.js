@@ -112,6 +112,7 @@ $MENU_TOGGLE.on('click', function() {
 		}
 
 	$BODY.toggleClass('nav-md nav-sm');
+	console.log('clicked - hhh toggle');
 
 	setContentHeight();
 

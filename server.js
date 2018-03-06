@@ -19,7 +19,7 @@ function unless(path, middleware) {
 
 app.set('view engine', 'ejs');
 app.set('views', __dirname + '/views');
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(unless('/api/roomdata',session({ secret: config.secret, resave: false, saveUninitialized: true })));
 app.use(express.static(__dirname+'/public'));
@@ -33,6 +33,7 @@ app.use('/app', require('./controllers/app.controller'));
 app.use('/api/users', require('./controllers/api/users.controller'));
 app.use('/api/rooms', require('./controllers/api/rooms.controller'));
 app.use('/api/roomdata', require('./controllers/api/roomdata.controller'));
+
 
 // make '/app' default route
 app.get('/', function (req, res) {

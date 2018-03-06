@@ -1,7 +1,6 @@
 var bodyParser = require('body-parser');
 var express = require('express');
 var router = express.Router();
-var crc = require('crc');
 var roomService = require('services/room.service');
 var roomdataService = require('services/roomdata.service');
 var Q = require('q');

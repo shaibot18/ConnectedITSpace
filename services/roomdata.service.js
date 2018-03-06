@@ -31,14 +31,23 @@ service.getAllById = getAllById;
 service.delete = _delete;
 module.exports = service;
 
+<<<<<<< HEAD
 function getAllById(_RoomId) {
     let deferred = Q.defer();
     Roomdata.find({ 
         _RoomId: _RoomId,
     },function(err,res){
+=======
+
+function getAll(){
+    var deferred = Q.defer();
+
+    Roomdata.find({},function (err, roomdataList) {
+>>>>>>> 6bf8c0ce851357a104ef8222bc6a01e76e0cb099
         if (err) deferred.reject(err.name + ': ' + err.message);
         deferred.resolve(res);    
     });
+
     return deferred.promise;
 }
 
@@ -114,6 +123,55 @@ function getByTimeRange(_RoomId,startTime,endTime){
     return deferred.promise;
 }
 
+<<<<<<< HEAD
+=======
+
+function add(roomdataParams) {
+    var deferred = Q.defer();
+    // validation
+    var MacAddress = roomdataParams.MacAddress;
+    console.log('roomdataParams');
+    console.log(roomdataParams);
+    var room = roomService.getIdByMacAddress(MacAddress);
+    roomService.getIdByMacAddress(MacAddress)
+        .then(function(_RoomId){
+            if(_RoomId.length == 0){
+                deferred.reject('Invalid post: no existing room matches this mac address ' + MacAddress);
+            }
+            else if (_RoomId.length > 1){
+                deferred.reject('Invalid post: this mac address '+ MacAddress + 'matches too many rooms');                
+            }
+            else{
+                roomdataParams._RoomId = _RoomId[0]; 
+                saveRoom(roomdataParams);                
+            }
+        })
+        .catch(function(err){
+            deferred.reject(err.name + ': ' + err.message);
+        })
+    return deferred.promise;
+    
+    function saveRoom(roomdataParams){
+        var roomdata = new Roomdata({
+            // MacAddress: roomdataParams.MacAddress,
+            _RoomId: roomdataParams._RoomId,
+            Time: new Date(parseInt(roomdataParams.Time)),
+            TimeZone: roomdataParams.TimeZone,
+            Direction: (roomdataParams.Direction == "In") ? true : false
+        });
+        console.log(roomdata);
+        roomdata.save(function (err, doc) {
+                if (err) deferred.reject(err.name + ': ' + err.message);
+                deferred.resolve();
+                // console.log(doc);
+                console.log('Roomdata received');
+            });
+    }   
+}
+
+
+
+>>>>>>> 6bf8c0ce851357a104ef8222bc6a01e76e0cb099
 function _delete(_id) {
     var deferred = Q.defer();
 

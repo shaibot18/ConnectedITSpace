@@ -10,6 +10,7 @@ router.get('/', function (req, res) {
     // log user out
     delete req.session.token;
     delete req.session.user;
+
     // move success message into local variable so it only appears once (single read)
     var viewData = { success: req.session.success };
     delete req.session.success;
