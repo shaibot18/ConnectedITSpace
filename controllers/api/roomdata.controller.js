@@ -56,16 +56,47 @@ function getByTimeRange(req,res){
     }
 }
 
+function convertTimeZone(timeZone){
+    if (sign == "+"){
+        return parseInt(timeZone.slice(1,3))*3600*1000 + parseInt(timeZone.slice(3,5))*60*1000
+    }
+    else {
+        return (parseInt(timeZone.slice(1,3))*3600*1000 + parseInt(timeZone.slice(3,5))*60*1000)*(-1);
+    }
+}
+
 function handlePost(req,res){
     let cmd = req.body.cmd;
     res.set('Content-Type','application/x-www-form-urlencoded');                        
-    let systemTimeWeek = genTimeString(new Date()) + '00';            
     let flag = req.body.flag;
     let resFlag = flag.substr(2,2) + flag.substr(0,2);
-    let data,cmdType;    
+    let data,cmdType,SN,timeDiff;    
     switch(cmd){
         case 'getsetting':
             data = parseSetting(req.body.data);
+            SN = data.SN;
+            roomService.getRoomBySN(SN)
+                .then(function(room){
+                    if(room.length == 0){
+                        console.log('Invalid post: no existing room matches this SN ' + SN);
+                        res.status(400).send('Invalid post: no existing room matches this SN ' + SN);
+                        res.end();
+                    }
+                    else if (room.length > 1){
+                        console.log('Invalid post: this SN '+ SN + 'matches too many rooms');
+                        res.status(400).send('Invalid post: this SN '+ SN + 'matches too many rooms');
+                        res.end();             
+                    }
+                    else{
+                        data.timeZone = room[0].timeZone;
+                    }
+                })
+            .catch(function(err){
+                res.status(400).send(err.name + ': ' + err.message);
+                res.end(); 
+            });
+            timeDiff = convertTimeZone(data.timeZone);
+            data.timeCheck = Math.abs(new Date() + timeDiff - date.systemTime) < 60000;
             if (data.crcCheck){
                 console.log('CrcCheck successful');
                 if(data.timeCheck){
@@ -76,6 +107,9 @@ function handlePost(req,res){
                     console.log('Time check failed');
                     cmdType = '04'//reset parameters
                 }
+                let systemTimeWeek = genTimeString(new Date(new Date() + timeDiff)) + '00';
+                let recordPeriod = padLeft((0).toString(16).toUpperCase());//default 10
+                let uploadPeriod = padLeft((0).toString(16).toUpperCase());// default 120, 0 for real-time
                 let resultString = cmdType + resFlag + '000000000300' 
                     + recordPeriod + uploadPeriod
                     + '0000000000000000000002000000000000000000000000000000000000000000'
@@ -86,7 +120,15 @@ function handlePost(req,res){
             break;
         case 'cache': 
             data = parseData(req.body);
-            console.log(data);
+            SN = data.status.SN;
+            roomService.getRoomBySN(SN)
+                .then(function(room){
+                        data.timeZone = room[0].timeZone;
+                })
+            .catch(function(err){
+                res.status(400).send(err.name + ': ' + err.message);
+                res.end(); 
+            });
             let resType;
             if(data.err) {
                 console.log(data.err);
@@ -96,6 +138,8 @@ function handlePost(req,res){
                 resType = '01';//data uploading check successful 
             }
             cmdType = '03';//check both system time and open/close time 
+            timeDiff = convertTimeZone(data.timeZone);
+            let systemTimeWeek = genTimeString(new Date(new Date() + timeDiff)) + '00';
             let resultString = resType + resFlag + cmdType + systemTimeWeek + openTime + closeTime;
             res.status(200).send('result=' + resultString + crcEncrypt(resultString));
             res.end();                
@@ -140,7 +184,7 @@ function genTimeString(date){
 
 function parseSetting(data){
     var resultObj = {
-        sn: data.slice(0,8).match(/[\w]{2}/g).reverse().join(''),//string
+        SN: data.slice(0,8).match(/[\w]{2}/g).reverse().join(''),//string
         cmdType: data.slice(8,10),//string
         speed: data.slice(10,12),//string
         recordCycle: parseInt(data.slice(12,14),16),//int
@@ -160,7 +204,6 @@ function parseSetting(data){
         crc: data.slice(-4),
         crcCheck: crcEncrypt(data.slice(0,-4)) == data.slice(-4),
     }
-    resultObj.timeCheck = Math.abs(resultObj.systemTime - new Date()) < 60000;
     return resultObj
 }
 
@@ -201,7 +244,7 @@ function parseData(body){
     }
     resultObj.status =  {
         version: status.slice(0,4),
-        sn: status.slice(4,12).match(/[\w]{2}/g).reverse().join(''),
+        SN: status.slice(4,12).match(/[\w]{2}/g).reverse().join(''),
         focus: status.slice(12,14) == '00',//'00' for normal '01' for failure
         voltage: parseInt(status.slice(16,18) + status.slice(14,16),16) / 1000,
         battery: parseInt(status.slice(18,20),16),

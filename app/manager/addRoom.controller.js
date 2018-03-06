@@ -20,11 +20,6 @@
             UserService.GetCurrent().then(function (user) {
                 vm.user = user;
             });
-            // UserService.GetAll().then(function(userList){
-            //     vm.userList = userList;
-            //     console.log('User list is ');
-            //     console.log(userList);
-            // })
         }
 
         function createRoom() {
