@@ -1,24 +1,19 @@
 (function () {
-    'use strict';
+  angular
+    .module('app')
+    .controller('EditRoom.ManagerController', Controller);
 
-    angular
-        .module('app')
-        .controller('EditRoom.ManagerController', Controller);
+  function Controller(UserService, RoomService, FlashService) {
+    const vm = this;
 
-    function Controller(UserService,RoomService,FlashService) {
-        var vm = this;
 
-       
+    initController();
 
-        initController();
-
-        function initController() {
-            // get current user
-            UserService.GetCurrent().then(function (user) {
-                vm.user = user;
-            });
-        }
-
+    function initController() {
+      // get current user
+      UserService.GetCurrent().then((user) => {
+        vm.user = user;
+      });
     }
-
-})();
+  }
+}());

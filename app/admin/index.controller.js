@@ -1,75 +1,72 @@
 (function () {
-    'use strict';
+  angular
+    .module('app')
+    .controller('Index.AdminController', Controller);
 
-    angular
-        .module('app')
-        .controller('Index.AdminController', Controller);
+  function Controller($scope, $window, UserService, FlashService, RoomService, RoomDataService) {
+    const vm = this;
 
-    function Controller($scope, $window, UserService, FlashService, RoomService, RoomDataService) {
-        var vm = this;
+    vm.user = null;
+    vm.saveUser = saveUser;
+    vm.deleteUser = deleteUser;
 
-        vm.user = null;
-        vm.saveUser = saveUser;
-        vm.deleteUser = deleteUser;
-        
 
-        initController();
+    initController();
 
-         $scope.renderTable = function(){
-            $('#datatable').DataTable();                                        
-         }      
+    $scope.renderTable = function () {
+      $('#datatable').DataTable();
+    };
 
-        function initController() {
-            // get current user
-            UserService.GetCurrent().then(function (user) {
-                vm.user = user;
-            }); 
-           
-            // RoomService.GetAll()
-            //     .then(function(roomList){
-            //         $scope.roomList = roomList;
-            //     })
-            //     .catch(function(err){
-            //        console.log(err); 
-            //     });
+    function initController() {
+      // get current user
+      UserService.GetCurrent().then((user) => {
+        vm.user = user;
+      });
 
-            var up = UserService.GetAll();
-            var rp = RoomService.GetAll();
-            Promise.all([up,rp]).then(function(values){
-                $scope.userList = values[0];
-                $scope.roomList = values[1];
-                $.each($scope.roomList,function(ind1,Room){
-                    $.each($scope.userList,function(ind2,User){
-                        if(User._id == Room._userID){
-                            $scope.roomList[ind1]["username"] = User.firstName + ' ' + User.lastName;
-                        }
-                    })
-                });
-                $scope.$apply();
-                console.log($scope.roomList);
-            })    
-        }
+      // RoomService.GetAll()
+      //     .then(function(roomList){
+      //         $scope.roomList = roomList;
+      //     })
+      //     .catch(function(err){
+      //        console.log(err);
+      //     });
 
-        function saveUser() {
-            UserService.Update(vm.user)
-                .then(function () {
-                    FlashService.Success('User updated');
-                })
-                .catch(function (error) {
-                    FlashService.Error(error);
-                });
-        }
-
-        function deleteUser() {
-            UserService.Delete(vm.user._id)
-                .then(function () {
-                    // log user out
-                    $window.location = '/login';
-                })
-                .catch(function (error) {
-                    FlashService.Error(error);
-                });
-        }
+      const up = UserService.GetAll();
+      const rp = RoomService.GetAll();
+      Promise.all([up, rp]).then((values) => {
+        $scope.userList = values[0];
+        $scope.roomList = values[1];
+        $.each($scope.roomList, (ind1, Room) => {
+          $.each($scope.userList, (ind2, User) => {
+            if (User._id == Room._userID) {
+              $scope.roomList[ind1].username = `${User.firstName} ${User.lastName}`;
+            }
+          });
+        });
+        $scope.$apply();
+        console.log($scope.roomList);
+      });
     }
 
-})();
+    function saveUser() {
+      UserService.Update(vm.user)
+        .then(() => {
+          FlashService.Success('User updated');
+        })
+        .catch((error) => {
+          FlashService.Error(error);
+        });
+    }
+
+    function deleteUser() {
+      UserService.Delete(vm.user._id)
+        .then(() => {
+          // log user out
+          $window.location = '/login';
+        })
+        .catch((error) => {
+          FlashService.Error(error);
+        });
+    }
+  }
+}());

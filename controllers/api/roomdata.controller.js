@@ -1,14 +1,13 @@
 const express = require('express');
 const router = express.Router();
-var roomService = require('services/room.service');
-var roomdataService = require('services/roomdata.service');
+const roomService = require('services/room.service');
+const roomdataService = require('services/roomdata.service');
 const crc = require('crc');
-var Q = require('q');
 
-var openTime = padLeft((0).toString(16).toUpperCase()) + padLeft((0).toString(16).toUpperCase());
-var closeTime = padLeft((23).toString(16).toUpperCase()) + padLeft((0).toString(16).toUpperCase());
-var recordPeriod = padLeft((0).toString(16).toUpperCase());//default 10, 0 for real-time
-var uploadPeriod = padLeft((0).toString(16).toUpperCase());// default 120, 0 for real-time
+let openTime = padLeft((0).toString(16).toUpperCase()) + padLeft((0).toString(16).toUpperCase());
+let closeTime = padLeft((23).toString(16).toUpperCase()) + padLeft((0).toString(16).toUpperCase());
+let recordPeriod = padLeft((0).toString(16).toUpperCase());// default 10, 0 for real-time
+let uploadPeriod = padLeft((0).toString(16).toUpperCase());// default 120, 0 for real-time
 
 router.get('/:RoomId', getByTimeRange);
 router.get('/all/:RoomId', getAllById);
@@ -33,7 +32,7 @@ function getAllById(req, res) {
 }
 
 function getByTimeRange(req, res) {
-    var query = req.query;
+    let query = req.query;
     if (req.params.RoomId) {
         if (query.startTime && query.endTime) {
             roomdataService.getByTimeRange(req.params.RoomId, parseInt(query.startTime), parseInt(query.endTime))
@@ -63,6 +62,7 @@ function convertTimeZone(timeZone) {
 }
 
 function handlePost(req, res) {
+    console.log(req.body);
     let cmd = req.body.cmd;
     res.set('Content-Type', 'application/x-www-form-urlencoded');
     let flag = req.body.flag;

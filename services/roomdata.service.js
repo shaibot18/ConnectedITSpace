@@ -1,4 +1,4 @@
-var config = require('config.json');
+const config = require('config.json');
 var _ = require('lodash');
 var jwt = require('jsonwebtoken');
 var bcrypt = require('bcryptjs');
@@ -96,9 +96,9 @@ function getById(_id) {
     return deferred.promise;
 }
 
-function getByTimeRange(_RoomId,startTime,endTime){
-    console.log('Start time is ' + startTime);
-    console.log('End time is ' + endTime);
+function getByTimeRange(_RoomId, startTime, endTime) {
+    console.log(`Start time is ${startTime}`);
+    console.log(`End time is ${endTime}`);
     var deferred = Q.defer();
     Roomdata.find({ 
         _RoomId: _RoomId,
