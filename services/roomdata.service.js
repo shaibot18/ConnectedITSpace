@@ -1,7 +1,5 @@
 const config = require('config.json');
 var _ = require('lodash');
-var jwt = require('jsonwebtoken');
-var bcrypt = require('bcryptjs');
 var roomService = require('services/room.service');
 var Q = require('q');
 var mongoose = require('services/mongooseCon');
@@ -58,8 +56,8 @@ function add(roomdataParams) {
                 deferred.reject('Invalid post: this SN '+ SN + 'matches too many rooms');                
             }
             else{
-                roomdataParams._RoomId = room[0]._id; 
-                saveRoom(roomdataParams);                
+                roomdataParams._RoomId = room[0]._id;
+                saveRoom(roomdataParams);
             }
         })
         .catch(function(err){
@@ -83,7 +81,6 @@ function getById(_id) {
     var deferred = Q.defer();
     Roomdata.findById(_id, function (err, user) {
         if (err) deferred.reject(err.name + ': ' + err.message);
-
         if (user) {
             // return user (without hashed password)
             deferred.resolve(_.omit(user, 'hash'));
@@ -116,13 +113,11 @@ function getByTimeRange(_RoomId, startTime, endTime) {
 }
 
 function _delete(_id) {
-    var deferred = Q.defer();
-
+    const deferred = Q.defer();
     Roomdata.remove(
         { _id: mongo.helper.toObjectID(_id) },
         function (err) {
             if (err) deferred.reject(err.name + ': ' + err.message);
-
             deferred.resolve();
         });
 

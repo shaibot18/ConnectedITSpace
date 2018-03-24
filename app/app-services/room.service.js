@@ -12,10 +12,15 @@
     service.GetByUsername = GetByUsername;
     service.Create = Create;
     service.Delete = Delete;
+    service.Get = Get;
     return service;
 
     function Create(room) {
       return $http.post('/api/rooms', room).then(handleSuccess, handleError);
+    }
+
+    function Get(_id) {
+      return $http.get(`/api/rooms/${_id}`).then(handleSuccess, handleError);
     }
 
     function Delete(_id) {
@@ -43,7 +48,6 @@
     }
 
     // private functions
-
     function handleSuccess(res) {
       return res.data;
     }

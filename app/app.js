@@ -1,7 +1,5 @@
 
 (function () {
-  let user;
-
   angular
     .module('app', ['ui.router'])
     .config(config)
@@ -9,10 +7,7 @@
 
   function config($stateProvider, $urlRouterProvider) {
     // default route
-    console.log('Config function run');
-
     $urlRouterProvider.otherwise('/');
-
     if (window.user.role == 1) {
       $urlRouterProvider.when('/', '/admin');
       $stateProvider
