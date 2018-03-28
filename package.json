@@ -1,15 +1,18 @@
 {
-  "name": "mean-stack-registration-login-example",
+  "name": "ConnectedITSpace",
   "version": "0.0.1",
-  "description": "MEAN Stack User Registration and Login Example Application",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cornflourblue/mean-stack-registration-login-example.git"
   },
   "dependencies": {
+    "@mapbox/mapbox-gl-geocoder": "^2.2.0",
+    "@uirouter/angularjs": "^1.0.15",
+    "angular": "^1.4.14",
     "bcryptjs": "^2.1.0",
     "body-parser": "^1.13.2",
     "crc": "^3.5.0",
+    "del": "^3.0.0",
     "ejs": "^2.3.3",
     "eslint": "^4.18.2",
     "eslint-config-airbnb-base": "^12.1.0",
@@ -18,6 +21,7 @@
     "express-session": "^1.11.3",
     "jsonwebtoken": "^5.0.2",
     "lodash": "^3.10.0",
+    "mapbox-gl": "^0.44.1",
     "mongodb": "^2.1.16",
     "mongoose": "^4.13.9",
     "q": "^1.4.1",
@@ -34,7 +38,8 @@
   "homepage": "https://github.com/cornflourblue/mean-stack-registration-login-example#readme",
   "main": "server.js",
   "devDependencies": {
-    "eslint-plugin-import": "^2.9.0"
+    "eslint-plugin-import": "^2.9.0",
+    "gulp": "^3.9.1"
   },
   "author": "EvsChen",
   "keywords": []

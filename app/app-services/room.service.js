@@ -5,14 +5,12 @@
 
   function Service($http, $q) {
     const service = {};
-    service.GetCurrent = GetCurrent;
     service.GetRoomList = GetRoomList;
     service.GetAll = GetAll;
-    service.GetById = GetById;
-    service.GetByUsername = GetByUsername;
     service.Create = Create;
     service.Delete = Delete;
     service.Get = Get;
+    service.Update = Update;
     return service;
 
     function Create(room) {
@@ -23,12 +21,12 @@
       return $http.get(`/api/rooms/${_id}`).then(handleSuccess, handleError);
     }
 
-    function Delete(_id) {
-      return $http.delete(`/api/rooms/${_id}`).then(handleSuccess, handleError);
+    function Update(_id, room) {
+      return $http.put(`/api/rooms/${_id}`, room).then(handleSuccess, handleError);
     }
 
-    function GetCurrent() {
-      return $http.get('/api/users/current').then(handleSuccess, handleError);
+    function Delete(_id) {
+      return $http.delete(`/api/rooms/${_id}`).then(handleSuccess, handleError);
     }
 
     function GetRoomList(_id) {
@@ -37,14 +35,6 @@
 
     function GetAll() {
       return $http.get('/api/rooms/roomlist/').then(handleSuccess, handleError);
-    }
-
-    function GetById(_id) {
-      return $http.get(`/api/users/${_id}`).then(handleSuccess, handleError);
-    }
-
-    function GetByUsername(username) {
-      return $http.get(`/api/users/${username}`).then(handleSuccess, handleError);
     }
 
     // private functions

@@ -13,14 +13,23 @@ const roomSchema = new Schema({
 const Room = mongoose.model('Room', roomSchema);
 const service = {};
 
+service.Update = Update;
 service.get = get;
 service.create = create;
 service.getByUserId = getByUserId;
 service.getRoomBySN = getRoomBySN;
 service.getAll = getAll;
 service.delete = _delete;
-service.update = update;
 module.exports = service;
+
+function Update(_id, room) {
+  const deferred = Q.defer();
+  Room.findByIdAndUpdate(_id, room, { new: true }, (err, updatedRoom) => {
+    if (err) { deferred.reject(err); }
+    deferred.resolve(updatedRoom);
+  });
+  return deferred.promise;
+}
 
 function get(_id) {
   const deferred = Q.defer();
@@ -36,9 +45,9 @@ function get(_id) {
 }
 
 function getByUserId(_userID) {
-  var deferred = Q.defer();
-  Room.find({ _userID: _userID }, function (err, res) {
-    if (err) deferred.reject(err.name + ': ' + err.message);
+  const deferred = Q.defer();
+  Room.find({ _userID }, (err, res) => {
+    if (err) deferred.reject(`${err.name}: ${err.message}`);
     if (res) {
       deferred.resolve(res);
     } else {
@@ -49,11 +58,11 @@ function getByUserId(_userID) {
 }
 
 function getRoomBySN(SN) {
-  var deferred = Q.defer();
-  Room.find({ SN: SN })
+  const deferred = Q.defer();
+  Room.find({ SN })
     .select('')
-    .exec(function (err, res) {
-      if (err) deferred.reject(err.name + ': ' + err.message);
+    .exec((err, res) => {
+      if (err) deferred.reject(`${err.name}: ${err.message}`);
       if (res) {
         deferred.resolve(res);
       } else {
@@ -65,10 +74,9 @@ function getRoomBySN(SN) {
 
 
 function getAll() {
-  var deferred = Q.defer();
-  Room.find({}, function (err, roomList) {
-    if (err) deferred.reject(err.name + ': ' + err.message);
-
+  const deferred = Q.defer();
+  Room.find({}, (err, roomList) => {
+    if (err) deferred.reject(`${err.name}: ${err.message}`);
     if (roomList) {
       deferred.resolve(roomList);
     } else {
@@ -80,39 +88,20 @@ function getAll() {
 }
 
 function create(roomParam) {
-  var deferred = Q.defer();
-  var room = new Room(roomParam);
-  room.save(function (err, room) {
-    if (err) deferred.reject(err.name + ': ' + err.message);
-    deferred.resolve();
+  const deferred = Q.defer();
+  const room = new Room(roomParam);
+  room.save((err, doc) => {
+    if (err) deferred.reject(`${err.name}: ${err.message}`);
+    deferred.resolve(doc);
   });
   return deferred.promise;
 }
 
 function _delete(_id) {
-  var deferred = Q.defer();
-  Room.remove(
-    { _id: _id },
-    function (err) {
-      if (err) deferred.reject(err.name + ': ' + err.message);
-      deferred.resolve();
-    });
+  const deferred = Q.defer();
+  Room.remove({ _id }, (err) => {
+    if (err) deferred.reject(`${err.name}: ${err.message}`);
+    deferred.resolve();
+  });
   return deferred.promise;
 }
-
-function update(_id, roomParam) {
-  var deferred = Q.defer();
-  // validation
-  // fields to update
-  var set = roomParam;
-
-  Room.update(
-    { _id: mongo.helper.toObjectID(_id) },
-    { $set: set },
-    function (err, doc) {
-      if (err) deferred.reject(err.name + ': ' + err.message);
-      deferred.resolve();
-    });
-  return deferred.promise;
-}
-

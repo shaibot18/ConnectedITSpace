@@ -1,9 +1,9 @@
 const express = require('express');
-const router = express.Router();
 const roomService = require('services/room.service');
 const roomdataService = require('services/roomdata.service');
 const crc = require('crc');
 
+const router = express.Router();
 const openTime = padLeft((0).toString(16).toUpperCase()) + padLeft((0).toString(16).toUpperCase());
 const closeTime = padLeft((23).toString(16).toUpperCase()) + padLeft((0).toString(16).toUpperCase());
 const recordPeriod = padLeft((0).toString(16).toUpperCase());// default 10, 0 for real-time

@@ -60,7 +60,13 @@
           templateUrl: 'manager/addRoom.html',
           controller: 'AddRoom.ManagerController',
           controllerAs: 'vm',
-          data: { activeTab: 'addRoom' },
+        })
+        .state('editRoom', {
+          url: '/manager/editRoom/:roomId',
+          templateUrl: 'manager/editRoom.html',
+          controller: 'EditRoom.ManagerController',
+          controllerAs: 'vm',
+          data: { activeTab: 'roomInfo' },
         });
     }
   }
@@ -69,7 +75,6 @@
     // add JWT token as default auth header
     console.log('Run function run');
     $http.defaults.headers.common.Authorization = `Bearer ${$window.jwtToken}`;
-
     // update active tab on state change
     $rootScope.$on('$stateChangeSuccess', (event, toState, toParams, fromState, fromParams) => {
       $rootScope.activeTab = toState.data.activeTab;

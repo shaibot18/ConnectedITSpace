@@ -22,10 +22,9 @@
         .then((room) => {
           const timeZone = room.timeZone;
           const sign = timeZone.charAt(0);
-          if (sign == "+") {
+          if (sign == '+') {
             timeDiff = parseInt(timeZone.slice(1, 3)) * 3600 * 1000 + parseInt(timeZone.slice(3, 5)) * 60 * 1000
-          }
-          else {
+          } else {
             timeDiff = (parseInt(timeZone.slice(1, 3)) * 3600 * 1000 + parseInt(timeZone.slice(3, 5)) * 60 * 1000) * (-1);
           }
           deferred.resolve(timeDiff);
@@ -86,8 +85,7 @@
         tooltip: {
           trigger: 'axis',
           formatter(params) {
-            params = params[0];
-            return `${params.value[0].toLocaleTimeString('en-GB')} : ${params.value[1]}`;
+            return `${params[0].value[0].toLocaleTimeString('en-GB')} : ${params[0].value[1]}`;
           },
           axisPointer: {
             animation: false,

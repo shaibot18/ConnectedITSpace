@@ -8,11 +8,8 @@
 
     service.Success = Success;
     service.Error = Error;
-
     initService();
-
     return service;
-
     function initService() {
       $rootScope.$on('$locationChangeStart', () => {
         clearFlashMessage();

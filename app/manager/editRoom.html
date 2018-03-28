@@ -5,41 +5,44 @@
             <form class="form-horizontal form-label-left input_mask managementstyle">
                 <div class="form-input-middle">
                     <div class="col-xs-12 form-group has-feedback">
-                        <input type="search" class="form-control has-feedback-left" ng-model="vm.newRoom.country" placeholder="Search" required="required">
+                        <input type="search" class="form-control has-feedback-left" ng-model="vm.room.country" placeholder="Search" required="required">
                         <span class="required"></span>
                         <span class="fa fa-globe form-control-feedback left" aria-hidden="true"></span>
                     </div>
 
                     <div class="col-xs-12 form-group has-feedback">
-                        <input type="text" class="form-control has-feedback-left" ng-model="vm.newRoom.building" placeholder="Building" required="required">
+                        <input type="text" class="form-control has-feedback-left" ng-model="vm.room.building" placeholder="Building" required="required">
                         <span class="required"></span>
                         <span class="fa fa-institution form-control-feedback left" aria-hidden="true"></span>
                     </div>
 
                     <div class="col-xs-12 form-group has-feedback">
-                        <input type="text" class="form-control has-feedback-left" ng-model="vm.newRoom.macAddress" placeholder="SN" required="required">
+                        <input type="text" class="form-control has-feedback-left" ng-model="vm.room.SN" placeholder="SN" required="required">
                         <span class="required"></span>
                         <span class="fa fa-inbox form-control-feedback left" aria-hidden="true"></span>
                     </div>
-                    <div class="col-xs-6 form-group has-feedback">
-                        <input type="text" class="form-control has-feedback-left" ng-model="vm.newRoom.macAddress" placeholder="Open" required="required">
-                        <span class="required"></span>
+
+                    <div class="col-xs-12 form-group has-feedback">
+                        <input type="text" class="form-control has-feedback-left" ng-model="vm.room.openTime" placeholder="Open">
                         <span class="fa fa-toggle-on form-control-feedback left" aria-hidden="true"></span>
                     </div>
                     <div class="col-xs-6 form-group has-feedback">
-                        <input type="text" class="form-control has-feedback-left" ng-model="vm.newRoom.macAddress" placeholder="Close" required="required">
-                        <span class="required"></span>
+                        <input type="text" class="form-control has-feedback-left" ng-model="vm.room.closeTime" placeholder="Close">
                         <span class="fa fa-toggle-off form-control-feedback left" aria-hidden="true"></span>
                     </div>
 
-
+                    <div class="col-xs-12 form-group has-feedback">
+                        <input type="text" class="form-control has-feedback-left" ng-model="vm.room.timeZone" placeholder="TimeZone, for China e.g.:'+0800'" required="required">
+                        <span class="required"></span>
+                        <span class="fa fa-institution form-control-feedback left" aria-hidden="true"></span>
+                    </div>
                 </div>
-
 
                 <div class="form-group">
                     <div class="col-md-12 col-sm-12 col-xs-12">
-                        <button ng-click="vm.createRoom()" class="btn btn-success2" >
-                            save</button>
+                        <button ng-click="vm.editRoom()" class="btn btn-success2" >
+                            Confirm    
+                        </button>
                     </div>
                 </div>
 

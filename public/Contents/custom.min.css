@@ -22,10 +22,7 @@ ul.left.sgh_box_set li>.left{margin:0;padding:0;line-height: 12px;font-size: 13p
 ul.left.sgh_box_set li>.left span{font-size: 9px; }
 ul.right.sgh_box_set li:nth-child(3){background-color:#323642;margin: 0 10px 0 10px; border-radius: 20px; color:#fff;font-size: 10px;} 
 ul.right.sgh_box_set li:last-child{font-size: 10px;}
-
-
-
-/*与地图相关*/
+/* 与地图相关 */
 .mapboxgl-ctrl-geocoder.mapboxgl-ctrl .geocoder-icon-search{top:7px;left:7px;}
 .mapboxgl-ctrl-geocoder.mapboxgl-ctrl input[type="text"]{height:34px;}
 .mapboxgl-control-container .mapboxgl-ctrl-top-left{top:0;right:0; left:auto;}
@@ -56,8 +53,6 @@ ul li{list-style:none;}
 .container{height:100%;}
 .main_container{height:100%;}
 html, body{ margin:0; height:100%;padding:0; }
-/* #worldmapall{width:auto;height:91.5%;text-align:center;min-height:400px;} */
-/*#worldmapall{width:auto;height:92%;background:url(../../production/images/world.jpg) no-repeat center;background-size:auto 100%;text-align:center}*/
 .x_content.myroomtitle{padding:30px auto; font-weight:normal;}
 .numberleft{float:left;position:relative;width:50%;font-size: 70px;color: #323642;text-align:center;}
 .numberleftmargin{float:right;position:relative;width:50%;font-size: 30px; font-weight:lighter;margin-top: 18px;}
