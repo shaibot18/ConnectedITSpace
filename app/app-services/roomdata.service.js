@@ -7,21 +7,19 @@
     const service = {};
     service.GetAll = GetAll;
     service.GetByTimeRange = GetByTimeRange;
+    service.TotalNumber = TotalNumber;
     return service;
 
     function GetAll() {
       return $http.get('/api/roomdata').then(handleSuccess, handleError);
     }
 
-    function GetByTimeRange(_RoomId) {
-      const start = arguments[1];
-      const end = arguments[2] || Date.parse(Date());
-      // console.log('/api/roomdata/' + _RoomId + '?startTime=' + start + '&endTime=' + end);
-      return $http.get(`/api/roomdata/${_RoomId}?startTime=${start}&endTime=${end}`, { timeout: 3000 }).then(handleSuccess, handleError);
+    function TotalNumber() {
+      
     }
 
-    function Delete(_id) {
-      return $http.delete(`/api/users/${_id}`).then(handleSuccess, handleError);
+    function GetByTimeRange(_RoomId, start, end = Date.now()) {
+      return $http.get(`/api/roomdata/${_RoomId}?startTime=${start}&endTime=${end}`, { timeout: 3000 }).then(handleSuccess, handleError);
     }
 
     function handleSuccess(res) {
