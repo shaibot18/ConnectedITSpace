@@ -3,7 +3,10 @@
     .module('app')
     .controller('RoomInfo.ManagerController', Controller);
 
-  function Controller(UserService, RoomService, FlashService, RoomDataService, $stateParams, $scope, $log, $q) {
+  function Controller(
+    UserService, RoomService, FlashService, RoomDataService,
+    $stateParams, $scope, $log, $q
+  ) {
     const vm = this;
     vm.user = null;
     UserService.GetCurrent().then((user) => {
@@ -16,16 +19,20 @@
     const oneHour = 60 * oneMinute;
     const oneDay = 24 * oneHour;
     let timeDiff = 0;
+    $scope.avgNum = 0;
+    $scope.totalNum = 0;
     const initTime = function () {
       const deferred = $q.defer();
       RoomService.Get(roomId)
         .then((room) => {
           const timeZone = room.timeZone;
+          $scope.avgNum = room.avgNum || -1;
+          $scope.totalNum = room.totalNum || -1;
           const sign = timeZone.charAt(0);
-          if (sign == '+') {
-            timeDiff = parseInt(timeZone.slice(1, 3)) * 3600 * 1000 + parseInt(timeZone.slice(3, 5)) * 60 * 1000
+          if (sign === '+') {
+            timeDiff = parseInt(timeZone.slice(1, 3), 10) * 3600 * 1000 + parseInt(timeZone.slice(3, 5), 10) * 60 * 1000;
           } else {
-            timeDiff = (parseInt(timeZone.slice(1, 3)) * 3600 * 1000 + parseInt(timeZone.slice(3, 5)) * 60 * 1000) * (-1);
+            timeDiff = (parseInt(timeZone.slice(1, 3), 10) * 3600 * 1000 + parseInt(timeZone.slice(3, 5), 10) * 60 * 1000) * (-1);
           }
           deferred.resolve(timeDiff);
         })

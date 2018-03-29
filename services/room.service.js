@@ -42,8 +42,11 @@ const intervalObj = setInterval(() => {
         Promise.all([avgProm, totalProm])
           .then((values) => {
             const [avgNum, totalNum] = values;
-            Update(_id, { avgNum, totalNum })
-              .catch((err) => { console.error(err); });
+            Room.findById(_id, (err, doc) => {
+              doc.avgNum = avgNum;
+              doc.totalNum = totalNum;
+              doc.save();
+            });
           })
           .catch((err) => { console.error(err); });
       });

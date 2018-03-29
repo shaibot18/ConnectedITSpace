@@ -23,7 +23,7 @@
             <div class="x_content">
                 <div class="x_content_middle">
                     <a href='#/manager/roomInfo/{{room._id}}'>
-                        <h1 ng-bind="totalNumber(room._id)">400</h1>
+                        <h1 ng-bind="room.totalNum || -1"></h1>
                         <div>Total people</div>
                     </a>
                 </div>
