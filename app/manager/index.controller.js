@@ -3,7 +3,10 @@
     .module('app')
     .controller('Index.ManagerController', Controller);
 
-  function Controller($scope, $compile, UserService, RoomService, RoomDataService, FlashService, $state, $log) {
+  function Controller(
+    $scope, $compile, UserService, RoomService, RoomDataService, FlashService,
+    $state, $log
+  ) {
     const vm = this;
 
     vm.user = null;
@@ -14,8 +17,9 @@
         .then(() => { $state.reload(); })
         .catch((err) => { FlashService.Error(err); });
     };
-
-    $scope.totalNumber = RoomDataService.TotalNumber;
+    $scope.transTo = function (state, params = {}) {
+      $state.go(state, params);
+    };
 
     $(document).ready(() => {
       $('.middleadd2').click(() => {

@@ -10,6 +10,9 @@
   <title>Connected IT Space</title>
   <!-- Bootstrap -->
   <link href="/vendors/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+   <!-- bootstrap-datetimepicker -->
+   <link href="/vendors/bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css" rel="stylesheet">
+   <link href="/vendors/bootstrap-daterangepicker/daterangepicker.css" rel="stylesheet">
   <!-- Font Awesome -->
   <link href="/vendors/font-awesome/css/font-awesome.min.css" rel="stylesheet" crossorigin="anonymous">
   <!-- NProgress -->
@@ -61,14 +64,6 @@
                     User Management
                   </a>
                 </li>
-                <!-- <li ng-if="user.role == 2">
-                      <a ui-sref="roomInfo">
-                      <svg t="1511750296141" class="icon" style="" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2152" xmlns:xlink="http://www.w3.org/1999/xlink" width="26" height="26"><defs><style type="text/css"></style></defs><path d="M929.295 852.142h-865.391v-642.213c0-15.452 12.484-27.936 27.936-27.936s27.936 12.484 27.936 27.936v586.342h809.622c15.452 0 27.936 12.484 27.936 27.936-0.102 15.452-12.586 27.936-28.038 27.936v0zM845.59 740.399h-55.871c-30.801 0-55.871-24.968-55.871-55.871v-334.921c0-30.801 24.968-55.871 55.871-55.871h55.871c30.801 0 55.871 24.968 55.871 55.871v335.023c0 30.801-25.070 55.769-55.871 55.769v0zM566.439 740.399h-55.871c-30.801 0-55.871-24.968-55.871-55.871v-502.432c0-30.801 24.968-55.871 55.871-55.871h55.871c30.801 0 55.871 24.968 55.871 55.871v502.535c-0.102 30.801-25.070 55.769-55.871 55.769v0zM287.185 740.399h-55.871c-30.801 0-55.871-24.968-55.871-55.871v-223.281c0-30.801 24.968-55.871 55.871-55.871h55.871c30.801 0 55.871 24.968 55.871 55.871v223.383c0 30.801-24.968 55.769-55.871 55.769v0z" p-id="2153" fill="#9d9ca4"></path></svg>
-                        My Room Data
-                      </a>
-                    </li> -->
-
-              </ul>
             </div>
 
             <!-- /menu footer buttons -->
@@ -95,14 +90,17 @@
     </div>
   </div>
 
-  <!-- <script src="//apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script> -->
-  <!-- <script src="//apps.bdimg.com/libs/angular.js/1.4.6/angular.min.js"></script> -->
   <script src="/public/scripts/angular/angular.min.js"></script>
-  <script src="/public/scripts/@uirouter/angularjs/release/angular-ui-router.js"></script>
+  <!-- <script src="/public/scripts/@uirouter/angularjs/release/angular-ui-router.js"></script> -->
+  <script src="//unpkg.com/@uirouter/angularjs/release/angular-ui-router.min.js"></script>
   <!-- jQuery -->
   <script src="/vendors/jquery/dist/jquery.min.js"></script>
   <!-- Bootstrap -->
   <script src="/vendors/bootstrap/dist/js/bootstrap.min.js"></script>
+  <!-- DateTimePicker -->
+  <script src="/vendors/moment/min/moment.min.js"></script>
+  <script src="/vendors/bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
+  <script src="/vendors/bootstrap-daterangepicker/daterangepicker.js"></script>
   <!-- NProgress -->
   <script src="/vendors/nprogress/nprogress.js"></script>
   <!-- morris.js -->

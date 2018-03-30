@@ -4,6 +4,7 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 const config = require('config.json');
 const path = require('path');
+const RoomDataService = require('services/roomdata.service');
 
 const app = express();
 function unless(p, middleware) {
@@ -38,7 +39,10 @@ app.use('/api/roomdata', require('./controllers/api/roomdata.controller'));
 
 
 // make '/app' default route
-app.get('/', (req, res) => res.redirect('/app'));
+app.get('/', (req, res) => {
+  res.redirect('/app');
+  RoomDataService.UpdateAllNum();
+});
 app.post('/', (req, res) => {
   console.log(req.body);
   return res.send('received post');
@@ -46,10 +50,10 @@ app.post('/', (req, res) => {
 // start server
 if (process.env.PORT) {
   const server = app.listen(process.env.PORT, () => {
-    console.log('Server listening at http://' + server.address().address + ':' + server.address().port);
+    console.log(`Server listening at http://${server.address().address} ${server.address().port}`);
   });
 } else {
   const server = app.listen(3000, '0.0.0.0', () => {
-    console.log('Server listening at http://' + server.address().address + ':' + server.address().port);
+    console.log(`Server listening at http:// ${server.address().address}:${server.address().port}`);
   });
 }

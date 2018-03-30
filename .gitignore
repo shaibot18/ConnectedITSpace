@@ -2,12 +2,6 @@
 logs
 *.log
 
-#server
-server.js
-
-#config
-config.json
-
 # Runtime data
 pids
 *.pid

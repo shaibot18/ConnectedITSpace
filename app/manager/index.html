@@ -1,6 +1,7 @@
 <style>
     a {
         color: #485275;
+        cursor: pointer;
     }
 </style>
 
@@ -22,8 +23,8 @@
         <div class="x_panel outbackgrounfcolor">
             <div class="x_content">
                 <div class="x_content_middle">
-                    <a href='#/manager/roomInfo/{{room._id}}'>
-                        <h1 ng-bind="room.totalNum || -1"></h1>
+                    <a ng-click="transTo('roomInfo',{ 'roomId': room._id })">
+                        <h1 ng-bind="room.totalNum"></h1>
                         <div>Total people</div>
                     </a>
                 </div>
@@ -34,7 +35,7 @@
                         <li>{{room.country}}</li>
                         <li>
                             <div class="preedit">
-                                <a href="#/manager/editRoom/{{room._id}}">
+                                <a ng-click="transTo('editRoom',{ 'roomId': room._id })">
                                     <svg class="icon" width="28px" height="28.00px" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M512 67C266.265 67 67 266.262 67 512.007 67 757.754 266.236 956.984 512 957c245.734-0.016 445-199.262 445-445.007C957 266.248 757.764 67 512 67zM512 927.319c-229.019 0-415.334-186.298-415.334-415.312C96.666 282.978 282.981 96.667 512 96.695c229.019-0.015 415.333 186.283 415.333 415.312C927.333 741.021 741.019 927.319 512 927.319z"
                                             fill="#323642" />

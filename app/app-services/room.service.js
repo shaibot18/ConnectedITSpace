@@ -34,7 +34,7 @@
     }
 
     function GetAll() {
-      return $http.get('/api/rooms/roomlist/').then(handleSuccess, handleError);
+      return $http.get('/api/rooms/').then(handleSuccess, handleError);
     }
 
     // private functions

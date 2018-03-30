@@ -3,7 +3,7 @@
     .module('app')
     .controller('Index.AdminController', Controller);
 
-  function Controller($scope, $window, UserService, FlashService, RoomService, RoomDataService) {
+  function Controller($scope, $window, UserService, FlashService, RoomService) {
     const vm = this;
 
     vm.user = null;
@@ -23,14 +23,6 @@
         vm.user = user;
       });
 
-      // RoomService.GetAll()
-      //     .then(function(roomList){
-      //         $scope.roomList = roomList;
-      //     })
-      //     .catch(function(err){
-      //        console.log(err);
-      //     });
-
       const up = UserService.GetAll();
       const rp = RoomService.GetAll();
       Promise.all([up, rp]).then((values) => {
@@ -38,7 +30,7 @@
         $scope.roomList = values[1];
         $.each($scope.roomList, (ind1, Room) => {
           $.each($scope.userList, (ind2, User) => {
-            if (User._id == Room._userID) {
+            if (User._id === Room._userID) {
               $scope.roomList[ind1].username = `${User.firstName} ${User.lastName}`;
             }
           });

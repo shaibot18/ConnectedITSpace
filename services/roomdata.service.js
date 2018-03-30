@@ -1,7 +1,6 @@
-const _ = require('lodash');
-const roomService = require('services/room.service');
 const Q = require('q');
 const mongoose = require('services/mongooseCon');
+const RoomService = require('services/room.service');
 
 const Schema = mongoose.Schema;
 const roomdataSchema = new Schema({
@@ -9,7 +8,8 @@ const roomdataSchema = new Schema({
   _RoomId: Schema.Types.ObjectId,
   Time: {
     type: Date,
-    default: Date.now
+    default: Date.now,
+    unique: true
   },
   TimeZone: {
     type: String,
@@ -24,11 +24,90 @@ roomdataSchema.index({
 const Roomdata = mongoose.model('Roomdata', roomdataSchema);
 const service = {};
 
+service.RoomData = Roomdata;
 service.add = add;
 service.getByTimeRange = getByTimeRange;
 service.getAllById = getAllById;
 service.delete = _delete;
+service.UpdateAllNum = UpdateAllNum;
+const UpdateInterval = setInterval(() => { UpdateAllNum(); }, 5 * 1000 * 60);
+service.UpdateTotal = UpdateTotal;
+service.UpdateAvg = UpdateAvg;
+service.UpdateInterval = UpdateInterval;
 module.exports = service;
+
+
+function UpdateAllNum() {
+  const deferred = Q.defer();
+  RoomService.GetAll()
+    .then((roomList) => {
+      roomList.forEach((room) => {
+        const _id = room._id;
+        const avgProm = UpdateAvg(_id);
+        const totalProm = UpdateTotal(_id);
+        Promise.all([avgProm, totalProm])
+          .then((values) => {
+            const [avgNum, totalNum] = values;
+            RoomService.get(_id)
+              .then((err, doc) => {
+                doc.avgNum = avgNum;
+                doc.totalNum = totalNum;
+                doc.save();
+                deferred.resolve([totalNum, avgNum]);
+              });
+          })
+          .catch((err) => {
+            console.error(err);
+            deferred.reject(err);
+          });
+      });
+    })
+    .catch((err) => {
+      console.error(err);
+      deferred.reject(err);
+    });
+  return deferred.promise;
+}
+
+function UpdateAvg(_id) {
+  const deferred = Q.defer();
+  let avgNum = 0;
+  let totalNum = 0;
+  let dayNum = 0;
+  let curDay = 0;
+  let curMonth = 0;
+  getAllById(_id)
+    .then((dataList) => {
+      dataList.forEach((element) => {
+        const date = element.Time;
+        if (date.getMonth() !== curMonth || date.getDate() !== curDay) {
+          dayNum += 1;
+          curDay = date.getDate();
+          curMonth = date.getMonth();
+        }
+        totalNum += element.In - element.Out;
+      });
+      avgNum = (dayNum === 0) ? 0 : Math.round(totalNum / dayNum);
+      deferred.resolve(avgNum);
+    })
+    .catch((err) => { deferred.reject(err); });
+  return deferred.promise;
+}
+
+function UpdateTotal(_id) {
+  const deferred = Q.defer();
+  let totalNum = 0;
+  getAllById(_id)
+    .then((dataList) => {
+      dataList.forEach((element) => {
+        totalNum += element.In - element.Out;
+      });
+      deferred.resolve(totalNum);
+    })
+    .catch((err) => { deferred.reject(err); });
+  return deferred.promise;
+}
+
 
 function getAllById(_RoomId) {
   const deferred = Q.defer();
@@ -42,7 +121,8 @@ function getAllById(_RoomId) {
 function add(roomdataParams) {
   const deferred = Q.defer();
   const SN = roomdataParams.SN;
-  roomService.getRoomBySN(SN)
+  console.log(`SN is ${SN}`);
+  RoomService.GetRoomBySN(SN)
     .then((room) => {
       if (room.length === 0) {
         console.log(`Invalid post: no existing room matches SN: ${SN}`);

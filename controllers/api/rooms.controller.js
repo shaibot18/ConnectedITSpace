@@ -2,12 +2,12 @@ const express = require('express');
 const roomService = require('services/room.service');
 
 const router = express.Router();
+router.get('/', GetAll);
 router.post('/', Create);
 router.get('/:_id', Get);
 router.put('/:_id', Update);
 router.delete('/:_id', Delete);
-router.get('/roomlist/:_id', getRoomList);
-router.get('/roomlist/', getAll);
+router.get('/roomlist/:_id', GetRoomList);
 module.exports = router;
 
 function Update(req, res) {
@@ -16,13 +16,15 @@ function Update(req, res) {
     .catch((err) => { res.status(400).send(err); });
 }
 function Get(req, res) {
-  roomService.get(req.params._id)
-    .then((room) => {
-      if (room) {
-        res.send(room);
-      }
-    })
-    .catch((err) => { res.status(400).send(err); });
+  if (req.params._id) {
+    roomService.get(req.params._id)
+      .then((room) => {
+        if (room) {
+          res.send(room);
+        }
+      })
+      .catch((err) => { res.status(400).send(err); });
+  }
 }
 
 function Create(req, res) {
@@ -42,7 +44,7 @@ function Delete(req, res) {
     });
 }
 
-function getRoomList(req, res) {
+function GetRoomList(req, res) {
   roomService.getByUserId(req.params._id)
     .then((roomList) => {
       if (roomList) {
@@ -54,8 +56,8 @@ function getRoomList(req, res) {
     .catch((err) => { res.status(400).send(err); });
 }
 
-function getAll(req, res) {
-  roomService.getAll()
+function GetAll(req, res) {
+  roomService.GetAll()
     .then((roomList) => {
       if (roomList) {
         res.send(roomList);

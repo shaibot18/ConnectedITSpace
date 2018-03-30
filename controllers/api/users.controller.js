@@ -1,6 +1,6 @@
-﻿var express = require('express');
-var router = express.Router();
-var userService = require('services/user.service');
+﻿const express = require('express');
+const userService = require('services/user.service');
+const router = express.Router();
 
 // routes
 router.post('/authenticate', authenticateUser);
@@ -39,17 +39,6 @@ function registerUser(req, res) {
 }
 
 function getCurrentUser(req, res) {
-    // userService.getById(req.user.sub)
-    //     .then(function (user) {
-    //         if (user) {
-    //             res.send(user);
-    //         } else {
-    //             res.sendStatus(404);
-    //         }
-    //     })
-    //     .catch(function (err) {
-    //         res.status(400).send(err);
-    //     });
     res.send(req.session.user);
     console.log("User in session is ");
     console.log(req.session.user);

@@ -21,13 +21,31 @@
     let timeDiff = 0;
     $scope.avgNum = 0;
     $scope.totalNum = 0;
+    $scope.formatDate = (date) => {
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+      const calDate = date.getDate();
+      const weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()];
+      return `${year}/${month}/${calDate} ${weekday}`;
+    };
+
+    const initStyle = function () {
+      $('#single_cal3').daterangepicker({
+        singleDatePicker: true,
+        singleClasses: 'picker_3'
+      }, (start, end, label) => {
+        console.log(start.toISOString(), end.toISOString(), label);
+      });
+    };
+
     const initTime = function () {
       const deferred = $q.defer();
       RoomService.Get(roomId)
         .then((room) => {
+          $log.log(room);
           const timeZone = room.timeZone;
-          $scope.avgNum = room.avgNum || -1;
-          $scope.totalNum = room.totalNum || -1;
+          $scope.avgNum = (room.avgNum === undefined) ? -1 : room.avgNum;
+          $scope.totalNum = (room.totalNum === undefined) ? -1 : room.totalNum;
           const sign = timeZone.charAt(0);
           if (sign === '+') {
             timeDiff = parseInt(timeZone.slice(1, 3), 10) * 3600 * 1000 + parseInt(timeZone.slice(3, 5), 10) * 60 * 1000;
@@ -49,7 +67,6 @@
       RoomDataService.GetByTimeRange(roomId, startTime, endTime)
         .then((dataList) => {
           $log.log('Init data list');
-          $log.log(dataList);
           let lastTime = '';
           $.each(dataList, (index, element) => {
             if (element.Time !== lastTime) {
@@ -67,6 +84,7 @@
       return deferred.promise;
     };
 
+    initStyle();
     initTime()
       .then((t) => {
         timeDiff = t;
@@ -129,7 +147,6 @@
         const curTime = Date.now() + timeDiff;
         RoomDataService.GetByTimeRange(roomId, curTime - period - delay, curTime - delay)
           .then((dataList) => {
-            $log.log(dataList);
             let lastTime = '';
             $.each(dataList, (index, element) => {
               if (element.Time !== lastTime) {
@@ -140,6 +157,7 @@
           })
           .catch((err) => {
             FlashService.Error(err);
+            $log.log(err);
           });
         data.push({
           name: new Date(curTime - delay - timeDiff).toString(),
@@ -151,7 +169,6 @@
             data,
           }],
         });
-        $log.log(data);
       }
     }
 
@@ -169,8 +186,6 @@
           .then((dataList) => {
             let inSum = 0;
             let outSum = 0;
-            $log.log('Data list is');
-            $log.log(dataList);
             let lastTime = '';
             $.each(dataList, (index, element) => {
               if (element.Time !== lastTime) {
@@ -262,13 +277,14 @@
       for (let i = 0; i < 7; i++) {
         $log.log(`Start date is ${new Date(startTime + (i * oneDay) - timeDiff)}`);
         $log.log(`End date is ${new Date(startTime + ((i + 1) * oneDay) - timeDiff)}`);
-        promArr[i] = RoomDataService.GetByTimeRange(roomId, startTime + (i * oneDay), startTime + ((i + 1) * oneDay))
+        promArr[i] = RoomDataService.GetByTimeRange(
+          roomId,
+          startTime + (i * oneDay), startTime + ((i + 1) * oneDay)
+        )
           .then((dataList) => {
             let inSum = 0;
             let outSum = 0;
             let lastTime = '';
-            $log.log('Data list is');
-            $log.log(dataList);
             $.each(dataList, (index, element) => {
               if (element.Time !== lastTime) {
                 inSum += element.In;
@@ -289,7 +305,8 @@
           });
       }
       Promise.all(promArr).then(() => {
-        $log.log(resultData);
+        resultData.sort((prev, next) => (prev.date - next.date));
+        $scope.historyData = resultData;
       });
     }
   }
