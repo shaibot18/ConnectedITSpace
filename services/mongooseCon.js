@@ -18,6 +18,6 @@ mongoose.connect(connectionString,connectionOptions,function(err){
 });
 
 const db = mongoose.connection;
-db.on('error', console.error('connection error:'));
+db.on('error', console.error.bind(console, 'connection error:'));
 mongoose.Promise = global.Promise;
 module.exports = mongoose;
