@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const config = require('config.json');
 const path = require('path');
 const RoomDataService = require('services/roomdata.service');
+const DbService = require('services/db.service');
 
 const app = express();
 function unless(p, middleware) {
@@ -28,8 +29,9 @@ app.use(unless('/api/roomdata', session({
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/public/scripts', express.static(path.join(__dirname, 'node_modules')));
 // use JWT auth to secure the api
-// app.use('/api', expressJwt({ secret: config.secret }).unless({ path: ['/api/users/authenticate', '/api/users/register'] }));
-// routes
+// app.use('/api', expressJwt({ secret: config.secret }).unless({
+//   path: ['/api/users/authenticate', '/api/users/register']
+// }));
 app.use('/login', require('./controllers/login.controller'));
 app.use('/register', require('./controllers/register.controller'));
 app.use('/app', require('./controllers/app.controller'));
@@ -37,11 +39,20 @@ app.use('/api/users', require('./controllers/api/users.controller'));
 app.use('/api/rooms', require('./controllers/api/rooms.controller'));
 app.use('/api/roomdata', require('./controllers/api/roomdata.controller'));
 
+function AppInitialize() {
+  RoomDataService.UpdateAllNum()
+    .then((res) => { console.log(res); })
+    .catch((err) => { console.log(err); });
+  if (config.removeDuplicates) {
+    DbService.removeDuplicates()
+      .catch((err) => { console.log(err); });
+  }
+}
 
 // make '/app' default route
 app.get('/', (req, res) => {
   res.redirect('/app');
-  RoomDataService.UpdateAllNum();
+  AppInitialize();
 });
 app.post('/', (req, res) => {
   console.log(req.body);

@@ -9,7 +9,6 @@ const roomdataSchema = new Schema({
   Time: {
     type: Date,
     default: Date.now,
-    unique: true
   },
   TimeZone: {
     type: String,
@@ -144,7 +143,7 @@ function add(roomdataParams) {
     console.log(`Time is ${Date.parse(roomdata.Time)}`);
     roomdata.save((err, doc) => {
       if (err) deferred.reject(err.name + ': ' + err.message);
-      deferred.resolve();
+      deferred.resolve(doc);
     });
   }
 }
