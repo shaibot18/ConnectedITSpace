@@ -22,6 +22,7 @@
     "jsonwebtoken": "^5.0.2",
     "lodash": "^3.10.0",
     "mapbox-gl": "^0.44.1",
+    "moment": "^2.22.0",
     "mongodb": "^2.1.16",
     "mongoose": "^4.13.9",
     "q": "^1.4.1",

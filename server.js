@@ -45,6 +45,12 @@ function AppInitialize() {
     .catch((err) => { console.log(err); });
   if (config.removeDuplicates) {
     DbService.removeDuplicates()
+      .then(() => { console.log('remove duplicates successful'); })
+      .catch((err) => { console.log(err); });
+  }
+  if (config.adjustTimeZone) {
+    DbService.adjustTimeZone()
+      .then(() => { console.log('Adjust time zone successfull'); })
       .catch((err) => { console.log(err); });
   }
 }

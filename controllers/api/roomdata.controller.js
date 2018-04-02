@@ -1,20 +1,23 @@
 const express = require('express');
+const moment = require('moment');
 const RoomService = require('services/room.service');
 const RoomDataService = require('services/roomdata.service');
 const UtilService = require('services/util.service');
 
 const padLeft = UtilService.padLeft;
 const router = express.Router();
+// TODO: get open time and close time from the room setting
 const openTime = padLeft((0).toString(16).toUpperCase()) +
-                 padLeft((0).toString(16).toUpperCase());
+  padLeft((0).toString(16).toUpperCase());
 const closeTime = padLeft((23).toString(16).toUpperCase()) +
-                  padLeft((0).toString(16).toUpperCase());
-const recordPeriod = padLeft((0).toString(16).toUpperCase());// default 10, 0 for real-time
-const uploadPeriod = padLeft((0).toString(16).toUpperCase());// default 120, 0 for real-time
+  padLeft((0).toString(16).toUpperCase());
+const recordPeriod = padLeft((0).toString(16).toUpperCase()); // default 10, 0 for real-time
+const uploadPeriod = padLeft((0).toString(16).toUpperCase()); // default 120, 0 for real-time
 
 router.get('/:RoomId', getByTimeRange);
 router.get('/all/:RoomId', getAllById);
 router.post('/', handlePost);
+module.exports = router;
 
 function getAllById(req, res) {
   if (req.params.RoomId) {
@@ -68,12 +71,11 @@ function convertTimeZone(timeZone) {
 
 function handlePost(req, res) {
   console.log(req.body);
-  const cmd = req.body.cmd;
   res.set('Content-Type', 'application/x-www-form-urlencoded');
+  const cmd = req.body.cmd;
   const flag = req.body.flag;
   const resFlag = flag.substr(2, 2) + flag.substr(0, 2);
   let cmdType;
-  let SN;
   let timeDiff;
   let data;
   switch (cmd) {
@@ -93,8 +95,8 @@ function handlePost(req, res) {
             data.timeZone = room[0].timeZone;
           }
           timeDiff = data.timeZone ? convertTimeZone(data.timeZone) : 0;
-          data.timeCheck = Math.abs(new Date().getTime() + timeDiff
-            - data.systemTime.getTime()) < 60000;
+          data.timeCheck = Math.abs(new Date().getTime() + timeDiff -
+            data.systemTime.getTime()) < 60000;
           if (data.crcCheck) {
             console.log('CrcCheck successful');
             if (data.timeCheck) {
@@ -118,21 +120,52 @@ function handlePost(req, res) {
           res.end();
         });
       break;
-    case 'cache':
-      data = parseData(req.body);
+    case 'cache': {
+      // TODO: the order of parse data and get time zone can be changed
+      // in order to improve speed
+      const body = req.body;
+      data = parseDataHeading(body);
       if (data.err) {
-        console.log(data.err);
         res.status(400).send(data.err);
         res.end();
         break;
       }
-      SN = data.status.SN;
+      const dataList = (typeof body.data === 'string') ? [body.data] : body.data;
+      const SN = data.status.SN;
       RoomService.GetRoomBySN(SN)
         .then((room) => {
-          data.timeZone = room[0].timeZone;
-          const resType = '01';// data uploading check successful
-          cmdType = '03';// check both system time and open/close time
-          timeDiff = data.timeZone ? convertTimeZone(data.timeZone) : 0;
+          const timeZone = room[0].timeZone;
+          const resType = '01'; // data uploading check successful
+          cmdType = '03'; // check both system time and open/close time
+          timeDiff = timeZone ? convertTimeZone(timeZone) : 0;
+          for (let i = 0; i < dataList.length; i++) {
+            const cur = dataList[i];
+            if (cur.length !== 34) {
+              res.sendStatus(400).send({
+                err: `Data length is not valid ${data[i]}`
+              });
+              res.end();
+            }
+            if (cur.slice(-4) !== UtilService.crcEncrypt(cur.slice(0, -4))) {
+              res.sendStatus(400).send({
+                err: `Data CrcCheck failed ${cur}`
+              });
+            }
+            const dataObj = {
+              SN,
+              Time: parseTime(cur.slice(0, 12), timeZone), // datetime
+              In: parseInt(cur.slice(14, 22).match(/[\w]{2}/g).reverse().join(''), 16),
+              Out: parseInt(cur.slice(22, 30).match(/[\w]{2}/g).reverse().join(''), 16),
+            };
+            RoomDataService.add(dataObj)
+              .then(() => {
+                console.log('Add data successful');
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+            console.log(dataObj);
+          }
           const systemTimeWeek = genTimeString(new Date(Date.now() + timeDiff)).concat('00');
           const resultString = `${resType}${resFlag}${cmdType}${systemTimeWeek}${openTime}${closeTime}`;
           res.status(200).send(`result${resultString} ${UtilService.crcEncrypt(resultString)} `);
@@ -143,17 +176,21 @@ function handlePost(req, res) {
           res.end();
         });
       break;
+    }
     default:
       break;
   }
 }
 
 // this function is used to parse time string in the format 'yymmddhhmmss'
-function parseTime(timeString) {
+function parseTime(...args) {
+  const timeString = args[0];
   const timeArray = timeString.match(/[\w]{2}/g).map(element => parseInt(element, 16));
-  timeArray[1] -= 1;
   timeArray[0] += 2000;
-  return new Date(...timeArray);
+  if (args[1]) {
+    return moment.utc(timeArray.join(' ').concat(' ').concat(args[1]), 'YYYY MM DD HH mm ss Z');
+  }
+  return moment.utc(timeArray.join(' '), 'YYYY MM DD HH mm ss');
 }
 
 function genTimeString(date) {
@@ -184,45 +221,26 @@ function parseSetting(data) {
     systemTime: parseTime(data.slice(80, 92)), // datetime
     systemWeek: parseInt(data.slice(92, 94), 16),
     openTime: padLeft(parseInt(data.slice(94, 96), 16)) + padLeft(parseInt(data.slice(96, 98), 16)),
-    closeTime: (padLeft(parseInt(data.slice(98, 100), 16))
-      + padLeft(parseInt(data.slice(100, 102), 16))),
+    closeTime: (padLeft(parseInt(data.slice(98, 100), 16)) +
+      padLeft(parseInt(data.slice(100, 102), 16))),
     crc: data.slice(-4),
     crcCheck: UtilService.crcEncrypt(data.slice(0, -4)) === data.slice(-4),
   };
   return resultObj;
 }
 
-function parseData(body) {
+function parseDataHeading(body) {
   const status = body.status;
-  const data = typeof body.data === 'string' ? [body.data] : body.data;
   const resultObj = {};
-  resultObj.data = [];
   if (status.length !== 28) {
-    return { err: 'Status length is not valid' };
+    return {
+      err: 'Status length is not valid'
+    };
   }
   if (UtilService.crcEncrypt(status.slice(0, -4)) !== status.slice(-4)) {
-    return { err: `Status CrcCheck failed ${status}` };
-  }
-
-  for (let i = 0; i < data.length; i++) {
-    const cur = data[i];
-    if (cur.length !== 34) {
-      return { err: `Data length is not valid ${data[i]}` };
-    }
-    if (cur.slice(-4) !== UtilService.crcEncrypt(cur.slice(0, -4))) {
-      return { err: `Data CrcCheck failed ${cur}` };
-    }
-    const dataObj = {
-      SN: status.slice(4, 12).match(/[\w]{2}/g).reverse().join(''),
-      Time: parseTime(cur.slice(0, 12)), // datetime
-      In: parseInt(cur.slice(14, 22).match(/[\w]{2}/g).reverse().join(''), 16),
-      Out: parseInt(cur.slice(22, 30).match(/[\w]{2}/g).reverse().join(''), 16),
+    return {
+      err: `Status CrcCheck failed ${status}`
     };
-    console.log(dataObj);
-    RoomDataService.add(dataObj)
-      .then(() => { console.log('Add data successful'); })
-      .catch((err) => { console.log(err); });
-    resultObj.data.push(dataObj);
   }
   resultObj.status = {
     version: status.slice(0, 4),
@@ -234,5 +252,3 @@ function parseData(body) {
   };
   return resultObj;
 }
-
-module.exports = router;

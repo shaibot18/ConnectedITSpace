@@ -94,7 +94,7 @@
         today.setMinutes(0);
         today.setSeconds(0);
         today.setMilliseconds(0);
-        const zeroTime = Date.parse(today) + timeDiff;
+        const zeroTime = Date.parse(today);
         renderToday(zeroTime);
         renderHistory(zeroTime);
         return initCount(Date.parse(today), now - period);

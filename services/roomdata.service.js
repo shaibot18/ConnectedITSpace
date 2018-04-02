@@ -28,32 +28,31 @@ service.add = add;
 service.getByTimeRange = getByTimeRange;
 service.getAllById = getAllById;
 service.delete = _delete;
+// TODO: fix update num function
 service.UpdateAllNum = UpdateAllNum;
-const UpdateInterval = setInterval(() => { UpdateAllNum(); }, 5 * 1000 * 60);
 service.UpdateTotal = UpdateTotal;
 service.UpdateAvg = UpdateAvg;
-service.UpdateInterval = UpdateInterval;
 module.exports = service;
 
 
 function UpdateAllNum() {
   const deferred = Q.defer();
+  console.log('update function get called');
   RoomService.GetAll()
     .then((roomList) => {
       roomList.forEach((room) => {
+        console.log(room);
         const _id = room._id;
         const avgProm = UpdateAvg(_id);
         const totalProm = UpdateTotal(_id);
         Promise.all([avgProm, totalProm])
           .then((values) => {
             const [avgNum, totalNum] = values;
-            RoomService.get(_id)
-              .then((err, doc) => {
-                doc.avgNum = avgNum;
-                doc.totalNum = totalNum;
-                doc.save();
-                deferred.resolve([totalNum, avgNum]);
-              });
+            room.avgNum = avgNum;
+            room.totalNum = totalNum;
+            room.save();
+            deferred.resolve([totalNum, avgNum]);
+            console.log(`Room ${_id} updated AvgNum: ${avgNum} TotalNum: ${totalNum}`);
           })
           .catch((err) => {
             console.error(err);
@@ -149,8 +148,6 @@ function add(roomdataParams) {
 }
 
 function getByTimeRange(_RoomId, startTime, endTime) {
-  console.log(`Start time is ${startTime}`);
-  console.log(`End time is ${endTime}`);
   const deferred = Q.defer();
   Roomdata.find({
     _RoomId,
@@ -160,8 +157,6 @@ function getByTimeRange(_RoomId, startTime, endTime) {
     }
   }, (err, res) => {
     if (err) deferred.reject(err.name + ': ' + err.message);
-    console.log('Result is');
-    console.log(res);
     deferred.resolve(res);
   });
   return deferred.promise;
