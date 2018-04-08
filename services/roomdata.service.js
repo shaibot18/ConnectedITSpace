@@ -77,7 +77,7 @@ function UpdateAvg(_id) {
           curDay = date.getDate();
           curMonth = date.getMonth();
         }
-        totalNum += element.In - element.Out;
+        totalNum += element.In;
       });
       avgNum = (dayNum === 0) ? 0 : Math.round(totalNum / dayNum);
       deferred.resolve(avgNum);
@@ -92,7 +92,7 @@ function UpdateTotal(_id) {
   getAllById(_id)
     .then((dataList) => {
       dataList.forEach((element) => {
-        totalNum += element.In - element.Out;
+        totalNum += element.In;
       });
       deferred.resolve(totalNum);
     })

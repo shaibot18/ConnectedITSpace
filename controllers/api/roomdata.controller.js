@@ -138,8 +138,6 @@ function handlePost(req, res) {
       break;
     }
     case 'cache': {
-      // TODO: the order of parse data and get time zone can be changed
-      // in order to improve speed
       const body = req.body;
       data = parseDataHeading(body);
       if (data.err) {

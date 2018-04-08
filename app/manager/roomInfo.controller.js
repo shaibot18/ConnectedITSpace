@@ -1,10 +1,11 @@
 angular
   .module('app')
-  .controller('RoomInfo.ManagerController', Controller);
+  .controller('RoomInfo.ManagerController', ['UserService', 'RoomService', 'FlashService', 'RoomDataService',
+    '$stateParams', '$scope', '$log', '$q', Controller]);
 
 function Controller(
   UserService, RoomService, FlashService, RoomDataService,
-  $stateParams, $scope, $log, $q, $document
+  $stateParams, $scope, $log, $q,
 ) {
   const vm = this;
   vm.user = null;
@@ -27,7 +28,10 @@ function Controller(
     const weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()];
     return `${year}/${month}/${calDate} ${weekday}`;
   };
-
+  $scope.exportDate = {
+    start: moment('2018-04-01'),
+    end: moment('2018-04-07')
+  };
   $scope.exportToCSV = function () {
     function convertToHours(start, end, list) {
       const result = [];
@@ -74,32 +78,36 @@ function Controller(
           link.setAttribute('download', 'DataExport.csv');
           document.body.appendChild(link); // Required for FF
           link.click();
-          document.body.removeChild(link); 
+          document.body.removeChild(link);
         });
-    } else {
-      $log.log('Please choose date');
     }
   };
+  $scope.barPlotDate = moment().hour(0).minute(0).second(0)
+    .millisecond(0);
+  $scope.renderBarPlot = renderBarPlot;
 
   const initStyle = function () {
     if (typeof ($.fn.daterangepicker) === 'undefined') { return; }
     $('#single_cal3').daterangepicker({
+      locale: {
+        format: 'YYYY-MM-DD'
+      },
+      startDate: $scope.exportDate.start.format('YYYY-MM-DD'),
       singleDatePicker: true,
       singleClasses: 'picker_3'
-    }, (start, end, label) => {
-      console.log(start.toISOString(), end.toISOString(), label);
+    }, (start) => {
+      $log.log(start);
+      $scope.barPlotDate = start;
     });
 
     $('#reservation').daterangepicker({
       locale: {
         format: 'YYYY-MM-DD'
       },
-      startDate: '2018-01-01',
-      endDate: '2018-04-30'
+      startDate: $scope.exportDate.start.format('YYYY-MM-DD'),
+      endDate: $scope.exportDate.end.format('YYYY-MM-DD')
     }, (start, end) => {
       $scope.exportDate = { start, end };
-      console.log(start.diff(end, 'days'));
-      console.log(start.toISOString(), end.toISOString());
     });
   };
 
@@ -107,7 +115,6 @@ function Controller(
     const deferred = $q.defer();
     RoomService.Get(roomId)
       .then((room) => {
-        $log.log(room);
         const timeZone = room.timeZone;
         $scope.avgNum = (room.avgNum === undefined) ? -1 : room.avgNum;
         $scope.totalNum = (room.totalNum === undefined) ? -1 : room.totalNum;
@@ -133,7 +140,6 @@ function Controller(
     let total = 0;
     RoomDataService.GetByTimeRange(roomId, startTime, endTime)
       .then((dataList) => {
-        $log.log('Init data list');
         let lastTime = '';
         $.each(dataList, (index, element) => {
           if (element.Time !== lastTime) {
@@ -141,7 +147,6 @@ function Controller(
           }
           lastTime = element.Time;
         });
-        $log.log(`Init count is ${total}`);
         deferred.resolve(total);
       })
       .catch((err) => {
@@ -155,16 +160,16 @@ function Controller(
   initTime()
     .then((t) => {
       timeDiff = t;
-      const now = Date.now();
-      const today = new Date(now);
-      today.setHours(0);
-      today.setMinutes(0);
-      today.setSeconds(0);
-      today.setMilliseconds(0);
-      const zeroTime = Date.parse(today);
-      renderToday(zeroTime);
-      renderHistory(zeroTime);
-      return initCount(Date.parse(today), now - period);
+      const now = moment().valueOf();
+      const zeroTime = moment()
+        .hour(0)
+        .minute(0)
+        .second(0)
+        .millisecond(0)
+        .valueOf();
+      renderBarPlot(zeroTime);
+      renderTable(zeroTime);
+      return initCount(zeroTime, now - period);
     })
     .then((total) => {
       renderRealTime(total);
@@ -238,8 +243,8 @@ function Controller(
       });
     }
   }
-// TODO: render graph into a isolate directive
-  function renderToday(zeroTime) {
+  // TODO: wrap graph into a isolated directive
+  function renderBarPlot(zeroTime) {
     const histoX = [];
     const inData = [];
     const outData = [];
@@ -247,8 +252,6 @@ function Controller(
     const promArr = [];
     for (let i = 8; i < 18; i++) {
       histoX.push(`${i}:00 - ${i + 1}:00`);
-      $log.log(`Start time is ${new Date(zeroTime + (i * oneHour))}`);
-      $log.log(`End time is ${new Date(zeroTime + ((i + 1) * oneHour))}`);
       promArr[i - 8] = RoomDataService.GetByTimeRange(
         roomId,
         zeroTime + (i * oneHour), zeroTime + ((i + 1) * oneHour)
@@ -333,13 +336,11 @@ function Controller(
     });
   }
 
-  function renderHistory(zeroTime) {
+  function renderTable(zeroTime) {
     const startTime = zeroTime - 7 * oneDay;
     const resultData = [];
     const promArr = [];
     for (let i = 0; i < 7; i++) {
-      $log.log(`Start date is ${new Date(startTime + (i * oneDay) - timeDiff)}`);
-      $log.log(`End date is ${new Date(startTime + ((i + 1) * oneDay) - timeDiff)}`);
       promArr[i] = RoomDataService.GetByTimeRange(
         roomId,
         startTime + (i * oneDay), startTime + ((i + 1) * oneDay)
