@@ -19,12 +19,23 @@ function generateData(inNum, outNum) {
   return resultString.concat(crcEncrypt(resultString));
 }
 
+const SN = 'AAAAAAAA';
+// const SN = 'FB8A8E16';
+// const SN = 'JFKD1101';
+
+function generateStatus() {
+  const resultString = '0101'.concat(SN.match(/[\w]{2}/g).reverse().join(''))
+    .concat('00F60C0D0001');
+  return resultString.concat(crcEncrypt(resultString));
+}
+
+
 const testData = {
   cmd: 'cache',
   flag: '3617',
-  status: '0101C28F64A2007A0A0002009E46',
-  data: [generateData(1, 2),
-    generateData(2, 3)
+  status: generateStatus(),
+  data: [generateData(2, 1),
+    generateData(3, 2)
   ],
   count: '0002',
   temp: 'C3B',

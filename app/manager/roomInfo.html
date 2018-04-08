@@ -43,7 +43,6 @@
   </div>
 </div>
 
-
 <div class="col-md-6 col-sm-6 col-xs-12">
   <div class="x_panel managementstyle">
     <div class="x_content myroomtitle">
@@ -58,7 +57,6 @@
     </div>
   </div>
 </div>
-
 <!--graph-->
 <!-- graph area -->
 <div class="col-md-12 col-sm-12 col-xs-12 fortop">
@@ -93,6 +91,18 @@
               </div>
             </div>
           </div>
+        </fieldset>
+
+        <fieldset>
+          <div class="control-group">
+            <div class="controls">
+              <div class="input-prepend input-group">
+                <span class="add-on input-group-addon"><i class="glyphicon glyphicon-calendar fa fa-calendar"></i></span>
+                <input type="text" style="width: 200px" name="reservation" id="reservation" class="form-control" value="01/01/2016 - 01/25/2016" />
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-primary" ng-click="exportToCSV()">Export</button>
         </fieldset>
 
       <div id="history" style="width:95%; height:300px;"></div>

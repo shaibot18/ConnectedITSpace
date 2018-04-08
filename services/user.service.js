@@ -3,7 +3,7 @@ const _ = require('lodash');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const Q = require('q');
-const mongoose = require('services/mongooseCon'); // pack mongoose connection into one module
+const mongoose = require('services/dbConnection.service'); // pack mongoose connection into one module
 
 const Schema = mongoose.Schema;
 const userSchema = new Schema({

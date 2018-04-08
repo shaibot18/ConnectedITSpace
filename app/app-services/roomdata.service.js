@@ -4,18 +4,18 @@
     .factory('RoomDataService', Service);
 
   function Service($http, $q) {
-    const service = {};
-    service.GetAll = GetAll;
-    service.GetByTimeRange = GetByTimeRange;
-    service.TotalNumber = TotalNumber;
-    return service;
+    const RoomDataService = {};
+    RoomDataService.GetAll = GetAll;
+    RoomDataService.GetByTimeRange = GetByTimeRange;
+    RoomDataService.UpdateAllNum = UpdateAllNum;
+    return RoomDataService;
+    
+    function UpdateAllNum(RoomId) {
+      return $http.get(`/api/roomdata/allnum/${RoomId}`).then(handleSuccess, handleError);
+    }
 
     function GetAll() {
       return $http.get('/api/roomdata').then(handleSuccess, handleError);
-    }
-
-    function TotalNumber() {
-      
     }
 
     function GetByTimeRange(_RoomId, start, end = Date.now()) {

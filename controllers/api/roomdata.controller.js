@@ -16,9 +16,24 @@ const uploadPeriod = padLeft((0).toString(16).toUpperCase()); // default 120, 0 
 
 router.get('/:RoomId', getByTimeRange);
 router.get('/all/:RoomId', getAllById);
+router.get('/allnum/:RoomId', UpdateAllNum);
 router.post('/', handlePost);
 module.exports = router;
 
+function UpdateAllNum(req, res) {
+  if (req.params.RoomId) {
+    const _id = req.params.RoomId;
+    RoomDataService.UpdateAllNum(_id)
+      .then((nums) => {
+        res.status(200).send(nums);
+      })
+      .catch((err) => {
+        res.status(400).send(err);
+      });
+  }
+}
+
+// Get all data of one room by the room id
 function getAllById(req, res) {
   if (req.params.RoomId) {
     const _RoomId = req.params.RoomId;
@@ -79,9 +94,10 @@ function handlePost(req, res) {
   let timeDiff;
   let data;
   switch (cmd) {
-    case 'getsetting':
+    case 'getsetting': {
       data = parseSetting(req.body.data);
-      RoomService.GetRoomBySN(data.SN)
+      const SN = data.SN;
+      RoomService.GetRoomBySN(SN)
         .then((room) => {
           if (room.length === 0) {
             console.log(`Invalid post: no existing room matches this SN ${SN}`);
@@ -120,6 +136,7 @@ function handlePost(req, res) {
           res.end();
         });
       break;
+    }
     case 'cache': {
       // TODO: the order of parse data and get time zone can be changed
       // in order to improve speed
@@ -233,14 +250,10 @@ function parseDataHeading(body) {
   const status = body.status;
   const resultObj = {};
   if (status.length !== 28) {
-    return {
-      err: 'Status length is not valid'
-    };
+    return { err: 'Status length is not valid' };
   }
   if (UtilService.crcEncrypt(status.slice(0, -4)) !== status.slice(-4)) {
-    return {
-      err: `Status CrcCheck failed ${status}`
-    };
+    return { err: `Status CrcCheck failed ${status}` };
   }
   resultObj.status = {
     version: status.slice(0, 4),

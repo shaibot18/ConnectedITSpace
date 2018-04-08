@@ -1,5 +1,5 @@
 // This service is used to perform global db operations
-const mongoose = require('services/mongooseCon');
+const mongoose = require('services/dbConnection.service');
 const RoomDataService = require('services/roomdata.service.js');
 const Q = require('q');
 

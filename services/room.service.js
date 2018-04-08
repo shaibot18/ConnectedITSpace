@@ -1,5 +1,5 @@
 const Q = require('q');
-const mongoose = require('services/mongooseCon');
+const mongoose = require('services/dbConnection.service');
 
 const Schema = mongoose.Schema;
 const roomSchema = new Schema({
@@ -45,8 +45,6 @@ function get(_id) {
     if (err) deferred.reject(`${err.name} : ${err.message}`);
     if (room) {
       deferred.resolve(room);
-    } else {
-      deferred.resolve();
     }
   });
   return deferred.promise;

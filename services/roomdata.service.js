@@ -1,5 +1,5 @@
 const Q = require('q');
-const mongoose = require('services/mongooseCon');
+const mongoose = require('services/dbConnection.service');
 const RoomService = require('services/room.service');
 
 const Schema = mongoose.Schema;
@@ -27,38 +27,32 @@ service.RoomData = Roomdata;
 service.add = add;
 service.getByTimeRange = getByTimeRange;
 service.getAllById = getAllById;
-service.delete = _delete;
-// TODO: fix update num function
+service.DeleteRoomData = DeleteRoomData;
 service.UpdateAllNum = UpdateAllNum;
 service.UpdateTotal = UpdateTotal;
 service.UpdateAvg = UpdateAvg;
 module.exports = service;
 
 
-function UpdateAllNum() {
+function UpdateAllNum(_id) {
   const deferred = Q.defer();
   console.log('update function get called');
-  RoomService.GetAll()
-    .then((roomList) => {
-      roomList.forEach((room) => {
-        console.log(room);
-        const _id = room._id;
-        const avgProm = UpdateAvg(_id);
-        const totalProm = UpdateTotal(_id);
-        Promise.all([avgProm, totalProm])
-          .then((values) => {
-            const [avgNum, totalNum] = values;
-            room.avgNum = avgNum;
-            room.totalNum = totalNum;
-            room.save();
-            deferred.resolve([totalNum, avgNum]);
-            console.log(`Room ${_id} updated AvgNum: ${avgNum} TotalNum: ${totalNum}`);
-          })
-          .catch((err) => {
-            console.error(err);
-            deferred.reject(err);
-          });
-      });
+  RoomService.get(_id)
+    .then((room) => {
+      const avgProm = UpdateAvg(_id);
+      const totalProm = UpdateTotal(_id);
+      Promise.all([avgProm, totalProm])
+        .then((values) => {
+          const [avgNum, totalNum] = values;
+          room.avgNum = avgNum;
+          room.totalNum = totalNum;
+          room.save();
+          deferred.resolve({ totalNum, avgNum });
+        })
+        .catch((err) => {
+          console.error(err);
+          deferred.reject(err);
+        });
     })
     .catch((err) => {
       console.error(err);
@@ -106,11 +100,10 @@ function UpdateTotal(_id) {
   return deferred.promise;
 }
 
-
 function getAllById(_RoomId) {
   const deferred = Q.defer();
   Roomdata.find({ _RoomId }, (err, res) => {
-    if (err) deferred.reject(err.name + ': ' + err.message);
+    if (err) deferred.reject(`${err.name}: ${err.message}`);
     deferred.resolve(res);
   });
   return deferred.promise;
@@ -126,22 +119,22 @@ function add(roomdataParams) {
         console.log(`Invalid post: no existing room matches SN: ${SN}`);
         deferred.reject(`Invalid post: no existing room matches SN: ${SN}`);
       } else if (room.length > 1) {
-        console.log('Invalid post: this SN ' + SN + 'matches too many rooms');
-        deferred.reject('Invalid post: this SN ' + SN + 'matches too many rooms');
+        console.log(`Invalid post: this SN ${SN} matches too many rooms`);
+        deferred.reject(`Invalid post: this SN ${SN} matches too many rooms`);
       } else {
         roomdataParams._RoomId = room[0]._id;
         saveRoom(roomdataParams);
       }
     })
-    .catch((err) => { deferred.reject(err.name + ': ' + err.message); });
+    .catch((err) => { deferred.reject(`${err.name}: ${err.message}`); });
   return deferred.promise;
-  function saveRoom(roomdataParams) {
-    const roomdata = new Roomdata(roomdataParams);
+  function saveRoom(params) {
+    const roomdata = new Roomdata(params);
     console.log('Saving roomdata ...');
     console.log(`In is ${roomdata.In} Out is ${roomdata.Out}`);
     console.log(`Time is ${Date.parse(roomdata.Time)}`);
     roomdata.save((err, doc) => {
-      if (err) deferred.reject(err.name + ': ' + err.message);
+      if (err) deferred.reject(`${err.name} : ${err.message}`);
       deferred.resolve(doc);
     });
   }
@@ -156,21 +149,20 @@ function getByTimeRange(_RoomId, startTime, endTime) {
       $lt: endTime
     }
   }, (err, res) => {
-    if (err) deferred.reject(err.name + ': ' + err.message);
+    if (err) deferred.reject(`${err.name} : ${err.message}`);
     deferred.resolve(res);
   });
   return deferred.promise;
 }
 
-function _delete(_id) {
+function DeleteRoomData(_id) {
   const deferred = Q.defer();
   Roomdata.remove(
-    { _id: mongoose.helper.toObjectID(_id) },
+    { _RoomId: _id },
     (err) => {
-      if (err) deferred.reject(err.name + ': ' + err.message);
+      if (err) deferred.reject(`${err.name}: ${err.message}`);
       deferred.resolve();
     }
   );
-
   return deferred.promise;
 }

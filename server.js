@@ -1,10 +1,10 @@
-﻿require('rootpath')();
+﻿// TODO: Add error log function
+require('rootpath')();
 const express = require('express');
 const session = require('express-session');
 const bodyParser = require('body-parser');
 const config = require('config.json');
 const path = require('path');
-const RoomDataService = require('services/roomdata.service');
 const DbService = require('services/db.service');
 
 const app = express();
@@ -40,9 +40,6 @@ app.use('/api/rooms', require('./controllers/api/rooms.controller'));
 app.use('/api/roomdata', require('./controllers/api/roomdata.controller'));
 
 function AppInitialize() {
-  RoomDataService.UpdateAllNum()
-    .then((res) => { console.log(res); })
-    .catch((err) => { console.log(err); });
   if (config.removeDuplicates) {
     DbService.removeDuplicates()
       .then(() => { console.log('remove duplicates successful'); })

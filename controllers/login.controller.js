@@ -1,37 +1,35 @@
-﻿var express = require('express');
-var router = express.Router();
-var request = require('request');
-var config = require('config.json');
-var jwt = require('jsonwebtoken');
-var baseApiUrl = process.env.PORT ? config.apiUrl : config.localUrl;
+﻿const express = require('express');
+const router = express.Router();
+const request = require('request');
+const config = require('config.json');
+const jwt = require('jsonwebtoken');
+
+const baseApiUrl = process.env.PORT ? config.apiUrl : config.localUrl;
 console.log(baseApiUrl);
 
-//TODO: Apply user timeout function
-router.get('/', function (req, res) {
+// TODO: Apply user timeout function
+router.get('/', (req, res) => {
   // log user out
   delete req.session.token;
   delete req.session.user;
-
   // move success message into local variable so it only appears once (single read)
-  var viewData = {
+  const viewData = {
     success: req.session.success
   };
   delete req.session.success;
   res.render('login', viewData);
 });
 
-router.post('/', function (req, res) {
+router.post('/', (req, res) => {
   // authenticate using api to maintain clean separation between layers
   request.post({
-    url: baseApiUrl + '/users/authenticate',
+    url: baseApiUrl.concat('/users/authenticate'),
     form: req.body,
     json: true
-  }, function (error, response, body) {
+  }, (error, response, body) => {
     if (error) {
       console.log(error);
-      return res.render('login', {
-        error: error
-      });
+      return res.render('login', { error });
     }
 
     if (!body.token) {
@@ -44,12 +42,12 @@ router.post('/', function (req, res) {
     // req.session.token = jwt.verify(body.token,config.secret);
     req.session.token = body.token;
     req.session.user = jwt.verify(body.token, config.secret);
-    console.log("req.session.user is");
+    console.log('req.session.user is');
     console.log(req.session.user);
     // var decoded = jwt.verify(body.token,config.secret);
     // console.log(decoded);
     // redirect to returnUrl
-    var returnUrl = req.query.returnUrl && decodeURIComponent(req.query.returnUrl) || '/';
+    const returnUrl = req.query.returnUrl && decodeURIComponent(req.query.returnUrl) || '/';
     console.log(returnUrl);
     res.redirect(returnUrl);
   });
