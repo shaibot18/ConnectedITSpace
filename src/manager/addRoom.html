@@ -4,23 +4,16 @@
             <br />
             <form class="form-horizontal form-label-left input_mask managementstyle">
                 <div class="form-input-middle">
-                    <map-search result='vm.result'></map-search>
+                    <div class="col-xs-12 form-group has-feedback">
+                        <input type="search" class="form-control has-feedback-left" ng-model="vm.newRoom.city" placeholder="Search" required="required">
+                        <span class="required"></span>
+                        <span class="fa fa-globe form-control-feedback left" aria-hidden="true"></span>
+                    </div>
+
                     <div class="col-xs-12 form-group has-feedback">
                         <input type="text" class="form-control has-feedback-left" ng-model="vm.newRoom.building" placeholder="Building" required="required">
                         <span class="required"></span>
                         <span class="fa fa-institution form-control-feedback left" aria-hidden="true"></span>
-                    </div>
-
-                    <div class="col-xs-12 form-group has-feedback">
-                        <input type="text" class="form-control has-feedback-left" ng-model="vm.newRoom.country" placeholder="Country" required="required">
-                        <span class="required"></span>
-                        <span class="fa fa-inbox form-control-feedback left" aria-hidden="true"></span>
-                    </div>
-
-                    <div class="col-xs-12 form-group has-feedback">
-                        <input type="text" class="form-control has-feedback-left" ng-model="vm.newRoom.city" placeholder="City" required="required">
-                        <span class="required"></span>
-                        <span class="fa fa-inbox form-control-feedback left" aria-hidden="true"></span>
                     </div>
 
                     <div class="col-xs-12 form-group has-feedback">
@@ -45,13 +38,9 @@
                         <span class="required"></span>
                         <span class="fa fa-institution form-control-feedback left" aria-hidden="true"></span>
                     </div>
-
-                    <div class="col-xs-12 form-group has-feedback">
-                        <input type="number" class="form-control has-feedback-left" ng-model="vm.newRoom.area" placeholder="Area of the room" required="required">
-                        <span class="required"></span>
-                        <span class="fa fa-institution form-control-feedback left" aria-hidden="true"></span>
-                    </div>
                 </div>
+
+
                 <div class="form-group">
                     <div class="col-md-12 col-sm-12 col-xs-12">
                         <button ng-click="vm.createRoom()" class="btn btn-success2" >

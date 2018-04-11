@@ -16,8 +16,6 @@ function Controller(UserService, RoomService, FlashService, $log) {
   }
   function createRoom() {
     vm.newRoom._userID = vm.user.sub;
-    vm.newRoom.coordinates = vm.result.coordinates;
-    vm.newRoom.placeName = vm.result.place_name;
     RoomService.Create(vm.newRoom)
       .then(() => {
         FlashService.Success('Room created');

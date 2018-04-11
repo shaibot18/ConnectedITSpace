@@ -4,7 +4,7 @@
 .locationinformation{float: left;padding-right: 10px;padding-left: 25px;line-height:60px }
 .locationinformation i{margin-right: 10px;}
 .outbackgrounfcolor{border-radius: 7px;background:#fff;box-shadow: rgba(204,204,204,.4) 0px 0px 3px;}
-.col-xs-12.form-group.has-feedback .form-control{border-top-width:0;border-left-width:0;border-right-width:0;box-shadow: none;border-radius: 0px;height:40px;font-size: 16px;color: #ccc;}
+.col-xs-12.form-group.has-feedback .form-control{border-top-width:0;border-left-width:0;border-right-width:0;box-shadow: none;border-radius: 0px;height:40px;font-size: 16px;color: #040303;}
 .col-xs-6.form-group.has-feedback .form-control{border-top-width:0;border-left-width:0;border-right-width:0;box-shadow: none;border-radius: 0px;height:40px;font-size: 16px;color: #ccc;}
 .managementstyle{background:#fff;-webkit-box-shadow: rgba(204,204,204,.4) 0px 0px 3px;-moz-box-shadow: rgba(204,204,204,.4) 0px 0px 3px;box-shadow: rgba(204,204,204,.4) 0px 0px 3px;border-radius: 7px;}
 #datatable_wrapper .row{margin-bottom: 30px;}
@@ -32,7 +32,6 @@ ul.right.sgh_box_set li:last-child{font-size: 10px;}
 .mapboxgl-ctrl.mapboxgl-ctrl-group > button{width:37px;height:37px;}
 
 ul li{list-style:none;}
-.fa.fa-map-marker.fa-3x{color:#8fd416;}
 .nav_menu.mycontent_bar{background:#fbfbfb;width:100%;position:relative;height:auto;min-height:100%; }
 .iconchinasgh_box{position:absolute;z-index:1000;width:340px;height:210px;background-color:#4e4f53;padding:16px 13px;display:none;margin-top:15px;box-shadow:6px 6px 15px rgba(0,0,0,.1);border-radius:8px;}
 .iconchinasgh_box div{height:30px;color:#cdcaca;font-size:14px;}

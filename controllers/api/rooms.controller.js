@@ -19,7 +19,7 @@ function Update(req, res) {
 
 function Get(req, res) {
   if (req.params._id) {
-    roomService.get(req.params._id)
+    roomService.Get(req.params._id)
       .then((room) => {
         if (room) {
           res.send(room);

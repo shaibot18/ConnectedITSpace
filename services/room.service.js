@@ -3,13 +3,28 @@ const mongoose = require('services/dbConnection.service');
 
 const Schema = mongoose.Schema;
 const roomSchema = new Schema({
+  placeName: String,
   country: String,
   city: String,
   building: String,
   timeZone: String,
   _userID: Schema.Types.ObjectId,
   SN: String,
+  coordinates: [Number],
+  area: Number,
+  openTime: {
+    type: String,
+    default: '0930'
+  },
+  closeTime: {
+    type: String,
+    default: '1730'
+  },
   totalNum: {
+    type: Number,
+    default: 0
+  },
+  curNum: {
     type: Number,
     default: 0
   },
@@ -23,9 +38,9 @@ const service = {};
 service.GetAll = GetAll;
 service.GetRoomBySN = GetRoomBySN;
 service.Update = Update;
-service.get = get;
+service.Get = Get;
 service.create = create;
-service.getByUserId = getByUserId;
+service.getByUserId = GetByUserId;
 service.delete = _delete;
 module.exports = service;
 
@@ -39,7 +54,7 @@ function Update(_id, room) {
   return deferred.promise;
 }
 
-function get(_id) {
+function Get(_id) {
   const deferred = Q.defer();
   Room.findById(_id, (err, room) => {
     if (err) deferred.reject(`${err.name} : ${err.message}`);
@@ -50,7 +65,7 @@ function get(_id) {
   return deferred.promise;
 }
 
-function getByUserId(_userID) {
+function GetByUserId(_userID) {
   const deferred = Q.defer();
   Room.find({ _userID }, (err, res) => {
     if (err) deferred.reject(`${err.name}: ${err.message}`);

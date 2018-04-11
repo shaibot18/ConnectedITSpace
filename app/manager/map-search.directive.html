@@ -1,0 +1,47 @@
+<style>
+  .modal .mapboxgl-control-container .mapboxgl-ctrl-top-left{
+    top: 0;
+    left: 0;
+  }
+
+  .modal .mapboxgl-control-container .mapboxgl-ctrl-top-left .mapboxgl-ctrl {
+    margin: 10px 0 0 10px;
+  }
+
+  .modal .mapboxgl-ctrl-top-right .mapboxgl-ctrl.mapboxgl-ctrl-group {
+    margin: 10px 10px 0 0;
+  }
+
+  button.mapboxgl-ctrl-icon.mapboxgl-ctrl-geolocate {
+    margin: 0;
+  }
+</style>
+
+<div class="col-xs-12 form-group has-feedback">
+  <input type="search" id ="map-search-input" class="form-control has-feedback-left" ng-model="result.place_name" placeholder="Search" required="required">
+  <span class="required"></span>
+  <span class="fa fa-globe form-control-feedback left" aria-hidden="true"></span>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="map-modal">
+  <div class="modal-dialog" style="width: 600px; height: 657px;" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Find location on map</h4>
+      </div>
+      <div class="modal-body">
+        <div id='map' style="height: 500px; width: 568px;"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" ng-click="updateInput()">Save location</button>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
