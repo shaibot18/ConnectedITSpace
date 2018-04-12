@@ -21,6 +21,7 @@ function Controller(
   let timeDiff = 0;
   $scope.avgNum = 0;
   $scope.totalNum = 0;
+  $scope.curNum = 0;
   $scope.formatDate = (date) => {
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
@@ -118,6 +119,7 @@ function Controller(
         const timeZone = room.timeZone;
         $scope.avgNum = (room.avgNum === undefined) ? -1 : room.avgNum;
         $scope.totalNum = (room.totalNum === undefined) ? -1 : room.totalNum;
+        $scope.curNum = (room.curNum === undefined) ? -1 : room.curNum;
         const sign = timeZone.charAt(0);
         if (sign === '+') {
           timeDiff = (parseInt(timeZone.slice(1, 3), 10) * 3600 * 1000

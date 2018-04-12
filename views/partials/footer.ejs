@@ -50,13 +50,13 @@
             el.className = 'marker';
             el.style.width = '40px';
             el.style.height = '40px';
-            // if (room.area && room.curNum / room.area > 2) {
-            //   el.style.color = 'rgba(240, 57, 75, 0.97)';
-            // }
-            // else {
-            //   el.style.color = 'rgba(132, 240, 98, 0.97)'
-            // }
-            el.style.color = 'rgba(132, 240, 98, 0.97)'
+            if (room.area && room.curNum / room.area > 2) {
+              el.style.color = 'rgba(240, 57, 75, 0.97)';
+            }
+            else {
+              el.style.color = 'rgba(132, 240, 98, 0.97)'
+            }
+            // el.style.color = 'rgba(132, 240, 98, 0.97)'
             // el.style.backgroundColor = 'black';
             const popup = new mapboxgl.Popup({
               closeButton: false,
