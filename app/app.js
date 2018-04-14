@@ -52,6 +52,15 @@ function config($stateProvider, $urlRouterProvider) {
   } else if (window.user.role == 2) {
     $urlRouterProvider.when('/', '/manager');
     $stateProvider
+      .state('dbControl', {
+        url: '/dbc',
+        templateUrl: 'manager/dbc.html',
+        controller: 'Dbc.ManagerController',
+        controllerAs: 'vm',
+        data: {
+          activeTab: 'dbc'
+        }
+      })
       .state('home', {
         url: '/manager',
         templateUrl: 'manager/index.html',

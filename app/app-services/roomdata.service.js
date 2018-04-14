@@ -7,8 +7,18 @@ function Service($http, $q) {
   RoomDataService.GetAll = GetAll;
   RoomDataService.GetByTimeRange = GetByTimeRange;
   RoomDataService.UpdateAllNum = UpdateAllNum;
+  RoomDataService.AdjustTimeZone = AdjustTimeZone;
+  RoomDataService.RemoveDuplicates = RemoveDuplicates;
   return RoomDataService;
-  
+
+  function RemoveDuplicates() {
+    return $http.get('/api/roomdata/remove').then(handleSuccess, handleError);
+  }
+
+  function AdjustTimeZone() {
+    return $http.get('/api/roomdata/adjust').then(handleSuccess, handleError);
+  }
+
   function UpdateAllNum(RoomId) {
     return $http.get(`/api/roomdata/allnum/${RoomId}`).then(handleSuccess, handleError);
   }

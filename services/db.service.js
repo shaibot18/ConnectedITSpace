@@ -20,6 +20,7 @@ const RoomData = RoomDataService.RoomData;
 // This function is used to remove data with the same time
 // caused by hardware error
 function removeDuplicates() {
+  console.log('remove function run');
   const deferred = Q.defer();
   RoomData.aggregate([{
     $group: {
@@ -57,6 +58,7 @@ function removeDuplicates() {
 
 function adjustTimeZone() {
   const deferred = Q.defer();
+  console.log('Adjust function run');
   RoomData.find({}, (err, docs) => {
     if (err) deferred.reject(err);
     else {

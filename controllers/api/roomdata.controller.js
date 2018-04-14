@@ -2,6 +2,7 @@ const express = require('express');
 const moment = require('moment');
 const RoomService = require('services/room.service');
 const RoomDataService = require('services/roomdata.service');
+const DbService = require('services/db.service');
 const UtilService = require('services/util.service');
 
 const padLeft = UtilService.padLeft;
@@ -15,10 +16,33 @@ const recordPeriod = padLeft((0).toString(16).toUpperCase()); // default 10, 0 f
 const uploadPeriod = padLeft((0).toString(16).toUpperCase()); // default 120, 0 for real-time
 
 router.get('/:RoomId', getByTimeRange);
+router.get('/adjust', adjustTimeZone);
+router.get('/remove', removeDuplicates);
 router.get('/all/:RoomId', getAllById);
 router.get('/allnum/:RoomId', UpdateAllNum);
 router.post('/', handlePost);
 module.exports = router;
+
+
+function removeDuplicates(req, res) {
+  DbService.removeDuplicates()
+    .then((result) => {
+      res.status(200).send(result);
+    })
+    .catch((err) => {
+      res.status(400).send(err);
+    });
+}
+
+function adjustTimeZone(req, res) {
+  DbService.adjustTimeZone()
+    .then((result) => {
+      res.status(200).send(result);
+    })
+    .catch((err) => {
+      res.status(400).send(err);
+    });
+}
 
 function UpdateAllNum(req, res) {
   if (req.params.RoomId) {
@@ -111,8 +135,8 @@ function handlePost(req, res) {
             data.timeZone = room[0].timeZone;
           }
           timeDiff = data.timeZone ? convertTimeZone(data.timeZone) : 0;
-          data.timeCheck = Math.abs(new Date().getTime() + timeDiff -
-            data.systemTime.getTime()) < 60000;
+          data.timeCheck = Math.abs(moment().valueOf() + timeDiff -
+            data.systemTime.valueOf()) < 60000;
           if (data.crcCheck) {
             console.log('CrcCheck successful');
             if (data.timeCheck) {
@@ -122,7 +146,7 @@ function handlePost(req, res) {
               console.log('Time check failed');
               cmdType = '04'; // reset parameters
             }
-            const systemTimeWeek = genTimeString(new Date(new Date().getTime() + timeDiff)).concat('00');
+            const systemTimeWeek = genTimeString(new Date(moment().valueOf() + timeDiff)).concat('00');
             const resultString = `${cmdType}${resFlag}000000000300`
               .concat(recordPeriod).concat(uploadPeriod)
               .concat('0000000000000000000002000000000000000000000000000000000000000000')

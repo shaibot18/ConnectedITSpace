@@ -152,7 +152,8 @@ function Controller(
         deferred.resolve(total);
       })
       .catch((err) => {
-        FlashService.Error(err);
+        FlashService.Error(`${err.name}:${err.message} ${err.stack}`);
+        console.error(err);
         deferred.reject(err);
       });
     return deferred.promise;
@@ -230,7 +231,8 @@ function Controller(
           });
         })
         .catch((err) => {
-          FlashService.Error(err);
+          FlashService.Error(`${err.name}:${err.message} ${err.stack}`);
+          console.error(err);
           $log.log(err);
         });
       data.push({
@@ -274,8 +276,8 @@ function Controller(
           totalData[i - 8] = inSum - outSum;
         })
         .catch((err) => {
-          $log.error(err);
-          FlashService.Error(err);
+          FlashService.Error(`${err.name}:${err.message} ${err.stack}`);
+          console.error(err);
         });
     }
     const historyOption = {
@@ -367,7 +369,7 @@ function Controller(
         })
         .catch((err) => {
           $log.error(err);
-          FlashService.Error(err);
+          FlashService.Error(`${err.name}:${err.message} ${err.stack}`);
         });
     }
     Promise.all(promArr).then(() => {
