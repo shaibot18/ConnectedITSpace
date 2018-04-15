@@ -16,13 +16,12 @@ const recordPeriod = padLeft((0).toString(16).toUpperCase()); // default 10, 0 f
 const uploadPeriod = padLeft((0).toString(16).toUpperCase()); // default 120, 0 for real-time
 
 router.get('/:RoomId', getByTimeRange);
-router.get('/adjust', adjustTimeZone);
+router.get('/adjust/:dir/:amount', adjustTimeZone);
 router.get('/remove', removeDuplicates);
 router.get('/all/:RoomId', getAllById);
 router.get('/allnum/:RoomId', UpdateAllNum);
 router.post('/', handlePost);
 module.exports = router;
-
 
 function removeDuplicates(req, res) {
   DbService.removeDuplicates()
@@ -35,13 +34,19 @@ function removeDuplicates(req, res) {
 }
 
 function adjustTimeZone(req, res) {
-  DbService.adjustTimeZone()
-    .then((result) => {
-      res.status(200).send(result);
-    })
-    .catch((err) => {
-      res.status(400).send(err);
-    });
+  if (req.params.dir) {
+    const dir = parseInt(req.params.dir, 10);
+    if (req.params.amount) {
+      const amount = parseInt(req.params.amount, 10);
+      DbService.adjustTimeZone(dir, amount)
+        .then((result) => {
+          res.status(200).send(result);
+        })
+        .catch((err) => {
+          res.status(400).send(err);
+        });
+    }
+  }
 }
 
 function UpdateAllNum(req, res) {

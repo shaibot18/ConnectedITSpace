@@ -1,6 +1,7 @@
 // This service is used to perform global db operations
 const mongoose = require('services/dbConnection.service');
-const RoomDataService = require('services/roomdata.service.js');
+const RoomDataService = require('services/roomdata.service');
+const RoomStatService = require('services/room.stat.service');
 const Q = require('q');
 
 const Schema = mongoose.Schema;
@@ -13,7 +14,7 @@ const dbCleanSchema = new Schema({
 const DbClean = mongoose.model('DbClean', dbCleanSchema);
 const service = {};
 service.removeDuplicates = removeDuplicates;
-
+service.adjustTimeZone = adjustTimeZone;
 module.exports = service;
 const RoomData = RoomDataService.RoomData;
 
@@ -53,5 +54,40 @@ function removeDuplicates() {
     dbClean.save();
   });
   deferred.resolve();
+  return deferred.promise;
+}
+
+/**
+ * 
+ * @param {dir} dir : for all other values than 1, move 8 hours later
+ * @param {amount} amount : amount of hours to be adjusted, default to 8
+ */
+function adjustTimeZone(dir, amount) {
+  const deferred = Q.defer();
+  let direction = 1;
+  const shiftHour = amount ? amount : 8;
+  RoomData.find({}, (err, docs) => {
+    if (err) deferred.reject(err);
+    else {
+      if (dir !== 1) {
+        direction = -1
+      }
+      console.log(`Adjusting timezone. Direction: ${direction}, shifting amount: ${shiftHour} `);
+      docs.forEach((doc) => {
+        doc.Time -= direction * shiftHour * 3600 * 1000;
+        doc.save();
+      });
+      deferred.resolve();
+
+      mongoose.connection.db.dropCollection('roomstats', (err, result) => {
+        if(err){
+          console.log(`Error dropping collection, no housekeeping done. \n ${err}`);
+        }
+        else{
+          RoomStatService.roomStatHouseKeep();
+        }
+      })
+    }
+  });
   return deferred.promise;
 }
