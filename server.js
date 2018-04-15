@@ -5,7 +5,6 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 const config = require('config.json');
 const path = require('path');
-const DbService = require('services/db.service');
 
 const app = express();
 function unless(p, middleware) {
@@ -39,23 +38,9 @@ app.use('/api/users', require('./controllers/api/users.controller'));
 app.use('/api/rooms', require('./controllers/api/rooms.controller'));
 app.use('/api/roomdata', require('./controllers/api/roomdata.controller'));
 
-function AppInitialize() {
-  if (config.removeDuplicates) {
-    DbService.removeDuplicates()
-      .then(() => { console.log('remove duplicates successful'); })
-      .catch((err) => { console.log(err); });
-  }
-  if (config.adjustTimeZone) {
-    DbService.adjustTimeZone()
-      .then(() => { console.log('Adjust time zone successfull'); })
-      .catch((err) => { console.log(err); });
-  }
-}
-
 // make '/app' default route
 app.get('/', (req, res) => {
   res.redirect('/app');
-  AppInitialize();
 });
 app.post('/', (req, res) => {
   console.log(req.body);

@@ -10,7 +10,7 @@ if (process.env.VCAP_SERVICES) {
 }
 
 const connectionOptions = {
-  // useMongoClient: true
+  useMongoClient: true
 };
 
 mongoose.connect(connectionString, connectionOptions, (err) => {

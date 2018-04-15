@@ -29,9 +29,10 @@ function Controller(
     const weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()];
     return `${year}/${month}/${calDate} ${weekday}`;
   };
+
   $scope.exportDate = {
-    start: moment('2018-04-01'),
-    end: moment('2018-04-07')
+    start: moment().day(-7),
+    end: moment()
   };
   $scope.exportToCSV = function () {
     function convertToHours(start, end, list) {
@@ -91,8 +92,10 @@ function Controller(
     if (typeof ($.fn.daterangepicker) === 'undefined') { return; }
     $('#single_cal3').daterangepicker({
       locale: {
-        format: 'YYYY-MM-DD'
+        format: 'YYYY-MM-DD',
+        firstDay: 1
       },
+      isInvalidDate: (date) => { return date.day() == 0 || date.day() == 6 },
       startDate: $scope.exportDate.start.format('YYYY-MM-DD'),
       singleDatePicker: true,
       singleClasses: 'picker_3'
@@ -103,7 +106,8 @@ function Controller(
 
     $('#reservation').daterangepicker({
       locale: {
-        format: 'YYYY-MM-DD'
+        format: 'YYYY-MM-DD',
+        firstDay: 1
       },
       startDate: $scope.exportDate.start.format('YYYY-MM-DD'),
       endDate: $scope.exportDate.end.format('YYYY-MM-DD')

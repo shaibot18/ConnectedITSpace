@@ -13,7 +13,7 @@ const dbCleanSchema = new Schema({
 const DbClean = mongoose.model('DbClean', dbCleanSchema);
 const service = {};
 service.removeDuplicates = removeDuplicates;
-service.adjustTimeZone = adjustTimeZone;
+
 module.exports = service;
 const RoomData = RoomDataService.RoomData;
 
@@ -53,21 +53,5 @@ function removeDuplicates() {
     dbClean.save();
   });
   deferred.resolve();
-  return deferred.promise;
-}
-
-function adjustTimeZone() {
-  const deferred = Q.defer();
-  console.log('Adjust function run');
-  RoomData.find({}, (err, docs) => {
-    if (err) deferred.reject(err);
-    else {
-      docs.forEach((doc) => {
-        doc.Time -= 8 * 3600 * 1000;
-        doc.save();
-      });
-      deferred.resolve();
-    }
-  });
   return deferred.promise;
 }
