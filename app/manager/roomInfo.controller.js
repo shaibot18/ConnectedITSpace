@@ -65,6 +65,8 @@ function Controller(
     }
     if ($scope.exportDate) {
       const { start, end } = $scope.exportDate;
+      const startStr = $scope.exportDate.start.format('YYYYMMDD');
+      const endStr = $scope.exportDate.end.format('YYYYMMDD');
       RoomDataService.GetByTimeRange(roomId, start.valueOf(), end.valueOf())
         .then((dataList) => {
           if (!dataList.length) { return; }
@@ -77,7 +79,7 @@ function Controller(
           const uri = encodeURI(csvContent);
           const link = document.createElement('a');
           link.setAttribute('href', uri);
-          link.setAttribute('download', 'DataExport.csv');
+          link.setAttribute('download', `DataExport-${startStr}-${endStr}.csv`);
           document.body.appendChild(link); // Required for FF
           link.click();
           document.body.removeChild(link);
@@ -96,7 +98,7 @@ function Controller(
         firstDay: 1
       },
       isInvalidDate: (date) => { return date.day() == 0 || date.day() == 6 },
-      startDate: $scope.exportDate.start.format('YYYY-MM-DD'),
+      startDate: moment(),
       singleDatePicker: true,
       singleClasses: 'picker_3'
     }, (start) => {
@@ -110,7 +112,13 @@ function Controller(
         firstDay: 1
       },
       startDate: $scope.exportDate.start.format('YYYY-MM-DD'),
-      endDate: $scope.exportDate.end.format('YYYY-MM-DD')
+      endDate: $scope.exportDate.end.format('YYYY-MM-DD'),
+      ranges: {
+        'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+        'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+        'This Month': [moment().startOf('month'), moment().endOf('month')],
+        'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+      }
     }, (start, end) => {
       $scope.exportDate = { start, end };
     });
@@ -177,80 +185,8 @@ function Controller(
       renderBarPlot(zeroTime);
       renderTable(zeroTime);
       return initCount(zeroTime, now - period);
-    })
-    .then((total) => {
-      renderRealTime(total);
     });
 
-  function renderRealTime(initTotal) {
-    let total = initTotal;
-    const data = [];
-    const realTimeOption = {
-      tooltip: {
-        trigger: 'axis',
-        formatter(params) {
-          return `${params[0].value[0].toLocaleTimeString('en-GB')} : ${params[0].value[1]}`;
-        },
-        axisPointer: {
-          animation: false,
-        },
-      },
-      xAxis: {
-        type: 'time',
-        splitLine: {
-          show: false,
-        },
-      },
-      yAxis: {
-        type: 'value',
-        splitLine: {
-          show: false,
-        },
-      },
-      series: [{
-        type: 'line',
-        showSymbol: false,
-        hoverAnimation: false,
-        data,
-      }],
-    };
-    const realTime = echarts.init(document.getElementById('real-time'));
-    realTime.setOption(realTimeOption);
-    const interval = setInterval(updateRealTime, period);
-    $scope.$on('$destroy', () => {
-      // Make sure that the interval is destroyed too
-      clearInterval(interval);
-    });
-
-    function updateRealTime() {
-      const curTime = Date.now();
-      RoomDataService.GetByTimeRange(roomId, curTime - period - delay, curTime - delay)
-        .then((dataList) => {
-          let lastTime = '';
-          $.each(dataList, (index, element) => {
-            if (element.Time !== lastTime) {
-              total = total + element.In - element.Out;
-            }
-            lastTime = element.Time;
-          });
-        })
-        .catch((err) => {
-          FlashService.Error(`${err.name}:${err.message} ${err.stack}`);
-          console.error(err);
-          $log.log(err);
-        });
-      data.push({
-        name: new Date(curTime - delay).toString(),
-        value: [new Date(curTime - delay), total],
-      });
-      $('#totalPeople').text(total.toString());
-      realTime.setOption({
-        series: [{
-          data,
-        }],
-      });
-    }
-  }
   // TODO: wrap graph into a isolated directive
   function renderBarPlot(zeroTime) {
     const histoX = [];
