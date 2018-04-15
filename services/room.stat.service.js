@@ -31,6 +31,7 @@ const RoomStat = mongoose.model('RoomStat', roomStatSchema);
 const service = {};
 
 service.RoomStat = RoomStat;
+service.getAllStats = getAllStats;
 service.roomStatHouseKeep = roomStatHouseKeep;
 module.exports = service;
 
@@ -137,6 +138,18 @@ function createRoomStatEntry(obj) {
   });
 }
 
+function getAllStats(){
+  const deferred = Q.defer();
+  RoomStat.find({}, (err, stats) => {
+    if (err) deferred.reject(`${err.name}: ${err.message}`);
+    if (stats) {
+      deferred.resolve(stats);
+    } else {
+      deferred.resolve();
+    }
+  });
+  return deferred.promise;
+}
 // function saveRoomStatEntry(){
   
 // }
