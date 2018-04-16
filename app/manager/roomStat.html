@@ -1,0 +1,63 @@
+﻿<style>
+  #historyTable {
+    width: 60%;
+    margin: 0 auto;
+    color: black;
+  }
+
+  #historyTable td, #historyTable th{
+    padding: 5px;
+    text-align: center;    
+  }
+.select-panel {
+  font-size: 15px;
+  margin-bottom: 20px;
+}
+
+  .select-panel .input-group {
+    margin-bottom: 0;
+  }
+
+</style>
+
+<!--graph-->
+<!-- /graph area -->
+<!-- /experimental graph area -->
+<div class="col-md-12 col-sm-12 col-xs-12 fortop">
+  <div class="x_panel managementstyle">
+    <div class="x_title">
+      <h2>All stats graph
+        <small></small>
+      </h2>
+      <div class="clearfix"></div>
+    </div>
+    <div class="x_content">
+      <div class="row">
+        <div class="col-md-12 select-panel" style="display: flex; align-items: center">
+          <div class="col-md-1">
+            Date:
+          </div>
+          <div class="col-md-3">
+            <fieldset>
+              <div class="control-group">
+                <div class="controls">
+                  <div class="input-prepend input-group">
+                    <span class="add-on input-group-addon">
+                      <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
+                    </span>
+                    <input type="text" style="width: 200px" name="reservation" id="select-date-all-stats" class="form-control" />
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+          </div>
+          <!-- <div class="col-md-2">
+            <button class="btn btn-primary" ng-click="renderBarPlot(barPlotDate)">Show</button>
+          </div> -->
+        </div>
+      </div>
+
+      <div id="allstats" style="width:95%; height:300px;"></div>
+    </div>
+  </div>
+</div>

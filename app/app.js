@@ -78,6 +78,14 @@ function config($stateProvider, $urlRouterProvider) {
           activeTab: 'roomInfo'
         },
       })
+      .state('roomStat', {
+        url: '/manager/roomStat/:roomId',
+        templateUrl: 'manager/roomStat.html',
+        controller: 'RoomStatController',
+        data: {
+          activeTab: 'roomStat'
+        },
+      })
       .state('addRoom', {
         url: '/manager/addRoom',
         templateUrl: 'manager/addRoom.html',

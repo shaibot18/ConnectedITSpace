@@ -37,7 +37,7 @@ app.use('/app', require('./controllers/app.controller'));
 app.use('/api/users', require('./controllers/api/users.controller'));
 app.use('/api/rooms', require('./controllers/api/rooms.controller'));
 app.use('/api/roomdata', require('./controllers/api/roomdata.controller'));
-app.use('/api/allstats', require('./controllers/api/roomdata.stats.controller'));
+app.use('/api/roomstat', require('./controllers/api/roomdata.stats.controller'));
 
 // make '/app' default route
 app.get('/', (req, res) => {

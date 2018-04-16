@@ -32,6 +32,8 @@ const service = {};
 
 service.RoomStat = RoomStat;
 service.getAllStats = getAllStats;
+service.getAllStatsById = getAllStatsById;
+service.getStatsByTimeRange = getStatsByTimeRange;
 service.roomStatHouseKeep = roomStatHouseKeep;
 module.exports = service;
 
@@ -147,6 +149,30 @@ function getAllStats(){
     } else {
       deferred.resolve();
     }
+  });
+  return deferred.promise;
+}
+
+function getAllStatsById(_roomId) {
+  const deferred = Q.defer();
+  RoomStat.find({ _roomId }, (err, res) => {
+    if (err) deferred.reject(`${err.name}: ${err.message}`);
+    deferred.resolve(res);
+  });
+  return deferred.promise;
+}
+
+function getStatsByTimeRange(_roomId, startTime, endTime) {
+  const deferred = Q.defer();
+  RoomStat.find({
+    _roomId,
+    recordDate: {
+      $gte: startTime,
+      $lt: endTime
+    }
+  }, (err, res) => {
+    if (err) deferred.reject(`${err.name} : ${err.message}`);
+    deferred.resolve(res);
   });
   return deferred.promise;
 }
