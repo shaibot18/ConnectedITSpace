@@ -1,0 +1,9 @@
+---
+applications:
+- name: CIS.R1.1.0
+  memory: 1024M
+  instances: 1
+  host: cis.r1.1.0
+  command: npm run start:build
+  services:
+  - cis-mongo
