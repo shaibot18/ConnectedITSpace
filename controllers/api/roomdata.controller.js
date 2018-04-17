@@ -4,6 +4,7 @@ const RoomService = require('services/room.service');
 const RoomDataService = require('services/roomdata.service');
 const DbService = require('services/db.service');
 const UtilService = require('services/util.service');
+const RawDataService = require('services/rawdata.service');
 
 const padLeft = UtilService.padLeft;
 const router = express.Router();
@@ -116,6 +117,8 @@ function convertTimeZone(timeZone) {
 function handlePost(req, res) {
   console.log(req.body);
   res.set('Content-Type', 'application/x-www-form-urlencoded');
+
+  RawDataService.add(req.body)
   const cmd = req.body.cmd;
   const flag = req.body.flag;
   const resFlag = flag.substr(2, 2) + flag.substr(0, 2);

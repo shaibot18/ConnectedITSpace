@@ -112,6 +112,9 @@ function Controller(
         format: 'YYYY-MM-DD',
         firstDay: 1
       },
+      dateLimit: {
+        "days": 30
+      },
       startDate: $scope.exportDate.start.format('YYYY-MM-DD'),
       endDate: $scope.exportDate.end.format('YYYY-MM-DD'),
       ranges: {
@@ -195,7 +198,7 @@ function Controller(
     const outData = [];
     const totalData = [];
     const promArr = [];
-    for (let i = 8; i < 19; i++) {
+    for (let i = 0; i < 24; i++) {
       histoX.push(`${i}:00 - ${i + 1}:00`);
       promArr[i - 8] = RoomDataService.GetByTimeRange(
         roomId,

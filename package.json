@@ -1,10 +1,6 @@
 {
   "name": "ConnectedITSpace",
-  "version": "0.0.1",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/cornflourblue/mean-stack-registration-login-example.git"
-  },
+  "version": "1.1.0",
   "dependencies": {
     "@mapbox/mapbox-gl-geocoder": "^2.2.0",
     "@uirouter/angularjs": "^1.0.15",
