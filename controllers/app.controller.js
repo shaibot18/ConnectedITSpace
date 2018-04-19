@@ -1,6 +1,7 @@
 ﻿const express = require('express');
 
 const router = express.Router();
+
 // use session auth to secure the angular app files
 router.use('/', (req, res, next) => {
   if (req.path !== '/login' && !req.session.token) {
@@ -14,11 +15,10 @@ router.get('/token', (req, res) => {
   res.send(req.session.token);
 });
 
-router.get('/user',(req,res) => {
+router.get('/user', (req, res) => {
   res.send(req.session.user);
-  console.log("User in session is ");
-  console.log(req.session.user);
-})
+  console.log(`${req.session.user.firstName} logged in`); // eslint-disable-line no-console
+});
 
 // serve angular app files from the '/app' route
 router.use('/', express.static('app'));

@@ -1,4 +1,5 @@
 ﻿const express = require('express');
+
 const router = express.Router();
 const request = require('request');
 const config = require('config.json');
@@ -42,13 +43,13 @@ router.post('/', (req, res) => {
     // req.session.token = jwt.verify(body.token,config.secret);
     req.session.token = body.token;
     req.session.user = jwt.verify(body.token, config.secret);
-    console.log('req.session.user is');
-    console.log(req.session.user);
+    // console.log('req.session.user is');
+    // console.log(req.session.user);
     // var decoded = jwt.verify(body.token,config.secret);
     // console.log(decoded);
     // redirect to returnUrl
     const returnUrl = req.query.returnUrl && decodeURIComponent(req.query.returnUrl) || '/';
-    console.log(returnUrl);
+    // console.log(returnUrl);
     res.redirect(returnUrl);
   });
 });

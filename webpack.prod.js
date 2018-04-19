@@ -8,7 +8,7 @@ module.exports = merge(common, {
   // devtool: 'source-map',
   output: {
     filename: '[name].[chunkhash].js',
-    path: path.resolve(__dirname, 'build')
+    path: path.resolve(__dirname, 'dist')
   },
   plugins: [
     new UglifyJSPlugin(),
