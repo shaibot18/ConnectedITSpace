@@ -70,9 +70,9 @@ function adjustTimeZone(dir, amount) {
     if (err) deferred.reject(err);
     else {
       if (dir !== 1) {
-        direction = -1
+        direction = -1;
       }
-      console.log(`Adjusting timezone. Direction: ${direction}, shifting amount: ${shiftHour} `);
+      console.log(`Adjusting timezone. Direction: ${direction}, shifting amount: ${shiftHour} `); // eslint-disable-line no-console
       docs.forEach((doc) => {
         doc.Time -= direction * shiftHour * 3600 * 1000;
         doc.save();

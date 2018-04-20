@@ -1,32 +1,18 @@
 const express = require('express');
 const moment = require('moment');
-const _ = require('underscore');
 const RoomStatService = require('services/room.stat.service');
+const chalk = require('chalk');
 
 const router = express.Router();
 
-router.get('/', GetAllStats);
-router.get('/:roomId', GetAllStatsById);
-router.get('/:roomId/:date', GetRoomStatsByIdDate);
+router.get('/:roomId', getAllStatsById);
+router.get('/:roomId/:date', getRoomStatsByIdDate);
 router.get('/:roomId/period', getRoomStatsByDateRange);
-router.post('/:roomId', manipulateRoomStats);
+router.post('/', manipulateRoomStats);
 module.exports = router;
 
-// Get all stats of all rooms
-function GetAllStats(req, res) {
-  RoomStatService.getAllStats()
-    .then((stats) => {
-      if (stats) {
-        res.send(stats);
-      } else {
-        res.sendStatus(404);
-      }
-    })
-    .catch((err) => { res.status(400).send(err); });
-}
-
 // Get all stats of a single room identified by id
-function GetAllStatsById(req, res) {
+function getAllStatsById(req, res) {
   if (req.params.roomId) {
     const _roomId = req.params.roomId;
     RoomStatService.getAllStatsById(_roomId)
@@ -43,127 +29,90 @@ function GetAllStatsById(req, res) {
   }
 }
 
-function GetRoomStatsByIdDate(req, res) {
-  const query = req.query;
+function getRoomStatsByIdDate(req, res) {
   if (req.params.roomId) {
-    if (query.startTime && query.endTime) {
-      let start = moment(query.startTime);
-      let end = moment(query.endTime);
-      if (start.diff(end)>0) {
-        let tmp = start;
-        start = end;
-        end = tmp;
-      }
-      
-      RoomStatService.getStatsByTimeRange(req.params.roomId, start, end)
-        .then((roomstats) => {
-          if (roomstats) {
-            res.send(roomstats);
-          } else {
-            res.sendStatus(404);
-          }
-        })
-        .catch((err) => {
-          res.status(400).send(err);
-        });
+    if (req.params.date) {
+      const roomId = req.params.roomId;
+      const qDate = moment(req.params.date);
+      _queryByIdDate(roomId, qDate, res);
     }
   }
+}
+
+function _queryByIdDate(roomId, qDate, res) {
+  RoomStatService.getStatsByIdDate(roomId, qDate)
+    .then((result) => {
+      if (result) {
+        res.send(result);
+      } else {
+        res.sendStatus(404);
+      }
+    })
+    .catch((err) => {
+      res.status(400).send(err);
+    });
 }
 
 function getRoomStatsByDateRange(req, res) {
   const query = req.query;
   if (req.params.roomId) {
     if (query.startTime && query.endTime) {
-      let start = moment(query.startTime);
-      let end = moment(query.endTime);
-      if (start.diff(end)>0) {
-        let tmp = start;
-        start = end;
-        end = tmp;
-      }
-      
-      RoomStatService.getStatsByTimeRange(req.params.roomId, start, end)
-        .then((roomstats) => {
-          if (roomstats) {
-            res.send(roomstats);
-          } else {
-            res.sendStatus(404);
-          }
-        })
-        .catch((err) => {
-          res.status(400).send(err);
-        });
+      _queryByDateRange(query.startTime, query.endTime, req.params.roomId, res);
     }
   }
 }
 
-
-function getRoomStatsByDateRange(req, res) {
-  const query = req.query;
-  if (req.params.roomId) {
-    if (query.startTime && query.endTime) {
-      let start = moment(query.startTime);
-      let end = moment(query.endTime);
-      if (start.diff(end)>0) {
-        let tmp = start;
-        start = end;
-        end = tmp;
-      }
-      
-      RoomStatService.getStatsByTimeRange(req.params.roomId, start, end)
-        .then((roomstats) => {
-          if (roomstats) {
-            res.send(roomstats);
-          } else {
-            res.sendStatus(404);
-          }
-        })
-        .catch((err) => {
-          res.status(400).send(err);
-        });
-    }
+function _queryByDateRange(startDate, endDate, roomId, res) {
+  let start = moment(startDate);
+  let end = moment(endDate);
+  if (start.diff(end) > 0) {
+    const tmp = start;
+    start = end;
+    end = tmp;
   }
+  RoomStatService.getStatsByTimeRange(roomId, start, end)
+    .then((roomstats) => {
+      if (roomstats) {
+        res.send(roomstats);
+      } else {
+        res.sendStatus(404);
+      }
+    })
+    .catch((err) => {
+      res.status(400).send(err);
+    });
 }
-
 
 /**
- * 
  * @param {req} request received
  * @param {res} response sent
  * This function provides entry points for handlers for each command
  */
-function manipulateRoomStats(req, res){
+function manipulateRoomStats(req, res) {
   const obj = req.body;
+  console.log(chalk.yellow(JSON.stringify(obj))); // eslint-disable-line no-console
 
-  let cmdRes = {};
-
-  switch(obj.cmd){
+  switch (obj.cmd) {
     case 'query':
-      _queryRoomStatHandler(obj).then((result) => {
-        res.code(result.code).send(result);
-      });
+      _queryRoomStatHandler(req, res);
       break;
     case 'inject':
-      cmdRes = _injectRoomStatHandler(obj).then((result) => {
-        res.code(result.code).send(result);
-      });
+      _injectRoomStatHandler(req, res);
       break;
     case 'generate':
-      cmdRes = _generateRoomStatHandler(obj).then((result) => {
-        res.code(result.code).send(result);
-      });
+      _generateRoomStatHandler(req, res);
       break;
     case 'delete':
-      cmdRes = _deleteRoomStatHandler(obj).then((result) => {
-        res.code(result.code).send(result);
-      });
+      _deleteRoomStatHandler(req, res);
       break;
-    default:break;
+    default:
+      res.status(400).send('No cmd body.');
+      break;
   }
 }
 
 /**
- * 
+ *
  * @param {obj} request object
  * {
  * cmd: 'query',
@@ -172,67 +121,18 @@ function manipulateRoomStats(req, res){
  * endDate: '2018-04-10'
  * }
  */
-function _queryRoomStatHandler(obj){
+function _queryRoomStatHandler(req, res) {
+  const queryObj = req.body;
 
-  const startDate = obj.startDate;
-  const endDate = obj.endDate;
-  const roomId = obj.roomId;
-
-  let start = moment(startDate);
-  let end = moment(endDate);
-
-  if(!end || start.diff(end)==0){
-    RoomStatService.getStatsByDate(roomId, start)
-    .then((roomstats) => {
-      if (roomstats) {
-        return {
-          code: '200',
-          data: roomstats
-        };
-      } else {
-        return {
-          code: 404,
-          data: 'No content'
-        };
-      }
-    })
-    .catch((err) => {
-      return {
-        code: 400,
-        data: err
-      };
-    });
-  }
-  else if (start.diff(end)>0) {
-    let tmp = start;
-    start = end;
-    end = tmp;
-
-    RoomStatService.getStatsByTimeRange(roomId, start, end)
-    .then((roomstats) => {
-      if (roomstats) {
-        return {
-          code: '200',
-          data: roomstats
-        };
-      } else {
-        return {
-          code: 404,
-          data: 'No content'
-        };
-      }
-    })
-    .catch((err) => {
-      return {
-        code: 400,
-        data: err
-      };
-    });
+  if (typeof queryObj.endDate === 'undefined') { // single date query
+    _queryByIdDate(queryObj.roomId, moment(queryObj.startDate), res);
+  } else { // date range query
+    _queryByDateRange(queryObj.startDate, queryObj.endDate, queryObj.roomId, res);
   }
 }
 
 /**
- * 
+ *
  * @param {obj} request object
  * {
  * cmd: 'inject',
@@ -242,32 +142,40 @@ function _queryRoomStatHandler(obj){
  *  {
  *    date: '2018-04-08',
  *    records: [
- *                {hour:0, in: 0, out: 0}
+ *                {hourRange:0, in: 0, out: 0, accu: 10}
  *              ]
 *   },
  * ]
  * }
  */
-function _injectRoomStatHandler(obj){
+function _injectRoomStatHandler(req, res) {
+  const roomId = req.body.roomId;
+  const tz = req.body.tz;
 
-  const roomId = obj.roomId;
-  const tz = obj.tz;
-  
-  obj.data.forEach(element => {
-    let record = {
+  req.body.data.forEach((e) => {
+    const record = {
       _roomId: roomId,
-      recordDate: element.date,
+      recordDate: e.date,
       recordTimeZone: tz,
-      stats: element.records
+      stats: e.records
     };
 
-    RoomStatService.createOrUpdateRoomStatEntry(record);
-    
+    RoomStatService.createOrUpdateRoomStatEntry(record)
+      .then((roomstats) => {
+        if (roomstats) {
+          res.send(roomstats);
+        } else {
+          res.sendStatus(404).send({ code: 404, msg: 'No records injected' });
+        }
+      })
+      .catch((err) => {
+        res.status(400).send(err);
+      });
   });
 }
 
 /**
- * 
+ *
  * @param {obj} request object
  * {
  * cmd: 'generate',
@@ -276,12 +184,12 @@ function _injectRoomStatHandler(obj){
  * endDate: '2018-04-10'
  * }
  */
-function _generateRoomStatHandler(obj){
-  
+function _generateRoomStatHandler(req, res) {
+  res.status(200).send({ code: 200, msg: 'Generate' });
 }
 
 /**
- * 
+ *
  * @param {obj} request object
  * {
  * cmd: 'delete',
@@ -290,7 +198,48 @@ function _generateRoomStatHandler(obj){
  * endDate: '2018-04-10'
  * }
  */
-function _deleteRoomStatHandler(obj){
-  
+function _deleteRoomStatHandler(req, res) {
+  const queryObj = req.body;
+
+  if (typeof queryObj.endDate === 'undefined') { // single date query
+    __deleteByDate(queryObj.roomId, moment(queryObj.startDate), res);
+  } else { // date range query
+    __deleteByDateRange(queryObj.roomId, queryObj.startDate, queryObj.endDate, res);
+  }
 }
 
+function __deleteByDate(roomId, date, res) {
+  RoomStatService.deleteRoomStatsEntry(roomId, moment(date))
+    .then((queryResult) => {
+      if (queryResult.n > 0) {
+        res.status(200).send({ code: 200, msg: `${queryResult.result.n} records removed.` });
+      } else {
+        res.status(200).send({ code: 200, msg: 'No records removed.' });
+      }
+    })
+    .catch((err) => {
+      res.status(400).send(err);
+    });
+}
+
+function __deleteByDateRange(roomId, startDate, endDate, res) {
+  let start = moment(startDate);
+  let end = moment(endDate);
+  if (start.diff(end) > 0) {
+    const tmp = start;
+    start = end;
+    end = tmp;
+  }
+
+  RoomStatService.deleteRoomStatsEntryByDateRange(roomId, start, end)
+    .then((queryResult) => {
+      if (queryResult.result.n > 0) {
+        res.status(200).send({ code: 200, msg: `${queryResult.result.n} records removed.` });
+      } else {
+        res.status(200).send({ code: 200, msg: 'No records removed.' });
+      }
+    })
+    .catch((err) => {
+      res.status(400).send(err);
+    });
+}
