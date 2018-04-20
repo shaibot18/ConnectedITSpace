@@ -40,11 +40,10 @@ function registerUser(req, res) {
 
 function getCurrentUser(req, res) {
     res.send(req.session.user);
-    console.log("User in session is ");
-    console.log(req.session.user);
+    console.log(`User in session is ${req.session.user}`);
 }
 
-function getUserList(req,res){
+function getUserList(req, res){
     userService.getAll().then(function(userList){
         if(userList){
             res.send(userList);

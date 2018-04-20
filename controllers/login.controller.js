@@ -1,12 +1,13 @@
 ﻿const express = require('express');
 
-const router = express.Router();
+const jwt = require('jsonwebtoken');
 const request = require('request');
 const config = require('config.json');
-const jwt = require('jsonwebtoken');
 
-const baseApiUrl = process.env.PORT ? config.apiUrl : config.localUrl;
-console.log(baseApiUrl);
+const router = express.Router();
+
+// const baseApiUrl = process.env.PORT ? config.apiUrl : config.localUrl;
+// console.log(baseApiUrl);
 
 // TODO: Apply user timeout function
 router.get('/', (req, res) => {
@@ -24,7 +25,7 @@ router.get('/', (req, res) => {
 router.post('/', (req, res) => {
   // authenticate using api to maintain clean separation between layers
   request.post({
-    url: baseApiUrl.concat('/users/authenticate'),
+    url: req.headers.host.concat('/users/authenticate'),
     form: req.body,
     json: true
   }, (error, response, body) => {

@@ -1,9 +1,10 @@
 ﻿var express = require('express');
-var router = express.Router();
 var request = require('request');
+var router = express.Router();
 var config = require('config.json');
-var baseApiUrl = process.env.PORT? config.apiUrl:config.localUrl;
-console.log(baseApiUrl);
+// var baseApiUrl = process.env.PORT? config.apiUrl:config.localUrl;
+// console.log(baseApiUrl);
+
 
 router.get('/', function (req, res) {
     res.render('register');
@@ -12,7 +13,7 @@ router.get('/', function (req, res) {
 router.post('/', function (req, res) {
     // register using api to maintain clean separation between layers
     request.post({
-        url: baseApiUrl + '/users/register',
+        url: req.headers.host + '/users/register',
         form: req.body,
         json: true
     }, function (error, response, body) {

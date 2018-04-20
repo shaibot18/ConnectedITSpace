@@ -34,7 +34,10 @@ service.RoomStat = RoomStat;
 service.getAllStats = getAllStats;
 service.getAllStatsById = getAllStatsById;
 service.getStatsByTimeRange = getStatsByTimeRange;
-service.roomStatHouseKeep = roomStatHouseKeep;
+service.getStatsByDate = getStatsByDate;
+service.createRoomStatEntry = createRoomStatEntry;
+service.deleteRoomStatsEntry = deleteRoomStatsEntry;
+service.updateRoomStatsEntryByDate = updateRoomStatsEntryByDate;
 module.exports = service;
 
 function roomStatHouseKeep() {
@@ -140,6 +143,32 @@ function createRoomStatEntry(obj) {
   });
 }
 
+function createOrUpdateRoomStatEntry(obj) {
+  
+  RoomStat.update({_roomId: obj.roomId, recordDate: obj.recordDate, recordTimeZone:recordTimeZone}, 
+    obj, {upsert: true, setDefaultsOnInsert: true}, (err, doc) => {
+    if (error) console.log(`${error.name}: ${error.message}`);
+  });
+}
+
+
+function deleteRoomStatsEntry(id, date) {
+  
+  var deferred = Q.defer();
+
+  RoomStat.remove({
+      _roomId: _id,
+      recordDate: date
+    },
+    function (err) {
+      if (err) deferred.reject(err.name + ': ' + err.message);
+      deferred.resolve();
+    });
+
+  return deferred.promise;
+}
+
+
 function getAllStats(){
   const deferred = Q.defer();
   RoomStat.find({}, (err, stats) => {
@@ -176,10 +205,15 @@ function getStatsByTimeRange(_roomId, startTime, endTime) {
   });
   return deferred.promise;
 }
-// function saveRoomStatEntry(){
-  
-// }
 
-// function getUniqDataEntries(elements){
-  
-// }
+function getStatsByDate(_roomId, queryDate) {
+  const deferred = Q.defer();
+  RoomStat.find({
+    _roomId,
+    recordDate: queryDate
+  }, (err, res) => {
+    if (err) deferred.reject(`${err.name} : ${err.message}`);
+    deferred.resolve(res);
+  });
+  return deferred.promise;
+}
