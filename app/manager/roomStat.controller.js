@@ -30,12 +30,12 @@ function RoomStatController(UserService, RoomService, FlashService, RoomStatServ
   // weekly stack chart options
   vm.weeklyStatsOptionBase = {
     // title: { text: '堆叠区域图' },
-    tooltip: { trigger: 'axis', axisPointer: { type: 'cross', label: { backgroundColor: '#6a7985' } } },
-    legend: { data: ['邮件营销', '联盟广告', '视频广告', '直接访问', '搜索引擎'] },
+    
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow', label: { backgroundColor: '#6a7985' } } },
     toolbox: { feature: { saveAsImage: {} } },
     grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
     xAxis: [ { type: 'category', boundaryGap: false, data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'] } ],
-    yAxis: [ { type: 'value' }]
+    yAxis: [{ type: 'value' }]
   };
   
   // daily picker options
@@ -108,11 +108,10 @@ function RoomStatController(UserService, RoomService, FlashService, RoomStatServ
 
   // get query result
   function _getStats(startDate, endDate) {
-
     const deferred = $q.defer();
 
     // query data object
-    let reqData = {
+    const reqData = {
       cmd: 'query',
       roomId: vm._roomId
     };
@@ -177,34 +176,18 @@ function RoomStatController(UserService, RoomService, FlashService, RoomStatServ
   }
 
   function _updateWeeklyStackPlot(result) {
-    console.log(result);
-
+    const seriesData = [];
+    for (let i = 0; i < 24; i++) {
+      seriesData.push({ name: i, type: 'line', stack: '总量', label: { normal: { show: true, position: 'center' } }, areaStyle: { normal: {} }, data: [0, 0, 0, 0, 0] });
+    }
+    result.forEach((e) => {
+      // iso weekday as the index in data array, need to reduce by 1
+      e.stats.forEach((ele) => {
+        seriesData[ele.hourRange].data[moment(e.recordDate).isoWeekday() - 1] = ele.in;
+      });
+    });
     $scope.weeklyStats.setOption({
-      series:[
-        { name: '0-1', type: 'line', stack: '总量', areaStyle: { normal: {} }, data: [120, 132, 101, 134, 90, 230, 210] },
-        { name: '1-2', type: 'line', stack: '总量', areaStyle: { normal: {} }, data: [220, 182, 191, 234, 290, 330, 310] },
-        { name: '2-3', type: 'line', stack: '总量', areaStyle: { normal: {} }, data: [150, 232, 201, 154, 190, 330, 410] },
-        { name: '3-4', type: 'line', stack: '总量', areaStyle: { normal: {} }, data: [320, 332, 301, 334, 390, 330, 320] },
-        { name: '4-5', type: 'line', stack: '总量', areaStyle: { normal: {} }, data: [320, 332, 301, 334, 390, 330, 320] },
-        { name: '5-6', type: 'line', stack: '总量', areaStyle: { normal: {} }, data: [320, 332, 301, 334, 390, 330, 320] },
-        { name: '7-4', type: 'line', stack: '总量', areaStyle: { normal: {} }, data: [320, 332, 301, 334, 390, 330, 320] },
-        { name: '8-4', type: 'line', stack: '总量', areaStyle: { normal: {} }, data: [320, 332, 301, 334, 390, 330, 320] },
-        { name: '9-4', type: 'line', stack: '总量', areaStyle: { normal: {} }, data: [320, 332, 301, 334, 390, 330, 320] },
-        { name: '10-4', type: 'line', stack: '总量', areaStyle: { normal: {} }, data: [320, 332, 301, 334, 390, 330, 320] },
-        { name: '11-4', type: 'line', stack: '总量', areaStyle: { normal: {} }, data: [320, 332, 301, 334, 390, 330, 320] },
-        { name: '12-4', type: 'line', stack: '总量', areaStyle: { normal: {} }, data: [320, 332, 301, 334, 390, 330, 320] },
-        { name: '13-4', type: 'line', stack: '总量', areaStyle: { normal: {} }, data: [320, 332, 301, 334, 390, 330, 320] },
-        { name: '14-4', type: 'line', stack: '总量', areaStyle: { normal: {} }, data: [320, 332, 301, 334, 390, 330, 320] },
-        { name: '15-4', type: 'line', stack: '总量', areaStyle: { normal: {} }, data: [320, 332, 301, 334, 390, 330, 320] },
-        { name: '16-4', type: 'line', stack: '总量', areaStyle: { normal: {} }, data: [320, 332, 301, 334, 390, 330, 320] },
-        { name: '17-4', type: 'line', stack: '总量', areaStyle: { normal: {} }, data: [320, 332, 301, 334, 390, 330, 320] },
-        { name: '18-4', type: 'line', stack: '总量', areaStyle: { normal: {} }, data: [320, 332, 301, 334, 390, 330, 320] },
-        { name: '19-4', type: 'line', stack: '总量', areaStyle: { normal: {} }, data: [320, 332, 301, 334, 390, 330, 320] },
-        { name: '20-4', type: 'line', stack: '总量', areaStyle: { normal: {} }, data: [320, 332, 301, 334, 390, 330, 320] },
-        { name: '21-4', type: 'line', stack: '总量', areaStyle: { normal: {} }, data: [320, 332, 301, 334, 390, 330, 320] },
-        { name: '22-4', type: 'line', stack: '总量', areaStyle: { normal: {} }, data: [320, 332, 301, 334, 390, 330, 320] },
-        { name: '23-24', type: 'line', stack: '总量', label: { normal: { show: true, position: 'top' } }, areaStyle: { normal: {} }, data: [820, 932, 901, 934, 1290, 1330, 1320] }
-      ],
+      series: seriesData
     });
   }
 }
