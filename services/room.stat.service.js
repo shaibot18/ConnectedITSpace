@@ -2,6 +2,7 @@ const Q = require('q');
 const mongoose = require('services/dbConnection.service');
 const RoomDataService = require('services/roomdata.service');
 const moment = require('moment');
+const chalk = require('chalk');
 const _ = require('underscore');
 
 const Schema = mongoose.Schema;
@@ -57,7 +58,10 @@ function getStatsByIdDate(_roomId, queryDate) {
   const deferred = Q.defer();
   RoomStat.findOne({
     _roomId,
-    recordDate: queryDate
+    recordDate: {
+      $gte: queryDate.toDate(),
+      $lt: moment(queryDate).add(1, 'days').toDate()
+    }
   }, (err, res) => {
     if (err) deferred.reject(`${err.name} : ${err.message}`);
     deferred.resolve(res);
@@ -70,8 +74,8 @@ function getStatsByTimeRange(_roomId, startTime, endTime) {
   RoomStat.find({
     _roomId,
     recordDate: {
-      $gte: startTime,
-      $lt: endTime
+      $gte: startTime.toDate(),
+      $lt: moment(endTime).add(1, 'days').toDate()
     }
   }, (err, res) => {
     if (err) deferred.reject(`${err.name} : ${err.message}`);
@@ -176,14 +180,12 @@ function roomStatHouseKeep() {
       // generate hour range list [0,1,2,4...23]
       const hoursOfDay = _.range(24);
 
-      let indexes = [];
-
       roomIds.forEach((r) => { // each room
         recordDates.forEach((d) => { // each day
           recordTimeZones.forEach((t) => { // each timezone
             const obj = {
               _roomId: r,
-              recordDate: moment(d),
+              recordDate: moment(d).format('YYYY-MM-DD'),
               recordTimeZone: t,
               stats: []
             };
@@ -211,10 +213,10 @@ function roomStatHouseKeep() {
                 };
 
                 obj.stats.push(vObj);
-
-                createRoomStatEntry(obj);
               }
             });
+            // createRoomStatEntry(obj);
+            createOrUpdateRoomStatEntry(obj);
           });
         });
       });

@@ -21,12 +21,11 @@
 </style>
 
 <!--graph-->
-<!-- /graph area -->
-<!-- /experimental graph area -->
+<!-- /daily visitor chart -->
 <div class="col-md-12 col-sm-12 col-xs-12 fortop">
   <div class="x_panel managementstyle">
     <div class="x_title">
-      <h2>All stats graph
+      <h2>Daily visitor chart
         <small></small>
       </h2>
       <div class="clearfix"></div>
@@ -58,6 +57,47 @@
       </div>
 
       <div id="dailyStatsChart" style="width:95%; height:300px;"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- /weekly visitor area stack chart -->
+<div class="col-md-12 col-sm-12 col-xs-12 fortop">
+  <div class="x_panel managementstyle">
+    <div class="x_title">
+      <h2>Weekly visitor stack chart
+        <small></small>
+      </h2>
+      <div class="clearfix"></div>
+    </div>
+    <div class="x_content">
+      <div class="row">
+        <div class="col-md-12 select-panel" style="display: flex; align-items: center">
+          <div class="col-md-1">
+            Week:
+          </div>
+          <div class="col-md-3">
+            <fieldset>
+              <div class="control-group">
+                <div class="controls">
+                  <div class="input-prepend input-group">
+                    <span class="add-on input-group-addon">
+                      <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
+                    </span>
+                    <input type="text" style="width: 200px" name="weekly-reservation" id="weekpicker" class="form-control" />
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-primary" ng-click="renderWeeklyStackPlot(chosenDate)">Show</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="weeklyStackChart" style="width:95%; height:400px;"></div>
     </div>
   </div>
 </div>

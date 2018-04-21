@@ -1,6 +1,5 @@
 const express = require('express');
 const moment = require('moment');
-
 const RoomService = require('services/room.service');
 const RoomDataService = require('services/roomdata.service');
 const DbService = require('services/db.service');
@@ -9,7 +8,6 @@ const RawDataService = require('services/rawdata.service');
 
 const padLeft = UtilService.padLeft;
 const router = express.Router();
-
 // TODO: get open time and close time from the room setting
 const openTime = padLeft((0).toString(16).toUpperCase()) +
   padLeft((0).toString(16).toUpperCase());
@@ -18,51 +16,13 @@ const closeTime = padLeft((23).toString(16).toUpperCase()) +
 const recordPeriod = padLeft((0).toString(16).toUpperCase()); // default 10, 0 for real-time
 const uploadPeriod = padLeft((0).toString(16).toUpperCase()); // default 120, 0 for real-time
 
-router.get('/:roomId', getByTimeRange);
-router.get('/adjust/:direction/:amount', adjustTimeZone);
+router.get('/:RoomId', getByTimeRange);
+router.get('/adjust/:dir/:amount', adjustTimeZone);
 router.get('/remove', removeDuplicates);
-router.get('/all/:roomId', getAllById);
-router.get('/allnum/:RoomId', updateAllNum);
+router.get('/all/:RoomId', getAllById);
+router.get('/allnum/:RoomId', UpdateAllNum);
 router.post('/', handlePost);
 module.exports = router;
-
-function getByTimeRange(req, res) {
-  const query = req.query;
-  if (req.params.roomId) {
-    if (query.startTime && query.endTime) {
-      RoomDataService.getByTimeRange(
-        req.params.roomId,
-        parseInt(query.startTime, 10), parseInt(query.endTime, 10)
-      )
-        .then((roomdataList) => {
-          if (roomdataList) {
-            res.send(roomdataList);
-          } else {
-            res.sendStatus(404);
-          }
-        })
-        .catch((err) => {
-          res.status(400).send(err);
-        });
-    }
-  }
-}
-
-function adjustTimeZone(req, res) {
-  if (req.params.direction) {
-    let direction = parseInt(req.params.direction, 10);
-    if (req.params.amount) {
-      let amount = parseInt(req.params.amount, 10);
-      DbService.adjustTimeZone(direction, amount)
-        .then((result) => {
-          res.status(200).send(result);
-        })
-        .catch((err) => {
-          res.status(400).send(err);
-        });
-    }
-  }
-}
 
 function removeDuplicates(req, res) {
   DbService.removeDuplicates()
@@ -74,11 +34,40 @@ function removeDuplicates(req, res) {
     });
 }
 
+function adjustTimeZone(req, res) {
+  if (req.params.dir) {
+    const dir = parseInt(req.params.dir, 10);
+    if (req.params.amount) {
+      const amount = parseInt(req.params.amount, 10);
+      DbService.adjustTimeZone(dir, amount)
+        .then((result) => {
+          res.status(200).send(result);
+        })
+        .catch((err) => {
+          res.status(400).send(err);
+        });
+    }
+  }
+}
+
+function UpdateAllNum(req, res) {
+  if (req.params.RoomId) {
+    const _id = req.params.RoomId;
+    RoomDataService.UpdateAllNum(_id)
+      .then((nums) => {
+        res.status(200).send(nums);
+      })
+      .catch((err) => {
+        res.status(400).send(err);
+      });
+  }
+}
+
 // Get all data of one room by the room id
 function getAllById(req, res) {
-  if (req.params.roomId) {
-    const _roomId = req.params.roomId;
-    RoomDataService.getAllById(_roomId)
+  if (req.params.RoomId) {
+    const _RoomId = req.params.RoomId;
+    RoomDataService.getAllById(_RoomId)
       .then((roomdataList) => {
         if (roomdataList) {
           res.send(roomdataList);
@@ -92,16 +81,25 @@ function getAllById(req, res) {
   }
 }
 
-function updateAllNum(req, res) {
-  if (req.params.roomId) {
-    const _roomId = req.params.roomId;
-    RoomDataService.UpdateAllNum(_roomId)
-      .then((nums) => {
-        res.status(200).send(nums);
-      })
-      .catch((err) => {
-        res.status(400).send(err);
-      });
+function getByTimeRange(req, res) {
+  const query = req.query;
+  if (req.params.RoomId) {
+    if (query.startTime && query.endTime) {
+      RoomDataService.getByTimeRange(
+        req.params.RoomId,
+        parseInt(query.startTime, 10), parseInt(query.endTime, 10)
+      )
+        .then((roomdataList) => {
+          if (roomdataList) {
+            res.send(roomdataList);
+          } else {
+            res.sendStatus(404);
+          }
+        })
+        .catch((err) => {
+          res.status(400).send(err);
+        });
+    }
   }
 }
 
@@ -120,7 +118,7 @@ function handlePost(req, res) {
   console.log(req.body);
   res.set('Content-Type', 'application/x-www-form-urlencoded');
 
-  RawDataService.add(req.body)
+  RawDataService.add(req.body);
   const cmd = req.body.cmd;
   const flag = req.body.flag;
   const resFlag = flag.substr(2, 2) + flag.substr(0, 2);

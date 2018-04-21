@@ -1,6 +1,7 @@
 const express = require('express');
 const moment = require('moment');
 const RoomStatService = require('services/room.stat.service');
+const mongoose = require('services/dbConnection.service');
 const chalk = require('chalk');
 
 const router = express.Router();
@@ -33,7 +34,7 @@ function getRoomStatsByIdDate(req, res) {
   if (req.params.roomId) {
     if (req.params.date) {
       const roomId = req.params.roomId;
-      const qDate = moment(req.params.date);
+      const qDate = moment(req.params.date).format('YYYY-MM-DD');
       _queryByIdDate(roomId, qDate, res);
     }
   }
@@ -186,7 +187,24 @@ function _injectRoomStatHandler(req, res) {
  * }
  */
 function _generateRoomStatHandler(req, res) {
-  res.status(200).send({ code: 200, msg: 'Generate' });
+
+  mongoose.connection.db.dropCollection('roomstats', (dberr) => {
+    if (dberr) {
+      console.log(chalk.red(`Error dropping collection, no housekeeping done. \n ${dberr}`));
+    } else {
+      RoomStatService.roomStatHouseKeep()
+        .then((roomstats) => {
+          if (roomstats) {
+            res.sendStatus(200).send({ code: 200, msg: 'House clean' });
+          } else {
+            res.sendStatus(200).send({ code: 404, msg: 'No records injected' });
+          }
+        })
+        .catch((err) => {
+          res.status(400).send(err);
+        });
+    }
+  })
 }
 
 /**
