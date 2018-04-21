@@ -187,10 +187,9 @@ function _injectRoomStatHandler(req, res) {
  * }
  */
 function _generateRoomStatHandler(req, res) {
-
   mongoose.connection.db.dropCollection('roomstats', (dberr) => {
     if (dberr) {
-      console.log(chalk.red(`Error dropping collection, no housekeeping done. \n ${dberr}`));
+      console.log(chalk.red(`Error dropping collection, no housekeeping done. \n ${dberr}`)); // eslint-disable-line no-console
     } else {
       RoomStatService.roomStatHouseKeep()
         .then((roomstats) => {
@@ -204,7 +203,7 @@ function _generateRoomStatHandler(req, res) {
           res.status(400).send(err);
         });
     }
-  })
+  });
 }
 
 /**

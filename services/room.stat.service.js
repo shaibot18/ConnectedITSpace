@@ -2,7 +2,6 @@ const Q = require('q');
 const mongoose = require('services/dbConnection.service');
 const RoomDataService = require('services/roomdata.service');
 const moment = require('moment');
-const chalk = require('chalk');
 const _ = require('underscore');
 
 const Schema = mongoose.Schema;

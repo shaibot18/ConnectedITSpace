@@ -66,7 +66,7 @@
 <div class="col-md-12 col-sm-12 col-xs-12 fortop">
   <div class="x_panel managementstyle">
     <div class="x_title">
-      <h2>Weekly visitor IN chart
+      <h2>Weekly visitor charts
         <small></small>
       </h2>
       <div class="clearfix"></div>
@@ -92,12 +92,14 @@
             </fieldset>
           </div>
           <div class="col-md-2">
-            <button class="btn btn-primary" ng-click="renderWeeklyStackPlot(chosenDate)">Show</button>
+            <button class="btn btn-primary" ng-click="renderWeeklyPlot(chosenDate)">Show</button>
           </div>
         </div>
       </div>
 
       <div id="weeklyStackChart" style="width:95%; height:400px;"></div>
+
+      <div id="weeklyBarNegativeChart" style="width:95%; height:400px;"></div>
     </div>
   </div>
 </div>
