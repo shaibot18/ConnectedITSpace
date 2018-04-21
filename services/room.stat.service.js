@@ -55,7 +55,7 @@ function getAllStatsById(_roomId) {
 
 function getStatsByIdDate(_roomId, queryDate) {
   const deferred = Q.defer();
-  RoomStat.find({
+  RoomStat.findOne({
     _roomId,
     recordDate: queryDate
   }, (err, res) => {

@@ -45,7 +45,7 @@ function _queryByIdDate(roomId, qDate, res) {
       if (result) {
         res.send(result);
       } else {
-        res.sendStatus(404);
+        res.sendStatus(200).send({ code: 404, msg: 'No records found' });
       }
     })
     .catch((err) => {
@@ -75,7 +75,7 @@ function _queryByDateRange(startDate, endDate, roomId, res) {
       if (roomstats) {
         res.send(roomstats);
       } else {
-        res.sendStatus(404);
+        res.sendStatus(200).send({ code: 404, msg: 'No records found' });
       }
     })
     .catch((err) => {
@@ -165,7 +165,7 @@ function _injectRoomStatHandler(req, res) {
         if (roomstats) {
           res.send(roomstats);
         } else {
-          res.sendStatus(404).send({ code: 404, msg: 'No records injected' });
+          res.sendStatus(200).send({ code: 404, msg: 'No records injected' });
         }
       })
       .catch((err) => {
@@ -179,6 +179,7 @@ function _injectRoomStatHandler(req, res) {
  * @param {obj} request object
  * {
  * cmd: 'generate',
+ * src: [db|random],
  * roomId: 'id',
  * startDate: '2018-04-08',
  * endDate: '2018-04-10'

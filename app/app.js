@@ -3,6 +3,7 @@
 // import './app-content/app.css';
 
 angular.module('app.directive', []);
+
 angular.module('app', ['ui.router', 'app.directive'])
   .config(config)
   .run(run);

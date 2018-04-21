@@ -1,26 +1,31 @@
 angular
   .module('app')
-  .factory('RoomStatService', Service);
+  .factory('RoomStatService', RoomStatService);
 
-function Service($http, $q) {
-  const RoomStatService = {};
-  RoomStatService.GetAllStats = GetAllStats;
-  RoomStatService.GetAllStatsById = GetAllStatsById;
-  RoomStatService.GetAllStatsByRange = GetAllStatsByRange;
+function RoomStatService($http, $q) {
+  const roomStatService = {};
+  roomStatService.obtainStats = obtainStats;
+  // roomStatService.GetAllStats = getAllStats;
+  // roomStatService.GetAllStatsById = getAllStatsById;
+  // roomStatService.GetAllStatsByRange = getAllStatsByRange;
 
-  return RoomStatService;
+  return roomStatService;
 
-  function GetAllStats() {
-    return $http.get('/api/roomstat').then(handleSuccess, handleError);
+  function obtainStats(data) {
+    return $http.post('/api/roomstat/', data).then(handleSuccess, handleError);
   }
 
-  function GetAllStatsById(_roomId) {
-    return $http.get(`/api/roomstat/${_roomId}`).then(handleSuccess, handleError);
-  }
+  // function getAllStats() {
+  //   return $http.get('/api/roomstat').then(handleSuccess, handleError);
+  // }
 
-  function GetAllStatsByRange(_roomId, start, end = Date.now()) {
-    return $http.get(`/api/roomstat/${_roomId}/period?startTime=${start}&endTime=${end}`, { timeout: 3000 }).then(handleSuccess, handleError);
-  }
+  // function getAllStatsById(_roomId) {
+  //   return $http.get(`/api/roomstat/${_roomId}`).then(handleSuccess, handleError);
+  // }
+
+  // function getAllStatsByRange(_roomId, start, end = Date.now()) {
+  //   return $http.get(`/api/roomstat/${_roomId}/period?startTime=${start}&endTime=${end}`, { timeout: 3000 }).then(handleSuccess, handleError);
+  // }
 
   function handleSuccess(res) {
     return res.data;
