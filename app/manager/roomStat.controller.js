@@ -18,6 +18,13 @@ function RoomStatController(UserService, RoomService, FlashService, RoomStatServ
     end: moment().endOf('week')
   };
 
+  const wds = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+  const hrs = ['12a', '1a', '2a', '3a', '4a', '5a', '6a',
+    '7a', '8a', '9a', '10a', '11a',
+    '12p', '1p', '2p', '3p', '4p', '5p',
+    '6p', '7p', '8p', '9p', '10p', '11p'];
+  const hrs_sec = ['12a-8am', '8am-12pm', '12pm-13pm', '13pm-18pm', '18pm-24pm'];
+
   // daily stat chart options
   vm.dailyStatsOptionBase = {
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
@@ -27,25 +34,39 @@ function RoomStatController(UserService, RoomService, FlashService, RoomStatServ
     yAxis: [{ type: 'value' }]
   };
 
-  // weekly stack chart options
+  // weekly stack line chart options
   vm.weeklyStatsOptionBase = {
-    // title: { text: '堆叠区域图' },
-    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow', label: { backgroundColor: '#6a7985' } } },
-    toolbox: { feature: { saveAsImage: {} } },
+    title: { text: 'Inbound & Outbound visitors summary by day' },
+    tooltip: { trigger: 'axis' },
+    legend: { data: ['In', 'Out', 'Delta'] },
+    toolbox: { show: true, feature: { magicType: { show: true, type: ['stack', 'tiled'] }, saveAsImage: { show: true } } },
     grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
-    xAxis: [ { type: 'category', boundaryGap: false, data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'] } ],
+    xAxis: [ { type: 'category', boundaryGap: false, data: wds } ],
     yAxis: [{ type: 'value' }]
   };
 
-  // weekly bar negative chart options
-  vm.weeklyBarNegativeChartOptionBase = {
-    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-    legend: { data: ['Delta', 'In', 'Out'] },
-    grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
-    yAxis: [ { type: 'value' } ],
-    xAxis: [{ type: 'category', axisTick: { show: false }, data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'] }]
+  // weekly punch chart options
+  vm.weeklyPunchChartOptionBase = {
+    title: { text: 'Outbound visitor' },
+    legend: { data: ['Onbound visitors'], left: 'top' },
+    tooltip: {
+      position: 'top', formatter: params => `${params.value[0]} visitors at ${hrs[params.value[1]]}`,
+    },
+    grid: { left: 2, bottom: 10, right: 10, containLabel: true },
+    xAxis: { type: 'category', data: hrs, boundaryGap: false, splitLine: { show: true, lineStyle: { color: '#999', type: 'dashed' }}, axisLine: { show: false } },
+    yAxis: { type: 'category', data: wds, axisLine: { show: false } }
   };
-  
+
+  // weekly visitor heatmap chart options
+  vm.weeklyHeatMapChartOptionBase = {
+    title: { text: 'Inbound visitor heatmap' },
+    tooltip: { position: 'top' },
+    animation: false,
+    grid: { height: '50%', y: '10%' },
+    xAxis: { type: 'category', data: hrs, splitArea: { show: true } },
+    yAxis: { type: 'category', data: wds, splitArea: { show: true } }
+  };
+
   // daily picker options
   vm.dailyPickerOptions = {
     locale: { format: 'YYYY-MM-DD', firstDay: 1 },
@@ -84,8 +105,11 @@ function RoomStatController(UserService, RoomService, FlashService, RoomStatServ
     $scope.weeklyStats = echarts.init(document.getElementById('weeklyStackChart'));
     $scope.weeklyStats.setOption(vm.weeklyStatsOptionBase);
 
-    $scope.weeklyBarNegativeStats = echarts.init(document.getElementById('weeklyBarNegativeChart'));
-    $scope.weeklyBarNegativeStats.setOption(vm.weeklyBarNegativeChartOptionBase);
+    $scope.weeklyHeatMapStats = echarts.init(document.getElementById('weeklyHeatMapChart'));
+    $scope.weeklyHeatMapStats.setOption(vm.weeklyHeatMapChartOptionBase);
+
+    $scope.weeklyPunchStats = echarts.init(document.getElementById('weeklyPunchChart'));
+    $scope.weeklyPunchStats.setOption(vm.weeklyPunchChartOptionBase);
 
     $scope.renderDailyBarPlot($scope.dailyPlotDate);
     $scope.renderWeeklyPlot($scope.weekPlotDate); // renders both stack and bar negative charts
@@ -187,38 +211,65 @@ function RoomStatController(UserService, RoomService, FlashService, RoomStatServ
   }
 
   function _updateWeeklyPlot(result) {
-    const seriesData = [];
-    for (let i = 0; i < 24; i++) {
-      seriesData.push({ name: i, type: 'line', stack: '总量', label: { normal: { show: true, position: 'center' } }, areaStyle: { normal: {} }, data: [0, 0, 0, 0, 0] });
-    }
+    const rawData = []; // raw data to store clean data, format as [[in,out,d,h],[],...]
+    const dailySumData = []; // summed data (summarized to one day) [in, out, delta, d]
+    let maxInHour = 0; // max in hour during the week
+    let maxOutHour = 0; // max out hour during the week
 
-    const barNegativeSeries = [];
-    const barNegativeSeriesData = {
-      'In': [],
-      'Out': [],
-      'delta': []
-    };
-    const barNegativeIndexes = ['delta', 'In', 'Out'];
+    // seriesData.push({ name: i, type: 'line', stack: '总量', label: { normal: { show: true, position: 'center' } }, areaStyle: { normal: {} }, data: [0, 0, 0, 0, 0] });
+    
+    // generate empty rawdata matrix, [in,out,d,h]
+    for (let i = 0; i < 5; i++) {
+      for (let j = 0; j < 24; j++) {
+        rawData.push([0, 0, i, j]);
+      }
+    }
 
     result.forEach((e) => {
       // iso weekday as the index in data array, need to reduce by 1
       const wd = moment(e.recordDate).isoWeekday() - 1;
+      let dIn = 0;
+      let dOut = 0;
       e.stats.forEach((ele) => {
-        seriesData[ele.hourRange].data[wd] = ele.in;
-        barNegativeSeriesData.In[wd] = ele.in;
-        barNegativeSeriesData.Out[wd] = ele.out * -1; // switch to negative
-        barNegativeSeriesData.delta[wd] = ele.in - ele.out;
+        rawData[_.findIndex(rawData, (item) => {
+          return item[2] === wd && item[3] === ele.hourRange;
+        })] = [ele.in, ele.out, wd, ele.hourRange];
+        if (ele.in > maxInHour) maxInHour = ele.in;
+        if (ele.out > maxOutHour) maxOutHour = ele.out;
+        dIn += ele.in;
+        dOut += ele.out;
       });
-    });
-    $scope.weeklyStats.setOption({
-      series: seriesData
+      dailySumData.push([dIn, dOut, dIn - dOut, wd]);
     });
 
-    barNegativeIndexes.forEach((e) => {
-      barNegativeSeries.push({ name: e, type: 'bar', label: { normal: { show: true, position: 'inside' } }, data: barNegativeSeriesData[e] });
+    // Inbound & outbound visitor
+    $scope.weeklyStats.setOption({
+      series: [
+        { name: 'Inbound', type: 'line', smooth: true, data: dailySumData.map( item => item[0] ) },
+        { name: 'Outbound', type: 'line', smooth: true, data: dailySumData.map(item => item[1]) },
+        { name: 'Delta', type: 'line', smooth: true, data: dailySumData.map(item => item[2]) },
+      ]
     });
-    $scope.weeklyBarNegativeStats.setOption({
-      series: barNegativeSeries
+
+    $scope.weeklyHeatMapStats.setOption({
+      visualMap: { min: 0, max: maxInHour, calculable: true, orient: 'horizontal', left: 'center', bottom: '15%' },
+      series: [{
+        name: 'Inbound',
+        type: 'heatmap',
+        data: rawData.map(item => [item[3], item[2], item[0]]), // [d, h, in]
+        label: { normal: { show: true } },
+        itemStyle: { emphasis: { shadowBlur: 10, shadowColor: 'rgba(0, 0, 0, 0.5)' } }
+      }]
+    });
+
+    $scope.weeklyPunchStats.setOption({
+      series: [{
+        name: 'Outbound',
+        type: 'scatter',
+        symbolSize: val => val[2] * 3,
+        data: rawData.map(item => [item[3], item[2], item[1]]), // [d, h, out]
+        animationDelay: idx => idx * 10
+      }]
     });
   }
 }
