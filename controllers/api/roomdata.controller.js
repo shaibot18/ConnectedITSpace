@@ -1,7 +1,9 @@
 const express = require('express');
 const moment = require('moment');
+const chalk = require('chalk');
 const RoomService = require('services/room.service');
 const RoomDataService = require('services/roomdata.service');
+const RoomStatService = require('services/room.stat.service');
 const DbService = require('services/db.service');
 const UtilService = require('services/util.service');
 const RawDataService = require('services/rawdata.service');
@@ -18,7 +20,7 @@ const uploadPeriod = padLeft((0).toString(16).toUpperCase()); // default 120, 0 
 
 router.get('/:RoomId', getByTimeRange);
 router.get('/adjust/:dir/:amount', adjustTimeZone);
-router.get('/remove', removeDuplicates);
+router.get('/remove', removeDuplicates); // TODO: not exposed to external
 router.get('/all/:RoomId', getAllById);
 router.get('/allnum/:RoomId', UpdateAllNum);
 router.post('/', handlePost);
@@ -115,10 +117,11 @@ function convertTimeZone(timeZone) {
 }
 
 function handlePost(req, res) {
-  console.log(req.body);
+  console.log(chalk.yellow('INCOMING ROOM DATA ...'));
+  // console.log(req.body);
   res.set('Content-Type', 'application/x-www-form-urlencoded');
 
-  RawDataService.add(req.body);
+  RawDataService.add(req.body); // persist raw data
   const cmd = req.body.cmd;
   const flag = req.body.flag;
   const resFlag = flag.substr(2, 2) + flag.substr(0, 2);
@@ -127,7 +130,7 @@ function handlePost(req, res) {
   let data;
   switch (cmd) {
     case 'getsetting': {
-      data = parseSetting(req.body.data);
+      data = _parseSetting(req.body.data);
       const SN = data.SN;
       RoomService.GetRoomBySN(SN)
         .then((room) => {
@@ -171,7 +174,7 @@ function handlePost(req, res) {
     }
     case 'cache': {
       const body = req.body;
-      data = parseDataHeading(body);
+      data = _parseDataHeading(body);
       if (data.err) {
         res.status(400).send(data.err);
         res.end();
@@ -200,18 +203,28 @@ function handlePost(req, res) {
             }
             const dataObj = {
               SN,
-              Time: parseTime(cur.slice(0, 12), timeZone), // datetime
+              Time: parseTime(cur.slice(0, 12)), // datetime
               In: parseInt(cur.slice(14, 22).match(/[\w]{2}/g).reverse().join(''), 16),
               Out: parseInt(cur.slice(22, 30).match(/[\w]{2}/g).reverse().join(''), 16),
             };
             RoomDataService.add(dataObj)
-              .then(() => {
-                console.log('Add data successful');
+              .then((doc) => {
+                const roomId = doc._RoomId;
+                const eventDate = moment(doc.Time).format('YYYY-MM-DD');
+
+                RoomService.updateBatteryLevel(roomId, parseInt(data.status.battery, 10))
+                  .then((updatedDoc) => {
+                    console.log(chalk.green(`BATTERY Updated => ${updatedDoc._id}.`));
+                  });
+
+                RoomStatService.updateStatByIdAndDate(doc)
+                  .then(() => {
+                    console.log(chalk.yellow(`RECALCULATED Stats OK => Room:${roomId} Date:${eventDate}`));
+                  });
               })
               .catch((err) => {
                 console.log(err);
               });
-            console.log(dataObj);
           }
           const systemTimeWeek = genTimeString(new Date(Date.now() + timeDiff)).concat('00');
           const resultString = `${resType}${resFlag}${cmdType}${systemTimeWeek}${openTime}${closeTime}`;
@@ -233,11 +246,12 @@ function handlePost(req, res) {
 function parseTime(...args) {
   const timeString = args[0];
   const timeArray = timeString.match(/[\w]{2}/g).map(element => parseInt(element, 16));
-  timeArray[0] += 2000;
+  // timeArray[0] += 2000;
   if (args[1]) {
-    return moment.utc(timeArray.join(' ').concat(' ').concat(args[1]), 'YYYY MM DD HH mm ss Z');
+    // return moment.utc(timeArray.join(' ').concat(' ').concat(args[1]), 'YYYY MM DD HH mm ss Z');
+    return moment(timeArray.join(' ').concat(' ').concat(args[1]), 'YY MM DD HH mm ss Z').toDate();
   }
-  return moment.utc(timeArray.join(' '), 'YYYY MM DD HH mm ss');
+  return moment(timeArray.join(' '), 'YY MM DD HH mm ss').toDate();
 }
 
 function genTimeString(date) {
@@ -250,7 +264,7 @@ function genTimeString(date) {
   return year + month + day + hour + min + sec;
 }
 
-function parseSetting(data) {
+function _parseSetting(data) {
   const resultObj = {
     SN: data.slice(0, 8).match(/[\w]{2}/g).reverse().join(''), // string
     cmdType: data.slice(8, 10), // string
@@ -276,7 +290,7 @@ function parseSetting(data) {
   return resultObj;
 }
 
-function parseDataHeading(body) {
+function _parseDataHeading(body) {
   const status = body.status;
   const resultObj = {};
   if (status.length !== 28) {

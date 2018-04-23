@@ -2,6 +2,7 @@ const Q = require('q');
 const mongoose = require('services/dbConnection.service');
 const RoomDataService = require('services/roomdata.service');
 const moment = require('moment');
+const chalk = require('chalk');
 const _ = require('underscore');
 
 const Schema = mongoose.Schema;
@@ -41,6 +42,7 @@ service.createRoomStatEntry = createRoomStatEntry;
 service.deleteRoomStatsEntry = deleteRoomStatsEntry;
 service.deleteRoomStatsEntryByDateRange = deleteRoomStatsEntryByDateRange;
 service.createOrUpdateRoomStatEntry = createOrUpdateRoomStatEntry;
+service.updateStatByIdAndDate = updateStatByIdAndDate;
 service.roomStatHouseKeep = roomStatHouseKeep;
 module.exports = service;
 
@@ -145,6 +147,29 @@ function createOrUpdateRoomStatEntry(obj) {
       deferred.resolve(doc);
     }
   );
+  return deferred.promise;
+}
+
+function updateStatByIdAndDate(doc) {
+  const deferred = Q.defer();
+
+  // const tObj = {
+  //   _roomId: doc._id,
+  //   recordDate: 
+  // };
+
+  // RoomStat.findOneAndUpdate(
+  //   {
+  //     _roomId: doc._roomId,
+  //     recordDate: doc.recordDate,
+  //   },
+  //   tObj,
+  //   { new: true, upsert: true, setDefaultsOnInsert: true },
+  //   (err, doc) => {
+  //     if (err) deferred.reject(`${err.name} : ${err.message}`);
+  //     deferred.resolve(doc);
+  //   }
+  // );
   return deferred.promise;
 }
 

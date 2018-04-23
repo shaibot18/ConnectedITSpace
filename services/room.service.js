@@ -31,6 +31,10 @@ const roomSchema = new Schema({
   avgNum: {
     type: Number,
     default: 0
+  },
+  batteryLevel: {
+    type: Number,
+    default: 90
   }
 });
 const Room = mongoose.model('Room', roomSchema);
@@ -41,6 +45,7 @@ service.Update = Update;
 service.Get = Get;
 service.create = create;
 service.getByUserId = GetByUserId;
+service.updateBatteryLevel = updateBatteryLevel;
 service.delete = _delete;
 module.exports = service;
 
@@ -48,6 +53,15 @@ module.exports = service;
 function Update(_id, room) {
   const deferred = Q.defer();
   Room.findByIdAndUpdate(_id, room, { new: true }, (err, updatedRoom) => {
+    if (err) { deferred.reject(err); }
+    deferred.resolve(updatedRoom);
+  });
+  return deferred.promise;
+}
+
+function updateBatteryLevel(_id, battery) {
+  const deferred = Q.defer();
+  Room.findByIdAndUpdate(_id, { $set: { batteryLevel: battery } }, { new: true }, (err, updatedRoom) => {
     if (err) { deferred.reject(err); }
     deferred.resolve(updatedRoom);
   });

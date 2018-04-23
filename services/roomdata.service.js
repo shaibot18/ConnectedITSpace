@@ -2,6 +2,7 @@ const Q = require('q');
 const mongoose = require('services/dbConnection.service');
 const RoomService = require('services/room.service');
 const moment = require('moment');
+const chalk = require('chalk');
 
 const Schema = mongoose.Schema;
 const roomdataSchema = new Schema({
@@ -26,12 +27,15 @@ const service = {};
 
 service.RoomData = Roomdata;
 service.add = add;
-service.getByTimeRange = getByTimeRange;
-service.getAllById = getAllById;
-service.DeleteRoomData = DeleteRoomData;
+
 service.UpdateAllNum = UpdateAllNum;
 service.UpdateTotal = UpdateTotal;
 service.UpdateAvg = UpdateAvg;
+
+service.getAllById = getAllById;
+service.getByTimeRange = getByTimeRange;
+service.DeleteRoomData = DeleteRoomData;
+
 module.exports = service;
 
 
@@ -141,10 +145,28 @@ function getAllById(_RoomId) {
   return deferred.promise;
 }
 
+function _createOrUpdateRoomData(roomData) {
+  const deferred = Q.defer();
+  Roomdata.findOneAndUpdate(
+    {
+      _RoomId: roomData._RoomId,
+      In: roomData.in,
+      Out: roomData.out,
+      Time: roomData.Time
+    },
+    roomData,
+    { new: true, upsert: true, setDefaultsOnInsert: true },
+    (err, doc) => {
+      if (err) deferred.reject(`${err.name} : ${err.message}`);
+      deferred.resolve(doc);
+    }
+  );
+  return deferred.promise;
+}
+
 function add(roomdataParams) {
   const deferred = Q.defer();
   const SN = roomdataParams.SN;
-  console.log(`SN is ${SN}`);
   RoomService.GetRoomBySN(SN)
     .then((room) => {
       if (room.length === 0) {
@@ -155,19 +177,16 @@ function add(roomdataParams) {
         deferred.reject(`Invalid post: this SN ${SN} matches too many rooms`);
       } else {
         roomdataParams._RoomId = room[0]._id;
-        saveRoom(roomdataParams);
+        // timezone defaults to +0800
+        _createOrUpdateRoomData(roomdataParams)
+          .then((rData) => {
+            console.log(chalk.green(`SAVED Time=${rData.Time}, In=${rData.In} Out=${rData.Out}`));
+            deferred.resolve(rData);
+          });
       }
     })
     .catch((err) => { deferred.reject(`${err.name}: ${err.message}`); });
   return deferred.promise;
-  function saveRoom(params) {
-    const roomdata = new Roomdata(params);
-    console.log(`Saving roomdata ... Time=${Date.parse(roomdata.Time)}, In=${roomdata.In} Out=${roomdata.Out}`);
-    roomdata.save((err, doc) => {
-      if (err) deferred.reject(`${err.name} : ${err.message}`);
-      deferred.resolve(doc);
-    });
-  }
 }
 
 function getByTimeRange(_RoomId, startTime, endTime) {

@@ -20,6 +20,7 @@ const RoomData = RoomDataService.RoomData;
 
 // This function is used to remove data with the same time
 // caused by hardware error
+//TODO: duplicates string to be updated
 function removeDuplicates() {
   console.log('remove function run');
   const deferred = Q.defer();
