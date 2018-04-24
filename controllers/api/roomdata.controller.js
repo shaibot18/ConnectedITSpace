@@ -180,6 +180,7 @@ function handlePost(req, res) {
         res.end();
         break;
       }
+      // TODO: only the last entry should be injected?
       const dataList = (typeof body.data === 'string') ? [body.data] : body.data;
       const SN = data.status.SN;
       RoomService.GetRoomBySN(SN)
@@ -210,22 +211,18 @@ function handlePost(req, res) {
             RoomDataService.add(dataObj)
               .then((doc) => {
                 const roomId = doc._RoomId;
-                const eventDate = moment(doc.Time).format('YYYY-MM-DD');
+                const eventDate = moment(doc.Time);
 
                 RoomService.updateBatteryLevel(roomId, parseInt(data.status.battery, 10))
                   .then((updatedDoc) => {
                     console.log(chalk.green(`BATTERY Updated => ${updatedDoc._id}.`));
-                  });
-
-                RoomStatService.updateStatByIdAndDate(doc)
-                  .then(() => {
-                    console.log(chalk.yellow(`RECALCULATED Stats OK => Room:${roomId} Date:${eventDate}`));
                   });
               })
               .catch((err) => {
                 console.log(err);
               });
           }
+
           const systemTimeWeek = genTimeString(new Date(Date.now() + timeDiff)).concat('00');
           const resultString = `${resType}${resFlag}${cmdType}${systemTimeWeek}${openTime}${closeTime}`;
           res.status(200).send(`result${resultString} ${UtilService.crcEncrypt(resultString)} `);

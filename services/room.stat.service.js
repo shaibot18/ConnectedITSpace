@@ -2,8 +2,8 @@ const Q = require('q');
 const mongoose = require('services/dbConnection.service');
 const RoomDataService = require('services/roomdata.service');
 const moment = require('moment');
-const chalk = require('chalk');
 const _ = require('underscore');
+const chalk = require('chalk');
 
 const Schema = mongoose.Schema;
 
@@ -42,7 +42,7 @@ service.createRoomStatEntry = createRoomStatEntry;
 service.deleteRoomStatsEntry = deleteRoomStatsEntry;
 service.deleteRoomStatsEntryByDateRange = deleteRoomStatsEntryByDateRange;
 service.createOrUpdateRoomStatEntry = createOrUpdateRoomStatEntry;
-service.updateStatByIdAndDate = updateStatByIdAndDate;
+// service.updateStatByIdAndDate = updateStatByIdAndDate;
 service.roomStatHouseKeep = roomStatHouseKeep;
 module.exports = service;
 
@@ -150,29 +150,33 @@ function createOrUpdateRoomStatEntry(obj) {
   return deferred.promise;
 }
 
-function updateStatByIdAndDate(doc) {
-  const deferred = Q.defer();
+// function updateStatByIdAndDate(doc) {
+//   const deferred = Q.defer();
 
-  // const tObj = {
-  //   _roomId: doc._id,
-  //   recordDate: 
-  // };
+//   const tObj = {
+//     _roomId: doc._id,
+//     recordDate: 
+//   };
 
-  // RoomStat.findOneAndUpdate(
-  //   {
-  //     _roomId: doc._roomId,
-  //     recordDate: doc.recordDate,
-  //   },
-  //   tObj,
-  //   { new: true, upsert: true, setDefaultsOnInsert: true },
-  //   (err, doc) => {
-  //     if (err) deferred.reject(`${err.name} : ${err.message}`);
-  //     deferred.resolve(doc);
-  //   }
-  // );
-  return deferred.promise;
-}
+//   RoomStat.findOneAndUpdate(
+//     {
+//       _roomId: doc._roomId,
+//       recordDate: doc.recordDate,
+//     },
+//     tObj,
+//     { new: true, upsert: true, setDefaultsOnInsert: true },
+//     (err, doc) => {
+//       if (err) deferred.reject(`${err.name} : ${err.message}`);
+//       deferred.resolve(doc);
+//     }
+//   );
+//   return deferred.promise;
+// }
 
+/**
+ * House keeping function to recalculate all data
+ * Should be used with caution
+ */
 function roomStatHouseKeep() {
   const deferred = Q.defer();
   RoomDataService.RoomData.find({}, (err, docs) => {
@@ -251,3 +255,92 @@ function roomStatHouseKeep() {
   });
   return deferred.promise;
 }
+
+// run house keeper every hour
+setInterval(_roomStatHouseKeepByHour, 3600 * 1000);
+
+function _roomStatHouseKeepByHour() {
+  const curHr = moment('2018-04-12 20:00:00').hour();
+  const curDate = moment('2018-04-12 20:00:00').format('YYYY-MM-DD');
+  const startTime = moment(`${curDate} ${curHr}:00:00`);
+  const endTime = moment(startTime).add(1, 'h');
+
+  RoomDataService.RoomData.find({
+    Time: {
+      $gte: startTime,
+      $lt: endTime
+    }
+  }, (err, docs) => {
+    if (err) console.log(chalk.red(err));
+    else {
+      console.log(chalk.red(`START house keeping ${startTime.format('YYYY-MM-DD HH:mm:ss')} -> ${endTime.format('YYYY-MM-DD HH:mm:ss')}`)); // eslint-disable-line no-console
+      let uniqDocs = _.uniq(_.sortBy(docs, '_RoomId'), true);
+      uniqDocs = _.map(uniqDocs, (e) => {
+        return {
+          uniqId: String(e._RoomId) + ':' + moment(e.Time).format('YYYYMMDD') + ':' + moment(e.Time).format('H') + ':' + e.TimeZone,
+          _roomId: e._RoomId,
+          In: e.In,
+          Out: e.Out,
+          recordDate: moment(e.Time).format('YYYYMMDD'),
+          recordTime: moment(e.Time).format('H'),
+          recordTimeZone: e.TimeZone
+        };
+      });
+
+      // obtain a list of room ids that have records
+      const roomIds = _.uniq(_.map(uniqDocs, e => String(e._roomId)), true);
+
+      // obtain a list of dates with records
+      const recordDates = _.uniq(_.map(uniqDocs, e => e.recordDate), true);
+
+      // obtain a list of timezones with records
+      const recordTimeZones = _.uniq(_.map(uniqDocs, e => e.recordTimeZone), true);
+
+      // generate hour range list [0,1,2,4...23]
+      const hoursOfDay = _.range(24);
+
+      roomIds.forEach((r) => { // each room
+        recordDates.forEach((d) => { // each day
+          recordTimeZones.forEach((t) => { // each timezone
+            const obj = {
+              _roomId: r,
+              recordDate: moment(d).format('YYYY-MM-DD'),
+              recordTimeZone: t,
+              stats: []
+            };
+
+            const totalAccu = 0;
+
+            hoursOfDay.forEach((h) => { // each hour
+              const filterStr = String(r) + ':' + d + ':' + h + ':' + t;
+              let totalIn = 0;
+              let totalOut = 0;
+
+              const tmpArr = _.filter(uniqDocs, e => (e.uniqId === filterStr));
+
+              if (tmpArr && tmpArr.length > 0) {
+                tmpArr.forEach((e) => {
+                  totalIn += e.In;
+                  totalOut += e.Out;
+                });
+
+                const vObj = {
+                  hourRange: h,
+                  in: totalIn,
+                  out: totalOut,
+                  accu: totalAccu + totalIn
+                };
+
+                obj.stats.push(vObj);
+              }
+            });
+            // createRoomStatEntry(obj);
+            createOrUpdateRoomStatEntry(obj);
+          });
+        });
+      });
+      console.log(chalk.red(`DONE house keeping ${startTime.format('YYYY-MM-DD HH:mm:ss')} -> ${endTime.format('YYYY-MM-DD HH:mm:ss')}`)); // eslint-disable-line no-console
+    }
+  });
+}
+
