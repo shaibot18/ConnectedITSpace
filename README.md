@@ -1,3 +1,6 @@
+### Status
+[![Build Status](https://travis-ci.org/shaibot18/ConnectedITSpace.svg?branch=master)](https://travis-ci.org/shaibot18/ConnectedITSpace.svg?branch=master)
+
 # Connected IT Space
 
 This system is designed for the Bosch Connected IT Space project, which aimed to monitor the number of visitors to IT Space and provides a vivid overview of the statistics. Also, people who want to visit one specific IT space can get the status of the space beforehead, in case the IT space is too crowded to accomodate more visitors.
