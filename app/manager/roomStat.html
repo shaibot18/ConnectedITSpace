@@ -20,16 +20,69 @@
 
 </style>
 
+<div class="col-md-6 col-sm-6 col-xs-12">
+  <div class="x_panel managementstyle">
+    <div class="x_content myroomtitle">
+      <div class="numberleft" ng-bind="avgInbound | number:0">
+      </div>
+      <div class="numberleftmargin">
+        <ul>
+          <li>Avg In/day</li>
+          <li><i ng-bind="currentMonth"></i> (excl. weekends)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="x_content myroomtitle">
+      <div class="numberleft" ng-bind="avgOutbound | number:0">
+      </div>
+      <div class="numberleftmargin">
+        <ul>
+          <li>Avg Out/day</li>
+          <li><i ng-bind="currentMonth"></i> (excl. weekends)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="col-md-6 col-sm-6 col-xs-12">
+  <div class="x_panel managementstyle">
+    <div class="x_content myroomtitle">
+      <div class="numberleft" ng-bind="totalInbound | number:0">
+      </div>
+      <div class="numberleftmargin">
+        <ul>
+          <li>Total Inbound</li>
+          <li><i ng-bind="currentMonth"></i> (excl. weekends)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="x_content myroomtitle">
+      <div class="numberleft" ng-bind="totalOutbound | number:0">
+      </div>
+      <div class="numberleftmargin">
+        <ul>
+          <li>Total Outbound</li>
+          <li><i ng-bind="currentMonth"></i> (excl. weekends)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!--graph-->
+<!-- /Monthy chart -->
+<div class="col-md-12 col-sm-12 col-xs-12 fortop">
+  <div class="x_panel managementstyle">
+    <div class="x_content">
+      <div id="currentMonthStackChart" style="width:95%; height:400px;"></div>
+    </div>
+  </div>
+</div>
+
 <!-- /daily visitor chart -->
 <div class="col-md-12 col-sm-12 col-xs-12 fortop">
   <div class="x_panel managementstyle">
-    <div class="x_title">
-      <h2>Daily visitor chart
-        <small></small>
-      </h2>
-      <div class="clearfix"></div>
-    </div>
     <div class="x_content">
       <div class="row">
         <div class="col-md-12 select-panel" style="display: flex; align-items: center">
@@ -60,7 +113,6 @@
     </div>
   </div>
 </div>
-
 
 <!-- /weekly visitor area stack chart -->
 <div class="col-md-12 col-sm-12 col-xs-12 fortop">

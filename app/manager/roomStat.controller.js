@@ -10,8 +10,12 @@ function RoomStatController(UserService, RoomService, FlashService, RoomStatServ
     vm.user = user;
   });
   vm._roomId = $stateParams.roomId;
-  $scope.avgNum = 0;
-  $scope.totalNum = 0;
+
+  $scope.avgInbound = 0;
+  $scope.avgOutbound = 0;
+  $scope.totalInbound = 0;
+  $scope.totalOutbound = 0;
+  $scope.currentMonth = moment().format('YYYY-MM');
   $scope.dailyPlotDate = moment();
   $scope.weekPlotDate = {
     start: moment().startOf('week'),
@@ -23,12 +27,24 @@ function RoomStatController(UserService, RoomService, FlashService, RoomStatServ
     '7a', '8a', '9a', '10a', '11a',
     '12p', '1p', '2p', '3p', '4p', '5p',
     '6p', '7p', '8p', '9p', '10p', '11p'];
-  const hrs_sec = ['12a-8am', '8am-12pm', '12pm-13pm', '13pm-18pm', '18pm-24pm'];
+  // const hrs_sec = ['12a-8am', '8am-12pm', '12pm-13pm', '13pm-18pm', '18pm-24pm'];
 
+  const mds = [];
+  $scope.numberOfWeekEndsToDate = 0; // number of weekends till today
+  // generate empty rawdata matrix, [in,out,d,h]
+  for (let i = 0; i < moment().daysInMonth(); i++) {
+    const d = moment().startOf('month').add(i, 'd');
+    mds.push(d.format('YYYY-MM-DD'));
+
+    if (moment().diff(d) > 0 && (d.day() in [0, 6])) { // day is before
+      $scope.numberOfWeekEndsToDate++;
+    }
+  }
   // daily stat chart options
   vm.dailyStatsOptionBase = {
+    title: { text: 'Daily bar chart' },
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-    legend: { data: ['In', 'Out'] },
+    legend: { data: ['In', 'Out']},
     grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
     xAxis: [{ type: 'category', axisTick: { show: false }, data: _.range(24) }],
     yAxis: [{ type: 'value' }]
@@ -36,12 +52,23 @@ function RoomStatController(UserService, RoomService, FlashService, RoomStatServ
 
   // weekly stack line chart options
   vm.weeklyStatsOptionBase = {
-    title: { text: 'Inbound & Outbound visitors summary by day' },
+    title: { text: 'Inbound & Outbound per day' },
     tooltip: { trigger: 'axis' },
     legend: { data: ['In', 'Out', 'Delta'] },
     toolbox: { show: true, feature: { magicType: { show: true, type: ['stack', 'tiled'] }, saveAsImage: { show: true } } },
     grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
-    xAxis: [ { type: 'category', boundaryGap: false, data: wds } ],
+    xAxis: [{ type: 'category', boundaryGap: false, data: wds }],
+    yAxis: [{ type: 'value' }]
+  };
+
+  // current month stack line chart options
+  vm.currentMonthStatsOptionBase = {
+    title: { text: 'Current Month Inbound & Outbound per day' },
+    tooltip: { trigger: 'axis' },
+    legend: { data: ['In', 'Out', 'Delta'] },
+    toolbox: { show: true, feature: { magicType: { show: true, type: ['stack', 'tiled'] }, saveAsImage: { show: true } } },
+    grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+    xAxis: [{ type: 'category', boundaryGap: false, data: mds }],
     yAxis: [{ type: 'value' }]
   };
 
@@ -105,6 +132,9 @@ function RoomStatController(UserService, RoomService, FlashService, RoomStatServ
     $scope.weeklyStats = echarts.init(document.getElementById('weeklyStackChart'));
     $scope.weeklyStats.setOption(vm.weeklyStatsOptionBase);
 
+    $scope.currentMonthStats = echarts.init(document.getElementById('currentMonthStackChart'));
+    $scope.currentMonthStats.setOption(vm.currentMonthStatsOptionBase);
+
     $scope.weeklyHeatMapStats = echarts.init(document.getElementById('weeklyHeatMapChart'));
     $scope.weeklyHeatMapStats.setOption(vm.weeklyHeatMapChartOptionBase);
 
@@ -113,6 +143,7 @@ function RoomStatController(UserService, RoomService, FlashService, RoomStatServ
 
     $scope.renderDailyBarPlot($scope.dailyPlotDate);
     $scope.renderWeeklyPlot($scope.weekPlotDate); // renders both stack and bar negative charts
+    $scope.renderCurrentMonthPlot(); // renders both stack and bar negative charts
   };
 
   $scope.renderDailyBarPlot = function (dailyPlotDate) {
@@ -133,6 +164,19 @@ function RoomStatController(UserService, RoomService, FlashService, RoomStatServ
     _getStats(startDate, endDate)
       .then((result) => {
         _updateWeeklyPlot(result);
+      })
+      .catch((err) => {
+        console.log(err); // eslint-disable-line no-console
+      });
+  };
+
+  $scope.renderCurrentMonthPlot = function () {
+    const startDate = moment().startOf('month').format('YYYY-MM-DD');
+    const endDate = moment().endOf('month').format('YYYY-MM-DD');
+
+    _getStats(startDate, endDate)
+      .then((result) => {
+        _updateCurrentMonthPlot(result);
       })
       .catch((err) => {
         console.log(err); // eslint-disable-line no-console
@@ -178,34 +222,10 @@ function RoomStatController(UserService, RoomService, FlashService, RoomStatServ
       });
     }
     $scope.dailyStats.setOption({
-      series: [{
-        name: 'In',
-        type: 'bar',
-        stack: '总量',
-        label: {
-          normal: {
-            show: true,
-          },
-        },
-        data: inData,
-      },
-      {
-        name: 'Out',
-        type: 'bar',
-        stack: '总量',
-        label: {
-          normal: {
-            show: true,
-            position: 'bottom',
-          },
-        },
-        data: outData,
-      },
-      {
-        name: 'Total',
-        type: 'line',
-        data: totalData,
-      },
+      series: [
+        { name: 'In', type: 'bar', stack: '总量', label: { normal: { show: true, }, }, data: inData, },
+        { name: 'Out', type: 'bar', stack: '总量', label: { normal: { show: true, position: 'bottom', }, }, data: outData, },
+        { name: 'Total', type: 'line', data: totalData, }
       ],
     });
   }
@@ -272,4 +292,45 @@ function RoomStatController(UserService, RoomService, FlashService, RoomStatServ
       }]
     });
   }
+
+  function _updateCurrentMonthPlot(result) {
+    const rawData = []; // raw data to store clean data, format as [[in,out,d,h],[],...]
+    const dailySumData = []; // summed data (summarized to one day) [in, out, delta, d]
+    // generate empty rawdata matrix, [in,out,d,h]
+    for (let i = 0; i < moment().daysInMonth(); i++) {
+      for (let j = 0; j < 24; j++) {
+        rawData.push([0, 0, i, j]);
+      }
+    }
+
+    result.forEach((e) => {
+      // iso weekday as the index in data array, need to reduce by 1
+      const wd = moment(e.recordDate).isoWeekday() - 1;
+      let dIn = 0;
+      let dOut = 0;
+      e.stats.forEach((ele) => {
+        rawData[_.findIndex(rawData, (item) => {
+          return item[2] === wd && item[3] === ele.hourRange;
+        })] = [ele.in, ele.out, wd, ele.hourRange];
+        dIn += ele.in;
+        $scope.totalInbound += ele.in;
+        dOut += ele.out;
+        $scope.totalOutbound += ele.out;
+      });
+      dailySumData.push([dIn, dOut, dIn - dOut, wd]);
+    });
+
+    $scope.avgInbound = $scope.totalInbound / (moment().date() - $scope.numberOfWeekEndsToDate);
+    $scope.avgOutbound = $scope.totalOutbound / (moment().date() - $scope.numberOfWeekEndsToDate);
+
+    // Inbound & outbound visitor
+    $scope.currentMonthStats.setOption({
+      series: [
+        { name: 'Inbound', type: 'line', smooth: true, data: dailySumData.map(item => item[0]) },
+        { name: 'Outbound', type: 'line', smooth: true, data: dailySumData.map(item => item[1]) },
+        { name: 'Delta', type: 'line', smooth: true, data: dailySumData.map(item => item[2]) },
+      ]
+    });
+  }
 }
+

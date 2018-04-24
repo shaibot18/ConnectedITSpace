@@ -13,9 +13,9 @@
         <div class="x_panel outbackgrounfcolor">
             <div class="x_content">
                 <div class="x_content_middle">
-                    <a ng-click="transTo('roomInfo',{ 'roomId': room._id })">
-                        <h1 ng-bind="room.curNum"></h1>
-                        <div>Total people</div>
+                    <a ng-click="transTo('roomStat',{ 'roomId': room._id })">
+                        <h1 ng-bind="room.batteryLevel"><i>%</i></h1>
+                        <div>Battery level</div>
                     </a>
                 </div>
                 <div class="x_content_title">
@@ -23,7 +23,7 @@
                         <li>{{room.city}}</li>
                         <li>{{room.building}}</li>
                         <li>{{room.country}}</li>
-                        <li><a ng-click="transTo('roomStat',{ 'roomId': room._id })">Statistics</a></li>
+                        <li><a ng-click="transTo('roomInfo',{ 'roomId': room._id })">Info</a></li>
                         <li>
                             <div class="preedit">
                                 <a ng-click="transTo('editRoom',{ 'roomId': room._id })">
