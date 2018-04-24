@@ -3,6 +3,7 @@ const mongoose = require('services/dbConnection.service');
 const RoomDataService = require('services/roomdata.service');
 const RoomStatService = require('services/room.stat.service');
 const Q = require('q');
+const moment = require('moment');
 
 const Schema = mongoose.Schema;
 const dbCleanSchema = new Schema({
@@ -25,7 +26,7 @@ function removeDuplicates() {
   const deferred = Q.defer();
   RoomData.aggregate([{
     $group: {
-      _id: { Time: '$Time' },
+      _id: { Time: '$Time', In:'$In', Out:'$Out', SN: '$SN' },
       dups: { $push: '$_id' },
       count: { $sum: 1 }
     }

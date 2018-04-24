@@ -5,6 +5,7 @@ const RoomDataService = require('services/roomdata.service');
 const DbService = require('services/db.service');
 const UtilService = require('services/util.service');
 const RawDataService = require('services/rawdata.service');
+const chalk = require('chalk');
 
 const padLeft = UtilService.padLeft;
 const router = express.Router();
@@ -200,10 +201,12 @@ function handlePost(req, res) {
             }
             const dataObj = {
               SN,
-              Time: parseTime(cur.slice(0, 12), timeZone), // datetime
+              // Time: parseTime(cur.slice(0, 12), timeZone), // datetime
+              Time: parseTime(cur.slice(0, 12)), // datetime
               In: parseInt(cur.slice(14, 22).match(/[\w]{2}/g).reverse().join(''), 16),
               Out: parseInt(cur.slice(22, 30).match(/[\w]{2}/g).reverse().join(''), 16),
             };
+
             RoomDataService.add(dataObj)
               .then(() => {
                 console.log('Add data successful');

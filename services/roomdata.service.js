@@ -162,7 +162,8 @@ function add(roomdataParams) {
   return deferred.promise;
   function saveRoom(params) {
     const roomdata = new Roomdata(params);
-    console.log(`Saving roomdata ... Time=${Date.parse(roomdata.Time)}, In=${roomdata.In} Out=${roomdata.Out}`);
+    // console.log(`Saving roomdata ... Time=${Date.parse(roomdata.Time)}, In=${roomdata.In} Out=${roomdata.Out}`);
+    console.log(`Saving roomdata ... Time=${roomdata.Time}, In=${roomdata.In} Out=${roomdata.Out}`);
     roomdata.save((err, doc) => {
       if (err) deferred.reject(`${err.name} : ${err.message}`);
       deferred.resolve(doc);

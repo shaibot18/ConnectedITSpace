@@ -3,7 +3,7 @@ require('rootpath')();
 const express = require('express');
 const session = require('express-session');
 const bodyParser = require('body-parser');
-const config = require('config.json');
+const config = require('config');
 const path = require('path');
 
 const app = express();

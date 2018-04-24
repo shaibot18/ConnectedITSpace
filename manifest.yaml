@@ -4,6 +4,6 @@ applications:
   memory: 1024M
   instances: 1
   host: cis-r110
-  command: npm start:prod
+  command: npm run-script start:prod
   services:
-  - cis-mongo
+  - cis-mongodb

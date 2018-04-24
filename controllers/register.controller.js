@@ -1,7 +1,7 @@
 ﻿var express = require('express');
 var request = require('request');
 var router = express.Router();
-var config = require('config.json');
+var config = require('config');
 // var baseApiUrl = process.env.PORT? config.apiUrl:config.localUrl;
 // console.log(baseApiUrl);
 
