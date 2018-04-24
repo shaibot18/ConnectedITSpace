@@ -260,10 +260,13 @@ function roomStatHouseKeep() {
 setInterval(_roomStatHouseKeepByHour, 3600 * 1000);
 
 function _roomStatHouseKeepByHour() {
-  const curHr = moment('2018-04-12 20:00:00').hour();
-  const curDate = moment('2018-04-12 20:00:00').format('YYYY-MM-DD');
+  const curHr = moment().format('hh');
+  const curDate = moment().format('YYYY-MM-DD');
   const startTime = moment(`${curDate} ${curHr}:00:00`);
   const endTime = moment(startTime).add(1, 'h');
+
+  // const startTime = moment('2018-04-12 01:00:00');
+  // const endTime = moment('2018-04-21 01:00:00');
 
   RoomDataService.RoomData.find({
     Time: {

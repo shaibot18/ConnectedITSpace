@@ -236,11 +236,9 @@ function RoomStatController(UserService, RoomService, FlashService, RoomStatServ
     let maxInHour = 0; // max in hour during the week
     let maxOutHour = 0; // max out hour during the week
 
-    // seriesData.push({ name: i, type: 'line', stack: '总量', label: { normal: { show: true, position: 'center' } }, areaStyle: { normal: {} }, data: [0, 0, 0, 0, 0] });
-    
     // generate empty rawdata matrix, [in,out,d,h]
-    for (let i = 0; i < 5; i++) {
-      for (let j = 0; j < 24; j++) {
+    for (let i = 0; i < wds.length; i++) {
+      for (let j = 0; j < hrs.length; j++) {
         rawData.push([0, 0, i, j]);
       }
     }
@@ -248,8 +246,8 @@ function RoomStatController(UserService, RoomService, FlashService, RoomStatServ
     result.forEach((e) => {
       // iso weekday as the index in data array, need to reduce by 1
       const wd = moment(e.recordDate).isoWeekday() - 1;
-      let dIn = 0;
-      let dOut = 0;
+      let dIn = 0; // day in
+      let dOut = 0; // day out
       e.stats.forEach((ele) => {
         rawData[_.findIndex(rawData, (item) => {
           return item[2] === wd && item[3] === ele.hourRange;
@@ -265,7 +263,7 @@ function RoomStatController(UserService, RoomService, FlashService, RoomStatServ
     // Inbound & outbound visitor
     $scope.weeklyStats.setOption({
       series: [
-        { name: 'Inbound', type: 'line', smooth: true, data: dailySumData.map( item => item[0] ) },
+        { name: 'Inbound', type: 'line', smooth: true, data: dailySumData.map(item => item[0]) },
         { name: 'Outbound', type: 'line', smooth: true, data: dailySumData.map(item => item[1]) },
         { name: 'Delta', type: 'line', smooth: true, data: dailySumData.map(item => item[2]) },
       ]
@@ -294,12 +292,12 @@ function RoomStatController(UserService, RoomService, FlashService, RoomStatServ
   }
 
   function _updateCurrentMonthPlot(result) {
-    const rawData = []; // raw data to store clean data, format as [[in,out,d,h],[],...]
-    const dailySumData = []; // summed data (summarized to one day) [in, out, delta, d]
+    const rawMonthData = []; // raw data to store clean data, format as [[in,out,d,h],[],...]
+    const dailyMonthSumData = []; // summed data (summarized to one day) [in, out, delta, d]
     // generate empty rawdata matrix, [in,out,d,h]
     for (let i = 0; i < moment().daysInMonth(); i++) {
       for (let j = 0; j < 24; j++) {
-        rawData.push([0, 0, i, j]);
+        rawMonthData.push([0, 0, i, j]);
       }
     }
 
@@ -309,26 +307,26 @@ function RoomStatController(UserService, RoomService, FlashService, RoomStatServ
       let dIn = 0;
       let dOut = 0;
       e.stats.forEach((ele) => {
-        rawData[_.findIndex(rawData, (item) => {
-          return item[2] === wd && item[3] === ele.hourRange;
-        })] = [ele.in, ele.out, wd, ele.hourRange];
+        rawMonthData[moment(e.recordDate).date()] = [ele.in, ele.out, wd, ele.hourRange];
         dIn += ele.in;
         $scope.totalInbound += ele.in;
         dOut += ele.out;
         $scope.totalOutbound += ele.out;
       });
-      dailySumData.push([dIn, dOut, dIn - dOut, wd]);
+      dailyMonthSumData.push([dIn, dOut, dIn - dOut, wd]);
     });
 
     $scope.avgInbound = $scope.totalInbound / (moment().date() - $scope.numberOfWeekEndsToDate);
     $scope.avgOutbound = $scope.totalOutbound / (moment().date() - $scope.numberOfWeekEndsToDate);
 
+    console.log(dailyMonthSumData);
+
     // Inbound & outbound visitor
     $scope.currentMonthStats.setOption({
       series: [
-        { name: 'Inbound', type: 'line', smooth: true, data: dailySumData.map(item => item[0]) },
-        { name: 'Outbound', type: 'line', smooth: true, data: dailySumData.map(item => item[1]) },
-        { name: 'Delta', type: 'line', smooth: true, data: dailySumData.map(item => item[2]) },
+        { name: 'Inbound', type: 'line', smooth: true, data: dailyMonthSumData.map(item => item[0]) },
+        { name: 'Outbound', type: 'line', smooth: true, data: dailyMonthSumData.map(item => item[1]) },
+        { name: 'Delta', type: 'line', smooth: true, data: dailyMonthSumData.map(item => item[2]) },
       ]
     });
   }
