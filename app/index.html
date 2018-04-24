@@ -20,6 +20,11 @@
   <!-- Custom Theme Style -->
   <link href="/Contents/custom.min.css" rel="stylesheet">
   <link href="app-content/app.css" rel="stylesheet" />
+  <!-- Mapbox -->
+  <script src='/public/scripts/mapbox-gl/dist/mapbox-gl.js'></script>
+  <link href='https://cdnjs.cloudflare.com/ajax/libs/mapbox-gl/0.44.1/mapbox-gl.css' rel='stylesheet' />
+  <script src='/public/scripts/@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.min.js'></script>
+  <link rel='stylesheet' href='/public/scripts/@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css' type='text/css' />
 </head>
 
 <body class="nav-md">
@@ -40,7 +45,7 @@
               </div>
               <div class="profile_info">
                 <span id="userName"></span>
-                <h2>CI/CWR2.5-AP</h2>
+                <h2>CI/CWR4-AP</h2>
               </div>
               <div class="profile_login">
                 <a href="/login" target="_self">
@@ -91,8 +96,7 @@
   </div>
 
   <script src="/public/scripts/angular/angular.min.js"></script>
-  <!-- <script src="/public/scripts/@uirouter/angularjs/release/angular-ui-router.js"></script> -->
-  <script src="//unpkg.com/@uirouter/angularjs/release/angular-ui-router.min.js"></script>
+  <script src="/public/scripts/@uirouter/angularjs/release/angular-ui-router.js"></script>
   <!-- jQuery -->
   <script src="/vendors/jquery/dist/jquery.min.js"></script>
   <!-- Bootstrap -->
@@ -103,6 +107,8 @@
   <script src="/vendors/bootstrap-daterangepicker/daterangepicker.js"></script>
   <!-- NProgress -->
   <script src="/vendors/nprogress/nprogress.js"></script>
+  <!-- Underscore.js -->
+  <script src="/vendors/underscore/underscore.min.js"></script>
   <!-- morris.js -->
   <script src="/vendors/raphael/raphael.min.js"></script>
   <script src="/vendors/morris.js/morris.min.js"></script>
@@ -133,13 +139,18 @@
   <script src="app-services/flash.service.js"></script>
   <script src="app-services/room.service.js"></script>
   <script src="app-services/roomdata.service.js"></script>
+  <script src="app-services/roomstat.service.js"></script>
+  <script src="app-services/util.service.js"></script>
   <script src="admin/index.controller.js"></script>
   <script src="admin/addManager.controller.js"></script>
   <script src="admin/userManagement.controller.js"></script>
   <script src="manager/index.controller.js"></script>
   <script src="manager/addRoom.controller.js"></script>
   <script src="manager/roomInfo.controller.js"></script>
+  <script src="manager/roomStat.controller.js"></script>
   <script src="manager/editRoom.controller.js"></script>
+  <script src="manager/map-search.directive.js"></script>
+  <script src="manager/dbc.controller.js"></script>
 </body>
 
 </html>

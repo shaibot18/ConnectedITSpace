@@ -1,5 +1,6 @@
 ﻿const express = require('express');
 const userService = require('services/user.service');
+
 const router = express.Router();
 
 // routes
@@ -13,73 +14,72 @@ router.delete('/:_id', deleteUser);
 module.exports = router;
 
 function authenticateUser(req, res) {
-    userService.authenticate(req.body.username, req.body.password)
-        .then(function (token) {
-            if (token) {
-                // authentication successful
-                res.send({ token: token });
-            } else {
-                // authentication failed
-                res.status(401).send('Username or password is incorrect');
-            }
-        })
-        .catch(function (err) {
-            res.status(400).send(err);
-        });
+  userService.authenticate(req.body.username, req.body.password)
+    .then((token) => {
+      if (token) {
+        // authentication successful
+        res.send({ token: token });
+      } else {
+        // authentication failed
+        res.status(401).send('Username or password is incorrect');
+      }
+    })
+    .catch((err) => {
+      res.status(400).send(err);
+    });
 }
 
 function registerUser(req, res) {
-    userService.create(req.body)
-        .then(function () {
-            res.sendStatus(200);
-        })
-        .catch(function (err) {
-            res.status(400).send(err);
-        });
+  userService.create(req.body)
+    .then(() => {
+      res.sendStatus(200);
+    })
+    .catch((err) => {
+      res.status(400).send(err);
+    });
 }
 
 function getCurrentUser(req, res) {
-    res.send(req.session.user);
-    console.log("User in session is ");
-    console.log(req.session.user);
+  res.send(req.session.user);
+  console.log(`User in session is ${req.session.user}`);
 }
 
-function getUserList(req,res){
-    userService.getAll().then(function(userList){
-        if(userList){
-            res.send(userList);
-        }
-        else {
-            res.sendStatus(404);
-        }
-    })
-    .catch(function(err){
-        res.sendStatus(400).send(err);
+function getUserList(req, res) {
+  userService.getAll().then((userList) => {
+    if (userList) {
+      res.send(userList);
+    } else {
+      res.sendStatus(404);
+    }
+  })
+    .catch((err) => {
+      res.sendStatus(400).send(err);
     });   
 }
 
 function updateUser(req, res) {
-    var userId = req.user.sub;
-    if (req.params._id !== userId) {
-        // can only update own account
-        return res.status(401).send('You can only update your own account');
-    }
+  const userId = req.user.sub;
+  if (req.params._id !== userId) {
+    // can only update own account
+    res.status(401).send('You can only update your own account');
+    return;
+  }
 
-    userService.update(userId, req.body)
-        .then(function () {
-            res.sendStatus(200);
-        })
-        .catch(function (err) {
-            res.status(400).send(err);
-        });
+  userService.update(userId, req.body)
+    .then(() => {
+      res.sendStatus(200);
+    })
+    .catch((err) => {
+      res.status(400).send(err);
+    });
 }
 
 function deleteUser(req, res) {
-    userService.delete(req.params._id)
-        .then(function () {
-            res.sendStatus(200);
-        })
-        .catch(function (err) {
-            res.status(400).send(err);
-        });
+  userService.delete(req.params._id)
+    .then(() => {
+      res.sendStatus(200);
+    })
+    .catch((err) => {
+      res.status(400).send(err);
+    });
 }

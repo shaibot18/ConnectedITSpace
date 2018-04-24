@@ -5,28 +5,27 @@
     color: black;
   }
 
-
   #historyTable td, #historyTable th{
     padding: 5px;
     text-align: center;    
   }
+.select-panel {
+  font-size: 15px;
+  margin-bottom: 20px;
+}
+
+  .select-panel .input-group {
+    margin-bottom: 0;
+  }
 
 </style>
 <div class='nav_menu'>
-            <div class="myboss">
-              <div class="locationinformation">
-                     <i class="fa fa-map-marker"></i>China | Shanghai | sgh201 4F
-                </div>
-                <div class="site_titleimg2">
-                    <img src="/images/picture.jpg" alt="..." class="img-circle2">
-                </div>
-                <div class="mybosstext">
-                    <div>Doe.John@cn.bosch.com</div>
-                    <div>2188-1111</div>
-                </div>
-                
-            </div>
-      </div>
+  <div class="myboss">
+    <div class="locationinformation">
+            <i class="fa fa-map-marker"></i>China | Shanghai | SGH201 4F
+      </div>      
+  </div>
+</div>
 
 <div class="col-md-6 col-sm-6 col-xs-12">
   <div class="x_panel managementstyle">
@@ -35,24 +34,23 @@
       </div>
       <div class="numberleftmargin">
         <ul>
-          <li>Average </li>
-          <li>people/d</li>
+          <li>Average / day</li>
+          <li>in curren month (excl. weekends)</li>
         </ul>
       </div>
     </div>
   </div>
 </div>
 
-
 <div class="col-md-6 col-sm-6 col-xs-12">
   <div class="x_panel managementstyle">
     <div class="x_content myroomtitle">
-      <div class="numberleft" ng-bind="totalNum">
+      <div class="numberleft" ng-bind="curNum">
       </div>
       <div class="numberleftmargin">
         <ul>
           <li>Total</li>
-          <li>people</li>
+          <li>in current month</li>
         </ul>
       </div>
     </div>
@@ -60,40 +58,40 @@
 </div>
 
 <!--graph-->
-<!-- graph area -->
-<div class="col-md-12 col-sm-12 col-xs-12 fortop">
-  <div class="x_panel managementstyle">
-    <div class="x_title">
-      <h2>Real-time data
-        <small></small>
-      </h2>
-      <div class="clearfix"></div>
-    </div>
-    <div class="x_content">
-      <div id="real-time" style="width:95%; height:300px;"></div>
-    </div>
-  </div>
-</div>
 <!-- /graph area -->
 <div class="col-md-12 col-sm-12 col-xs-12 fortop">
   <div class="x_panel managementstyle">
     <div class="x_title">
-      <h2>History Data
+      <h2>Visitor per hour
         <small></small>
       </h2>
       <div class="clearfix"></div>
     </div>
     <div class="x_content">
-        <fieldset>
-        <div class="control-group">
-            <div class="controls">
-              <div class="col-md-11 xdisplay_inputx form-group has-feedback">
-                <input type="text" class="form-control has-feedback-left" id="single_cal3">
-                <span class="fa fa-calendar-o form-control-feedback left" aria-hidden="true"></span>
-              </div>
-            </div>
+      <div class="row">
+        <div class="col-md-12 select-panel" style="display: flex; align-items: center">
+          <div class="col-md-1">
+            Date:
           </div>
-        </fieldset>
+          <div class="col-md-3">
+            <fieldset>
+              <div class="control-group">
+                <div class="controls">
+                  <div class="input-prepend input-group">
+                    <span class="add-on input-group-addon">
+                      <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
+                    </span>
+                    <input type="text" style="width: 200px" name="reservation" id="single_cal3" class="form-control"/>
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-primary" ng-click="renderBarPlot(barPlotDate)">Show</button>
+          </div>
+        </div>
+      </div>
 
       <div id="history" style="width:95%; height:300px;"></div>
     </div>
@@ -108,6 +106,29 @@
       <div class="clearfix"></div>
     </div>
     <div class="x_content">
+      <div class="col-md-12 select-panel" style="display: flex; align-items: center">
+        <div class="col-md-1">
+          Export:
+        </div>
+        <div class="col-md-3">
+          <fieldset>
+            <div class="control-group">
+              <div class="controls">
+                <div class="input-prepend input-group">
+                  <span class="add-on input-group-addon">
+                    <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
+                  </span>
+                  <input type="text" style="width: 200px" name="reservation" id="reservation" class="form-control" value="01/01/2016 - 01/25/2016"
+                  />
+                </div>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-primary" ng-click="exportToCSV()">Export</button>
+        </div>
+      </div>
       <div>
         <table class="table table-hover" id="historyTable">
           <thead>
@@ -126,9 +147,48 @@
           </tbody>
         </table>
       </div>
+
     </div>
   </div>
 </div>
 <div class="clearfix"></div>
 
+<!-- /experimental graph area -->
+<div class="col-md-12 col-sm-12 col-xs-12 fortop">
+  <div class="x_panel managementstyle">
+    <div class="x_title">
+      <h2>All stats graph
+        <small></small>
+      </h2>
+      <div class="clearfix"></div>
+    </div>
+    <div class="x_content">
+      <div class="row">
+        <div class="col-md-12 select-panel" style="display: flex; align-items: center">
+          <div class="col-md-1">
+            Date:
+          </div>
+          <div class="col-md-3">
+            <fieldset>
+              <div class="control-group">
+                <div class="controls">
+                  <div class="input-prepend input-group">
+                    <span class="add-on input-group-addon">
+                      <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
+                    </span>
+                    <input type="text" style="width: 200px" name="reservation" id="select-date-all-stats" class="form-control" />
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+          </div>
+          <!-- <div class="col-md-2">
+            <button class="btn btn-primary" ng-click="renderBarPlot(barPlotDate)">Show</button>
+          </div> -->
+        </div>
+      </div>
 
+      <div id="allstats" style="width:95%; height:300px;"></div>
+    </div>
+  </div>
+</div>

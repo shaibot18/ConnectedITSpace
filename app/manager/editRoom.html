@@ -4,16 +4,23 @@
             <br />
             <form class="form-horizontal form-label-left input_mask managementstyle">
                 <div class="form-input-middle">
-                    <div class="col-xs-12 form-group has-feedback">
-                        <input type="search" class="form-control has-feedback-left" ng-model="vm.room.country" placeholder="Search" required="required">
-                        <span class="required"></span>
-                        <span class="fa fa-globe form-control-feedback left" aria-hidden="true"></span>
-                    </div>
-
+                    <map-search result='vm.result'></map-search>
                     <div class="col-xs-12 form-group has-feedback">
                         <input type="text" class="form-control has-feedback-left" ng-model="vm.room.building" placeholder="Building" required="required">
                         <span class="required"></span>
                         <span class="fa fa-institution form-control-feedback left" aria-hidden="true"></span>
+                    </div>
+
+                    <div class="col-xs-12 form-group has-feedback">
+                        <input type="text" class="form-control has-feedback-left" ng-model="vm.room.country" placeholder="Country" required="required">
+                        <span class="required"></span>
+                        <span class="fa fa-inbox form-control-feedback left" aria-hidden="true"></span>
+                    </div>
+
+                    <div class="col-xs-12 form-group has-feedback">
+                        <input type="text" class="form-control has-feedback-left" ng-model="vm.room.city" placeholder="City" required="required">
+                        <span class="required"></span>
+                        <span class="fa fa-inbox form-control-feedback left" aria-hidden="true"></span>
                     </div>
 
                     <div class="col-xs-12 form-group has-feedback">
@@ -23,16 +30,24 @@
                     </div>
 
                     <div class="col-xs-12 form-group has-feedback">
-                        <input type="text" class="form-control has-feedback-left" ng-model="vm.room.openTime" placeholder="Open">
+                        <input type="text" class="form-control has-feedback-left" ng-model="vm.room.openTime" placeholder="Open" required="required">
+                        <span class="required"></span>
                         <span class="fa fa-toggle-on form-control-feedback left" aria-hidden="true"></span>
                     </div>
                     <div class="col-xs-6 form-group has-feedback">
-                        <input type="text" class="form-control has-feedback-left" ng-model="vm.room.closeTime" placeholder="Close">
+                        <input type="text" class="form-control has-feedback-left" ng-model="vm.room.closeTime" placeholder="Close" required="required">
+                        <span class="required"></span>
                         <span class="fa fa-toggle-off form-control-feedback left" aria-hidden="true"></span>
                     </div>
 
                     <div class="col-xs-12 form-group has-feedback">
                         <input type="text" class="form-control has-feedback-left" ng-model="vm.room.timeZone" placeholder="TimeZone, for China e.g.:'+0800'" required="required">
+                        <span class="required"></span>
+                        <span class="fa fa-institution form-control-feedback left" aria-hidden="true"></span>
+                    </div>
+
+                    <div class="col-xs-12 form-group has-feedback">
+                        <input type="number" class="form-control has-feedback-left" ng-model="vm.room.area" placeholder="Area of the room" required="required">
                         <span class="required"></span>
                         <span class="fa fa-institution form-control-feedback left" aria-hidden="true"></span>
                     </div>

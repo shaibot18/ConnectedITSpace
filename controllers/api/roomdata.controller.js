@@ -1,22 +1,75 @@
 const express = require('express');
+const moment = require('moment');
+const chalk = require('chalk');
 const RoomService = require('services/room.service');
-const roomdataService = require('services/roomdata.service');
-const crc = require('crc');
+const RoomDataService = require('services/roomdata.service');
+const RoomStatService = require('services/room.stat.service');
+const DbService = require('services/db.service');
+const UtilService = require('services/util.service');
+const RawDataService = require('services/rawdata.service');
 
+const padLeft = UtilService.padLeft;
 const router = express.Router();
-const openTime = padLeft((0).toString(16).toUpperCase()) + padLeft((0).toString(16).toUpperCase());
-const closeTime = padLeft((23).toString(16).toUpperCase()) + padLeft((0).toString(16).toUpperCase());
-const recordPeriod = padLeft((0).toString(16).toUpperCase());// default 10, 0 for real-time
-const uploadPeriod = padLeft((0).toString(16).toUpperCase());// default 120, 0 for real-time
+// TODO: get open time and close time from the room setting
+const openTime = padLeft((0).toString(16).toUpperCase()) +
+  padLeft((0).toString(16).toUpperCase());
+const closeTime = padLeft((23).toString(16).toUpperCase()) +
+  padLeft((0).toString(16).toUpperCase());
+const recordPeriod = padLeft((0).toString(16).toUpperCase()); // default 10, 0 for real-time
+const uploadPeriod = padLeft((0).toString(16).toUpperCase()); // default 120, 0 for real-time
 
 router.get('/:RoomId', getByTimeRange);
+router.get('/adjust/:dir/:amount', adjustTimeZone);
+router.get('/remove', removeDuplicates); // TODO: not exposed to external
 router.get('/all/:RoomId', getAllById);
+router.get('/allnum/:RoomId', UpdateAllNum);
 router.post('/', handlePost);
+module.exports = router;
 
+function removeDuplicates(req, res) {
+  DbService.removeDuplicates()
+    .then((result) => {
+      res.status(200).send(result);
+    })
+    .catch((err) => {
+      res.status(400).send(err);
+    });
+}
+
+function adjustTimeZone(req, res) {
+  if (req.params.dir) {
+    const dir = parseInt(req.params.dir, 10);
+    if (req.params.amount) {
+      const amount = parseInt(req.params.amount, 10);
+      DbService.adjustTimeZone(dir, amount)
+        .then((result) => {
+          res.status(200).send(result);
+        })
+        .catch((err) => {
+          res.status(400).send(err);
+        });
+    }
+  }
+}
+
+function UpdateAllNum(req, res) {
+  if (req.params.RoomId) {
+    const _id = req.params.RoomId;
+    RoomDataService.UpdateAllNum(_id)
+      .then((nums) => {
+        res.status(200).send(nums);
+      })
+      .catch((err) => {
+        res.status(400).send(err);
+      });
+  }
+}
+
+// Get all data of one room by the room id
 function getAllById(req, res) {
   if (req.params.RoomId) {
     const _RoomId = req.params.RoomId;
-    roomdataService.getAllById(_RoomId)
+    RoomDataService.getAllById(_RoomId)
       .then((roomdataList) => {
         if (roomdataList) {
           res.send(roomdataList);
@@ -31,15 +84,17 @@ function getAllById(req, res) {
 }
 
 function getByTimeRange(req, res) {
-  let query = req.query;
+  const query = req.query;
   if (req.params.RoomId) {
     if (query.startTime && query.endTime) {
-      roomdataService.getByTimeRange(req.params.RoomId, parseInt(query.startTime), parseInt(query.endTime))
+      RoomDataService.getByTimeRange(
+        req.params.RoomId,
+        parseInt(query.startTime, 10), parseInt(query.endTime, 10)
+      )
         .then((roomdataList) => {
           if (roomdataList) {
             res.send(roomdataList);
-          }
-          else {
+          } else {
             res.sendStatus(404);
           }
         })
@@ -52,123 +107,148 @@ function getByTimeRange(req, res) {
 
 // This funtion converts "+0800" to milliseconds
 function convertTimeZone(timeZone) {
-  let sign = timeZone.charAt(0);
-  if (sign == "+") {
-    return parseInt(timeZone.slice(1, 3)) * 3600 * 1000 + parseInt(timeZone.slice(3, 5)) * 60 * 1000
+  const sign = timeZone.charAt(0);
+  if (sign === '+') {
+    return (parseInt(timeZone.slice(1, 3), 10) * 3600 * 1000 +
+      parseInt(timeZone.slice(3, 5), 10) * 60 * 1000);
   }
-  else {
-    return (parseInt(timeZone.slice(1, 3)) * 3600 * 1000 + parseInt(timeZone.slice(3, 5)) * 60 * 1000) * (-1);
-  }
+  return (parseInt(timeZone.slice(1, 3), 10) * 3600 * 1000 +
+    parseInt(timeZone.slice(3, 5), 10) * 60 * 1000) * (-1);
 }
 
 function handlePost(req, res) {
-  console.log(req.body);
-  let cmd = req.body.cmd;
+  console.log(chalk.yellow('INCOMING ROOM DATA ...'));
+  // console.log(req.body);
   res.set('Content-Type', 'application/x-www-form-urlencoded');
+
+  RawDataService.add(req.body); // persist raw data
+  const cmd = req.body.cmd;
   const flag = req.body.flag;
   const resFlag = flag.substr(2, 2) + flag.substr(0, 2);
   let cmdType;
-  let SN;
   let timeDiff;
   let data;
   switch (cmd) {
-    case 'getsetting':
-      data = parseSetting(req.body.data);
-      RoomService.GetRoomBySN(data.SN)
+    case 'getsetting': {
+      data = _parseSetting(req.body.data);
+      const SN = data.SN;
+      RoomService.GetRoomBySN(SN)
         .then((room) => {
           if (room.length === 0) {
-            console.log('Invalid post: no existing room matches this SN ' + SN);
-            res.status(400).send('Invalid post: no existing room matches this SN ' + SN);
+            console.log(`Invalid post: no existing room matches this SN ${SN}`);
+            res.status(400).send(`Invalid post: no existing room matches this SN ${SN}`);
             res.end();
-          }
-          else if (room.length > 1) {
-            console.log('Invalid post: this SN ' + SN + 'matches too many rooms');
-            res.status(400).send('Invalid post: this SN ' + SN + 'matches too many rooms');
+          } else if (room.length > 1) {
+            console.log(`Invalid post: this SN ${SN} matches too many rooms`);
+            res.status(400).send(`Invalid post: this SN ${SN} matches too many rooms`);
             res.end();
-          }
-          else {
+          } else {
             data.timeZone = room[0].timeZone;
           }
           timeDiff = data.timeZone ? convertTimeZone(data.timeZone) : 0;
-          data.timeCheck = Math.abs(new Date().getTime() + timeDiff - data.systemTime.getTime()) < 60000;
+          data.timeCheck = Math.abs(moment().valueOf() + timeDiff -
+            data.systemTime.valueOf()) < 60000;
           if (data.crcCheck) {
             console.log('CrcCheck successful');
             if (data.timeCheck) {
               console.log('Time check successful');
               cmdType = '05'; // confirm parameters
-            }
-            else {
+            } else {
               console.log('Time check failed');
               cmdType = '04'; // reset parameters
             }
-            const systemTimeWeek = genTimeString(new Date(new Date().getTime() + timeDiff)) + '00';
-            const resultString = cmdType + resFlag + '000000000300'
-              + recordPeriod + uploadPeriod
-              + '0000000000000000000002000000000000000000000000000000000000000000'
-              + systemTimeWeek + openTime + closeTime + '0000';
-            res.status(200).send('result=' + resultString + crcEncrypt(resultString));
+            const systemTimeWeek = genTimeString(new Date(moment().valueOf() + timeDiff)).concat('00');
+            const resultString = `${cmdType}${resFlag}000000000300`
+              .concat(recordPeriod).concat(uploadPeriod)
+              .concat('0000000000000000000002000000000000000000000000000000000000000000')
+              .concat(`${systemTimeWeek}${openTime}${closeTime}0000`);
+            res.status(200).send(`result=${resultString}${UtilService.crcEncrypt(resultString)}`);
             res.end();
           }
         })
         .catch((err) => {
-          res.status(400).send(err.name + ': ' + err.message);
+          res.status(400).send(`${err.name} : ${err.message}`);
           res.end();
         });
       break;
-    case 'cache':
-      data = parseData(req.body);
-      SN = data.status.SN;
+    }
+    case 'cache': {
+      const body = req.body;
+      data = _parseDataHeading(body);
+      if (data.err) {
+        res.status(400).send(data.err);
+        res.end();
+        break;
+      }
+      // TODO: only the last entry should be injected?
+      const dataList = (typeof body.data === 'string') ? [body.data] : body.data;
+      const SN = data.status.SN;
       RoomService.GetRoomBySN(SN)
         .then((room) => {
-          data.timeZone = room[0].timeZone;
-          let resType;
-          if (data.err) {
-            console.log(data.err);
-            resType = '02';//data uploading check failed     
+          const timeZone = room[0].timeZone;
+          const resType = '01'; // data uploading check successful
+          cmdType = '03'; // check both system time and open/close time
+          timeDiff = timeZone ? convertTimeZone(timeZone) : 0;
+          for (let i = 0; i < dataList.length; i++) {
+            const cur = dataList[i];
+            if (cur.length !== 34) {
+              res.sendStatus(400).send({
+                err: `Data length is not valid ${data[i]}`
+              });
+              res.end();
+            }
+            if (cur.slice(-4) !== UtilService.crcEncrypt(cur.slice(0, -4))) {
+              res.sendStatus(400).send({
+                err: `Data CrcCheck failed ${cur}`
+              });
+            }
+            const dataObj = {
+              SN,
+              Time: parseTime(cur.slice(0, 12)), // datetime
+              In: parseInt(cur.slice(14, 22).match(/[\w]{2}/g).reverse().join(''), 16),
+              Out: parseInt(cur.slice(22, 30).match(/[\w]{2}/g).reverse().join(''), 16),
+            };
+            RoomDataService.add(dataObj)
+              .then((doc) => {
+                const roomId = doc._RoomId;
+                const eventDate = moment(doc.Time);
+
+                RoomService.updateBatteryLevel(roomId, parseInt(data.status.battery, 10))
+                  .then((updatedDoc) => {
+                    console.log(chalk.green(`BATTERY Updated => ${updatedDoc._id}.`));
+                  });
+              })
+              .catch((err) => {
+                console.log(err);
+              });
           }
-          else {
-            resType = '01';//data uploading check successful 
-          }
-          cmdType = '03';//check both system time and open/close time 
-          timeDiff = data.timeZone ? convertTimeZone(data.timeZone) : 0;
-          let systemTimeWeek = genTimeString(new Date(new Date().getTime() + timeDiff)) + '00';
-          let resultString = resType + resFlag + cmdType + systemTimeWeek + openTime + closeTime;
-          res.status(200).send('result=' + resultString + crcEncrypt(resultString));
+
+          const systemTimeWeek = genTimeString(new Date(Date.now() + timeDiff)).concat('00');
+          const resultString = `${resType}${resFlag}${cmdType}${systemTimeWeek}${openTime}${closeTime}`;
+          res.status(200).send(`result${resultString} ${UtilService.crcEncrypt(resultString)} `);
           res.end();
         })
         .catch((err) => {
-          res.status(400).send(err.name + ': ' + err.message);
+          res.status(400).send(`${err.name} : ${err.message}`);
           res.end();
         });
       break;
+    }
     default:
       break;
   }
 }
 
-function padLeft() {
-  let string = arguments[0];
-  if (arguments[1]) {
-    let nOfBytes = arguments[1];
-    return ('0000' + string).slice((-2) * nOfBytes);
-  }
-  return ('00' + string).slice(-2);
-}
-
-function crcEncrypt(resultString) {
-  let buffer = new ArrayBuffer(resultString.length / 2);
-  let v8 = new Int8Array(buffer);
-  let resultArray = resultString.match(/[\w]{2}/g);
-  for (var i = 0; i < resultArray.length; i++) {
-    v8[i] = parseInt(resultArray[i], 16);
-  }
-  return padLeft(crc.crc16modbus(v8).toString(16).toUpperCase(), 2);
-}
-
 // this function is used to parse time string in the format 'yymmddhhmmss'
-function parseTime(timeString) {
-  let timeArray = timeString.match(/[\w]{2}/g).map(element => parseInt(element, 16));
-  return new Date(2000 + timeArray[0], timeArray[1] - 1, timeArray[2], timeArray[3], timeArray[4], timeArray[5]);
+function parseTime(...args) {
+  const timeString = args[0];
+  const timeArray = timeString.match(/[\w]{2}/g).map(element => parseInt(element, 16));
+  // timeArray[0] += 2000;
+  if (args[1]) {
+    // return moment.utc(timeArray.join(' ').concat(' ').concat(args[1]), 'YYYY MM DD HH mm ss Z');
+    return moment(timeArray.join(' ').concat(' ').concat(args[1]), 'YY MM DD HH mm ss Z').toDate();
+  }
+  return moment(timeArray.join(' '), 'YY MM DD HH mm ss').toDate();
 }
 
 function genTimeString(date) {
@@ -181,7 +261,7 @@ function genTimeString(date) {
   return year + month + day + hour + min + sec;
 }
 
-function parseSetting(data) {
+function _parseSetting(data) {
   const resultObj = {
     SN: data.slice(0, 8).match(/[\w]{2}/g).reverse().join(''), // string
     cmdType: data.slice(8, 10), // string
@@ -199,44 +279,22 @@ function parseSetting(data) {
     systemTime: parseTime(data.slice(80, 92)), // datetime
     systemWeek: parseInt(data.slice(92, 94), 16),
     openTime: padLeft(parseInt(data.slice(94, 96), 16)) + padLeft(parseInt(data.slice(96, 98), 16)),
-    closeTime: padLeft(parseInt(data.slice(98, 100), 16)) + padLeft(parseInt(data.slice(100, 102), 16)),
+    closeTime: (padLeft(parseInt(data.slice(98, 100), 16)) +
+      padLeft(parseInt(data.slice(100, 102), 16))),
     crc: data.slice(-4),
-    crcCheck: crcEncrypt(data.slice(0, -4)) === data.slice(-4),
+    crcCheck: UtilService.crcEncrypt(data.slice(0, -4)) === data.slice(-4),
   };
   return resultObj;
 }
 
-function parseData(body) {
+function _parseDataHeading(body) {
   const status = body.status;
-  const data = typeof body.data == 'string' ? [body.data] : body.data;
   const resultObj = {};
-  resultObj.data = [];
   if (status.length !== 28) {
     return { err: 'Status length is not valid' };
   }
-  if (crcEncrypt(status.slice(0, -4)) !== status.slice(-4)) {
+  if (UtilService.crcEncrypt(status.slice(0, -4)) !== status.slice(-4)) {
     return { err: `Status CrcCheck failed ${status}` };
-  }
-
-  for (let i = 0; i < data.length; i++) {
-    const cur = data[i];
-    if (cur.length !== 34) {
-      return { err: `Data length is not valid ${data[i]}` };
-    }
-    if (cur.slice(-4) != crcEncrypt(cur.slice(0, -4))) {
-      return { err: `Data CrcCheck failed ${cur}` };
-    }
-    const dataObj = {
-      SN: status.slice(4, 12).match(/[\w]{2}/g).reverse().join(''),
-      Time: parseTime(cur.slice(0, 12)), // datetime
-      In: parseInt(cur.slice(14, 22).match(/[\w]{2}/g).reverse().join(''), 16),
-      Out: parseInt(cur.slice(22, 30).match(/[\w]{2}/g).reverse().join(''), 16),
-    };
-    console.log(dataObj);
-    roomdataService.add(dataObj)
-      .then(() => { console.log('Add data successful'); })
-      .catch((err) => { console.log(err); });
-    resultObj.data.push(dataObj);
   }
   resultObj.status = {
     version: status.slice(0, 4),
@@ -248,5 +306,3 @@ function parseData(body) {
   };
   return resultObj;
 }
-
-module.exports = router;

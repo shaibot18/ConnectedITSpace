@@ -1,117 +1,123 @@
 ﻿<!-- jQuery -->
 <script type="text/javascript" src="vendors/jquery/dist/jquery.js"></script>
 <script>
-    var geojson = {
-        "type": "FeatureCollection",
-        "features": [
-            {
-                "type": "Feature",
-                "properties": {
-                    "message": "Baz",
-                },
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": [121.355249, 31.230112]// localtion for Bosch Shanghai
-                }
+  const geojson = {
+    "type": "FeatureCollection",
+    "features": []
+  };
+
+  mapboxgl.accessToken =
+    'pk.eyJ1IjoiZXZzY2hlbiIsImEiOiJjamM1c3d2Z2owcndrMnF0OGJ3b3o1MWkyIn0.oDhmygyuNxXmvq2CqIDFIw';
+  var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/streets-v10',
+    center: [121.355249, 31.230112],
+    maxZoom: 10,
+    minZoom: 3
+  });
+  map.addControl(new mapboxgl.GeolocateControl({
+    positionOptions: {
+      enableHighAccuracy: true
+    },
+    trackUserLocation: true
+  }));
+  var geocoder = new MapboxGeocoder({
+    accessToken: mapboxgl.accessToken,
+  });
+  map.addControl(geocoder, 'top-left');
+  map.on('load', function () {
+    geocoder.on('result', function (ev) {
+      console.log('Result is ');
+      console.log(ev.result.geometry);
+    });
+  });
+  $.get('/api/rooms/', (roomList) => {
+        roomList.forEach((room) => {
+          console.log(room);
+          if (room.coordinates.length > 0) {
+            // geojson.features.push({
+            //   type: 'Feature',
+            //   properties: {
+            //     id: room._id
+            //   },
+            //   geometry: {
+            //     type: 'Point',
+            //     coordinates: room.coordinates
+            //   }
+            // });
+            const el = document.createElement('div');
+            el.innerHTML = '<i class="fa fa-map-marker fa-3x" aria-hidden="true"></i>';
+            el.className = 'marker';
+            el.style.width = '40px';
+            el.style.height = '40px';
+            if (room.area && room.curNum / room.area > 2) {
+              el.style.color = 'rgba(240, 57, 75, 0.97)';
             }
-        ]
-    };
-    mapboxgl.accessToken =
-        'pk.eyJ1IjoiZXZzY2hlbiIsImEiOiJjamM1c3d2Z2owcndrMnF0OGJ3b3o1MWkyIn0.oDhmygyuNxXmvq2CqIDFIw';
-    var map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/mapbox/streets-v10',
-        center: [121.355249, 31.230112],
-        maxZoom: 10,
-        minZoom: 3
-    });
-    map.addControl(new mapboxgl.GeolocateControl({
-        positionOptions: {
-            enableHighAccuracy: true
-        },
-        trackUserLocation: true
-    }));
-    var geocoder = new MapboxGeocoder({
-        accessToken: mapboxgl.accessToken,
-    });
-    map.addControl(geocoder, 'top-left');
-    map.on('load',function(){
-        geocoder.on('result', function(ev) {
-            console.log('Result is ');
-            console.log(ev.result.geometry);
-        });
-    });
-
-    
-    var popupHTML = $('#sgh_box').html();
-
-    geojson.features.forEach(function(marker) {
-    // create a DOM element for the marker
-        var el = document.createElement('div');
-        el.innerHTML = '<i class="fa fa-map-marker fa-3x" aria-hidden="true"></i>';
-        el.className = 'marker';
-        el.style.width = '40px';
-        el.style.height = '40px';
-        // el.style.backgroundImage = 'url(https://placekitten.com/g/' + marker.properties.iconSize.join('/') + '/)';
-        // el.style.backgroundColor = 'black';
-        var popup = new mapboxgl.Popup({
-                closeButton: false,
-                closeOnClick: false
+            else {
+              el.style.color = 'rgba(132, 240, 98, 0.97)'
+            }
+            // el.style.color = 'rgba(132, 240, 98, 0.97)'
+            // el.style.backgroundColor = 'black';
+            const popup = new mapboxgl.Popup({
+              closeButton: false,
+              closeOnClick: false
             });
-        el.addEventListener('mouseover', function() {        
-            popup.setLngLat(marker.geometry.coordinates)
+            const popupHTML = $('#sgh_box').html();
+            el.addEventListener('mouseover', function () {
+              popup.setLngLat(room.coordinates)
                 .setHTML(popupHTML)
-                .addTo(map);        
+                .addTo(map);
+            });
+            el.addEventListener('mouseleave', function () {
+              popup.remove();
+            });
+            // add marker to map
+            new mapboxgl.Marker(el)
+              .setLngLat(room.coordinates)
+              .addTo(map);
+          }
         });
-        el.addEventListener('mouseleave', function() {        
-            popup.remove();      
-        });
-        // add marker to map
-        new mapboxgl.Marker(el)
-            .setLngLat(marker.geometry.coordinates)
-            .addTo(map);
-    });
+      });
 </script>
 <script type="text/javascript">
-    $(document).ready(function () {
-        //login
-        $("#myiconuse").click(
-            function () {
-                if ($(".mylogin_box").css("display") == "none") {
-                    $('#map').css('z-index', -1);
-                    $(".mylogin_box").show();
-                } else {
-                    $('#map').css('z-index', 'auto');
-                    $(".mylogin_box").hide();
-                }
-            }
-        );
-        $(".loginbutton").click(
-            function () {
-                $(".mylogin_box").css("display", "none");
-            }
-        );
+  $(document).ready(function () {
+    //login
+    $("#myiconuse").click(
+      function () {
+        if ($(".mylogin_box").css("display") == "none") {
+          $('#map').css('z-index', -1);
+          $(".mylogin_box").show();
+        } else {
+          $('#map').css('z-index', 'auto');
+          $(".mylogin_box").hide();
+        }
+      }
+    );
+    $(".loginbutton").click(
+      function () {
+        $(".mylogin_box").css("display", "none");
+      }
+    );
 
-        $(".iconchinasgh").hover(
-            function (e) {
-                var pageX = e.pageX + 20;
-                $(".iconchinasgh_box").css("left", pageX);
-                $(".iconchinasgh_box").css("display", "inline");
-            },
+    $(".iconchinasgh").hover(
+      function (e) {
+        var pageX = e.pageX + 20;
+        $(".iconchinasgh_box").css("left", pageX);
+        $(".iconchinasgh_box").css("display", "inline");
+      },
 
-            function (e) {
-                var pageX = e.pageX + 20;
-                $(".iconchinasgh_box").css("left", pageX);
-                $(".iconchinasgh_box").css("display", "none");
-            },
-        );
-    });
+      function (e) {
+        var pageX = e.pageX + 20;
+        $(".iconchinasgh_box").css("left", pageX);
+        $(".iconchinasgh_box").css("display", "none");
+      },
+    );
+  });
 </script>
 <!-- Bootstrap -->
 <script src="vendors/bootstrap/dist/js/bootstrap.min.js"></script>
 <!-- NProgress -->
 <script src="vendors/nprogress/nprogress.js"></script>
-
 <!-- Custom Theme Scripts -->
 <script src="scripts/custom.min.js"></script>
 </body>

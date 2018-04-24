@@ -1,7 +1,7 @@
 ﻿{
-    "connectionString": "mongodb://localhost:27017/mean-stack-registration-login-example",
-    "apiUrl": "https://cis.apps.sg1.bosch-iot-cloud.com/api",
+    "connectionString": "mongodb://localhost:27017/cis",
+    "apiUrl": "https://cis-r110.apps.sg1.bosch-iot-cloud.com/api",
     "localUrl": "http://localhost:3000/api",
     "secret": "REPLACE THIS WITH YOUR OWN SECRET, IT CAN BE ANY STRING",
-    "removeDuplicates": true
+    "removeDuplicates": false
 }

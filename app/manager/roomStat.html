@@ -1,0 +1,159 @@
+﻿<style>
+  #historyTable {
+    width: 60%;
+    margin: 0 auto;
+    color: black;
+  }
+
+  #historyTable td, #historyTable th{
+    padding: 5px;
+    text-align: center;    
+  }
+.select-panel {
+  font-size: 15px;
+  margin-bottom: 20px;
+}
+
+  .select-panel .input-group {
+    margin-bottom: 0;
+  }
+
+</style>
+
+<div class="col-md-6 col-sm-6 col-xs-12">
+  <div class="x_panel managementstyle">
+    <div class="x_content myroomtitle">
+      <div class="numberleft" ng-bind="avgInbound | number:0">
+      </div>
+      <div class="numberleftmargin">
+        <ul>
+          <li>Avg In/day</li>
+          <li><i ng-bind="currentMonth"></i> (excl. weekends)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="x_content myroomtitle">
+      <div class="numberleft" ng-bind="avgOutbound | number:0">
+      </div>
+      <div class="numberleftmargin">
+        <ul>
+          <li>Avg Out/day</li>
+          <li><i ng-bind="currentMonth"></i> (excl. weekends)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="col-md-6 col-sm-6 col-xs-12">
+  <div class="x_panel managementstyle">
+    <div class="x_content myroomtitle">
+      <div class="numberleft" ng-bind="totalInbound | number:0">
+      </div>
+      <div class="numberleftmargin">
+        <ul>
+          <li>Total Inbound</li>
+          <li><i ng-bind="currentMonth"></i> (excl. weekends)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="x_content myroomtitle">
+      <div class="numberleft" ng-bind="totalOutbound | number:0">
+      </div>
+      <div class="numberleftmargin">
+        <ul>
+          <li>Total Outbound</li>
+          <li><i ng-bind="currentMonth"></i> (excl. weekends)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--graph-->
+<!-- /Monthy chart -->
+<div class="col-md-12 col-sm-12 col-xs-12 fortop">
+  <div class="x_panel managementstyle">
+    <div class="x_content">
+      <div id="currentMonthStackChart" style="width:95%; height:400px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- /daily visitor chart -->
+<div class="col-md-12 col-sm-12 col-xs-12 fortop">
+  <div class="x_panel managementstyle">
+    <div class="x_content">
+      <div class="row">
+        <div class="col-md-12 select-panel" style="display: flex; align-items: center">
+          <div class="col-md-1">
+            Date:
+          </div>
+          <div class="col-md-3">
+            <fieldset>
+              <div class="control-group">
+                <div class="controls">
+                  <div class="input-prepend input-group">
+                    <span class="add-on input-group-addon">
+                      <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
+                    </span>
+                    <input type="text" style="width: 200px" name="reservation" id="singledaypicker" class="form-control" />
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-primary" ng-click="renderDailyBarPlot(dailyPlotDate)">Show</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="dailyStatsChart" style="width:95%; height:300px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- /weekly visitor area stack chart -->
+<div class="col-md-12 col-sm-12 col-xs-12 fortop">
+  <div class="x_panel managementstyle">
+    <div class="x_title">
+      <h2>Weekly visitor charts
+        <small></small>
+      </h2>
+      <div class="clearfix"></div>
+    </div>
+    <div class="x_content">
+      <div class="row">
+        <div class="col-md-12 select-panel" style="display: flex; align-items: center">
+          <div class="col-md-1">
+            Week:
+          </div>
+          <div class="col-md-3">
+            <fieldset>
+              <div class="control-group">
+                <div class="controls">
+                  <div class="input-prepend input-group">
+                    <span class="add-on input-group-addon">
+                      <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
+                    </span>
+                    <input type="text" style="width: 200px" name="weekly-reservation" id="weekpicker" class="form-control" />
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-primary" ng-click="renderWeeklyPlot(chosenDate)">Show</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="weeklyStackChart" style="width:95%; height:400px;"></div>
+
+      <div id="weeklyHeatMapChart" style="width:95%; height:400px;"></div>
+
+      <div id="weeklyPunchChart" style="width:95%; height:400px;"></div>
+    </div>
+  </div>
+</div>

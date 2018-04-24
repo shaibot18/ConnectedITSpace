@@ -1,6 +1,8 @@
 const Q = require('q');
-const mongoose = require('services/mongooseCon');
+const mongoose = require('services/dbConnection.service');
 const RoomService = require('services/room.service');
+const moment = require('moment');
+const chalk = require('chalk');
 
 const Schema = mongoose.Schema;
 const roomdataSchema = new Schema({
@@ -9,7 +11,6 @@ const roomdataSchema = new Schema({
   Time: {
     type: Date,
     default: Date.now,
-    unique: true
   },
   TimeZone: {
     type: String,
@@ -26,46 +27,73 @@ const service = {};
 
 service.RoomData = Roomdata;
 service.add = add;
-service.getByTimeRange = getByTimeRange;
-service.getAllById = getAllById;
-service.delete = _delete;
+
 service.UpdateAllNum = UpdateAllNum;
-const UpdateInterval = setInterval(() => { UpdateAllNum(); }, 5 * 1000 * 60);
 service.UpdateTotal = UpdateTotal;
 service.UpdateAvg = UpdateAvg;
-service.UpdateInterval = UpdateInterval;
+
+service.getAllById = getAllById;
+service.getByTimeRange = getByTimeRange;
+service.DeleteRoomData = DeleteRoomData;
+
 module.exports = service;
 
 
-function UpdateAllNum() {
+function UpdateAllNum(_id) {
   const deferred = Q.defer();
-  RoomService.GetAll()
-    .then((roomList) => {
-      roomList.forEach((room) => {
-        const _id = room._id;
-        const avgProm = UpdateAvg(_id);
-        const totalProm = UpdateTotal(_id);
-        Promise.all([avgProm, totalProm])
-          .then((values) => {
-            const [avgNum, totalNum] = values;
-            RoomService.get(_id)
-              .then((err, doc) => {
-                doc.avgNum = avgNum;
-                doc.totalNum = totalNum;
-                doc.save();
-                deferred.resolve([totalNum, avgNum]);
-              });
-          })
-          .catch((err) => {
-            console.error(err);
-            deferred.reject(err);
-          });
-      });
+  console.log('update function get called');
+  RoomService.Get(_id)
+    .then((room) => {
+      const avgProm = UpdateAvg(_id);
+      const totalProm = UpdateTotal(_id);
+      const curProm = UpdateCur(_id);
+      Promise.all([avgProm, totalProm, curProm])
+        .then((values) => {
+          const [avgNum, totalNum, curNum] = values;
+          room.avgNum = avgNum;
+          room.totalNum = totalNum;
+          room.curNum = curNum;
+          room.save();
+          deferred.resolve({ totalNum, avgNum, curNum });
+        })
+        .catch((err) => {
+          console.error(err);
+          deferred.reject(err);
+        });
     })
     .catch((err) => {
       console.error(err);
       deferred.reject(err);
     });
+  return deferred.promise;
+}
+
+function UpdateCur(_id) {
+  const deferred = Q.defer();
+  RoomService.Get(_id)
+    .then((room) => {
+      const { openTime, closeTime, timeZone } = room;
+      const zeroTime = moment().utcOffset(timeZone).startOf('day');
+      const startTime = zeroTime.clone()
+        .add(parseInt(openTime.substr(0, 2), 10), 'h')
+        .add(parseInt(openTime.substr(2, 2), 10), 'm');
+      const endTime = zeroTime.clone()
+        .add(parseInt(closeTime.substr(0, 2), 10), 'h')
+        .add(parseInt(closeTime.substr(2, 2), 10), 'm');
+      let curNum = 0;        
+      if (moment().isBetween(startTime, endTime)) {
+        getByTimeRange(_id, startTime.valueOf(), moment().valueOf())
+          .then((dataList) => {
+            dataList.forEach((ele) => {
+              curNum += ele.In - ele.Out;
+            });
+            deferred.resolve(curNum);
+          });
+      } else {
+        deferred.resolve(curNum);
+      }
+    })
+    .catch((err) => { deferred.reject(err); });
   return deferred.promise;
 }
 
@@ -85,7 +113,7 @@ function UpdateAvg(_id) {
           curDay = date.getDate();
           curMonth = date.getMonth();
         }
-        totalNum += element.In - element.Out;
+        totalNum += element.In;
       });
       avgNum = (dayNum === 0) ? 0 : Math.round(totalNum / dayNum);
       deferred.resolve(avgNum);
@@ -100,7 +128,7 @@ function UpdateTotal(_id) {
   getAllById(_id)
     .then((dataList) => {
       dataList.forEach((element) => {
-        totalNum += element.In - element.Out;
+        totalNum += element.In;
       });
       deferred.resolve(totalNum);
     })
@@ -108,50 +136,60 @@ function UpdateTotal(_id) {
   return deferred.promise;
 }
 
-
 function getAllById(_RoomId) {
   const deferred = Q.defer();
   Roomdata.find({ _RoomId }, (err, res) => {
-    if (err) deferred.reject(err.name + ': ' + err.message);
+    if (err) deferred.reject(`${err.name}: ${err.message}`);
     deferred.resolve(res);
   });
+  return deferred.promise;
+}
+
+function _createOrUpdateRoomData(roomData) {
+  const deferred = Q.defer();
+  Roomdata.findOneAndUpdate(
+    {
+      _RoomId: roomData._RoomId,
+      In: roomData.in,
+      Out: roomData.out,
+      Time: roomData.Time
+    },
+    roomData,
+    { new: true, upsert: true, setDefaultsOnInsert: true },
+    (err, doc) => {
+      if (err) deferred.reject(`${err.name} : ${err.message}`);
+      deferred.resolve(doc);
+    }
+  );
   return deferred.promise;
 }
 
 function add(roomdataParams) {
   const deferred = Q.defer();
   const SN = roomdataParams.SN;
-  console.log(`SN is ${SN}`);
   RoomService.GetRoomBySN(SN)
     .then((room) => {
       if (room.length === 0) {
         console.log(`Invalid post: no existing room matches SN: ${SN}`);
         deferred.reject(`Invalid post: no existing room matches SN: ${SN}`);
       } else if (room.length > 1) {
-        console.log('Invalid post: this SN ' + SN + 'matches too many rooms');
-        deferred.reject('Invalid post: this SN ' + SN + 'matches too many rooms');
+        console.log(`Invalid post: this SN ${SN} matches too many rooms`);
+        deferred.reject(`Invalid post: this SN ${SN} matches too many rooms`);
       } else {
         roomdataParams._RoomId = room[0]._id;
-        saveRoom(roomdataParams);
+        // timezone defaults to +0800
+        _createOrUpdateRoomData(roomdataParams)
+          .then((rData) => {
+            console.log(chalk.green(`SAVED Time=${rData.Time}, In=${rData.In} Out=${rData.Out}`));
+            deferred.resolve(rData);
+          });
       }
     })
-    .catch((err) => { deferred.reject(err.name + ': ' + err.message); });
+    .catch((err) => { deferred.reject(`${err.name}: ${err.message}`); });
   return deferred.promise;
-  function saveRoom(roomdataParams) {
-    const roomdata = new Roomdata(roomdataParams);
-    console.log('Saving roomdata ...');
-    console.log(`In is ${roomdata.In} Out is ${roomdata.Out}`);
-    console.log(`Time is ${Date.parse(roomdata.Time)}`);
-    roomdata.save((err, doc) => {
-      if (err) deferred.reject(err.name + ': ' + err.message);
-      deferred.resolve();
-    });
-  }
 }
 
 function getByTimeRange(_RoomId, startTime, endTime) {
-  console.log(`Start time is ${startTime}`);
-  console.log(`End time is ${endTime}`);
   const deferred = Q.defer();
   Roomdata.find({
     _RoomId,
@@ -160,23 +198,20 @@ function getByTimeRange(_RoomId, startTime, endTime) {
       $lt: endTime
     }
   }, (err, res) => {
-    if (err) deferred.reject(err.name + ': ' + err.message);
-    console.log('Result is');
-    console.log(res);
+    if (err) deferred.reject(`${err.name} : ${err.message}`);
     deferred.resolve(res);
   });
   return deferred.promise;
 }
 
-function _delete(_id) {
+function DeleteRoomData(_id) {
   const deferred = Q.defer();
   Roomdata.remove(
-    { _id: mongoose.helper.toObjectID(_id) },
+    { _RoomId: _id },
     (err) => {
-      if (err) deferred.reject(err.name + ': ' + err.message);
+      if (err) deferred.reject(`${err.name}: ${err.message}`);
       deferred.resolve();
     }
   );
-
   return deferred.promise;
 }
