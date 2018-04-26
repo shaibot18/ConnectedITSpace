@@ -1,4 +1,4 @@
-﻿const config = require('config.json');
+﻿const config = require('config/config');
 const _ = require('lodash');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
@@ -68,6 +68,7 @@ function getById(_id) {
 }
 
 function getAll() {
+  console.log('USER.SERVICE getAll called');
   var deferred = Q.defer();
   User.find({}, function (err, userList) {
     if (err) deferred.reject(err.name + ': ' + err.message);

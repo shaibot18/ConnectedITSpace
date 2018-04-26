@@ -2,9 +2,10 @@
 require('rootpath')();
 const express = require('express');
 const session = require('express-session');
+// const sessionStore = require('session-mongoose')(express);
 const bodyParser = require('body-parser');
 const path = require('path');
-const config = require('config.json');
+const config = require('config/config');
 
 const app = express();
 
@@ -21,11 +22,35 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
 app.use(unless('/api/roomdata', session({
   secret: config.secret,
   resave: false,
   saveUninitialized: true,
 })));
+
+// if (process.env.VCAP_SERVICES) {
+//   const vcapServices = JSON.parse(process.env.VCAP_SERVICES);
+//   connectionString = vcapServices['MongoDB-Service'][0].credentials.uri;
+
+//   app.use(unless('/api/roomdata', express.session({
+//     store: new sessionStore({
+//       url: connectionString,
+//       interval: 1200000
+//     }),
+//     secret: config.secret,
+//     resave: false,
+//     saveUninitialized: true,
+//   })));
+// }
+// else {
+//   app.use(unless('/api/roomdata', session({
+//     secret: config.secret,
+//     resave: false,
+//     saveUninitialized: true,
+//   })));
+// }
+
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/public/scripts', express.static(path.join(__dirname, 'node_modules')));
 // use JWT auth to secure the api
@@ -33,13 +58,13 @@ app.use('/public/scripts', express.static(path.join(__dirname, 'node_modules')))
 //   path: ['/api/users/authenticate', '/api/users/register']
 // }));
 
-app.use('/app', require('./controllers/app.controller'));
-app.use('/login', require('./controllers/login.controller'));
-app.use('/register', require('./controllers/register.controller'));
-app.use('/api/users', require('./controllers/api/users.controller'));
-app.use('/api/rooms', require('./controllers/api/rooms.controller'));
-app.use('/api/roomdata', require('./controllers/api/roomdata.controller'));
-app.use('/api/roomstat', require('./controllers/api/roomdata.stats.controller'));
+app.use('/app', require('controllers/app.controller'));
+app.use('/login', require('controllers/login.controller'));
+app.use('/register', require('controllers/register.controller'));
+app.use('/api/users', require('controllers/api/users.controller'));
+app.use('/api/rooms', require('controllers/api/rooms.controller'));
+app.use('/api/roomdata', require('controllers/api/roomdata.controller'));
+app.use('/api/roomstat', require('controllers/api/roomdata.stats.controller'));
 
 // make '/app' default route
 app.get('/', (req, res) => {

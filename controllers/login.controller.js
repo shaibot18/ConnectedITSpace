@@ -2,7 +2,7 @@
 const chalk = require('chalk');
 const jwt = require('jsonwebtoken');
 const request = require('request');
-const config = require('config.json');
+const config = require('config/config');
 
 const router = express.Router();
 
@@ -25,6 +25,7 @@ router.get('/', (req, res) => {
 router.post('/', (req, res) => {
   // authenticate using api to maintain clean separation between layers
   request.post({
+    // url: baseApiUrl + '/users/authenticate',
     url: `${req.protocol}://${req.get('host')}/api/users/authenticate`,
     form: req.body,
     json: true

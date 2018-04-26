@@ -1,6 +1,6 @@
 ﻿const express = require('express');
 const request = require('request');
-// const config = require('config.json');
+const config = require('config/config.js');
 
 const router = express.Router();
 
@@ -12,8 +12,11 @@ router.get('/', (req, res) => {
 });
 
 router.post('/', (req, res) => {
+  // console.log(`${req.headers.host}/users/register`);
+
   // register using api to maintain clean separation between layers
   request.post({
+    // url: baseApiUrl + '/users/register',
     url: `${req.headers.host}/users/register`,
     form: req.body,
     json: true

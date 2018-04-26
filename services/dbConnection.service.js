@@ -1,4 +1,4 @@
-const config = require('config.json');
+const config = require('config/config');
 const mongoose = require('mongoose');
 
 let connectionString = '';
@@ -10,8 +10,8 @@ if (process.env.VCAP_SERVICES) {
 }
 
 const connectionOptions = {
-  useMongoClient: true,
-  autoIndex: false
+  // useMongoClient: true,
+  // autoIndex: false
 };
 
 mongoose.connect(connectionString, connectionOptions, (err) => {
