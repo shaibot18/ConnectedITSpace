@@ -1,9 +1,14 @@
 ---
 applications:
-- name: CIS.R1.1.0
+- name: CIS.R1.2.1
   memory: 1024M
   instances: 1
-  host: cis-r110
-  command: npm start:prod
+  host: cis-r121
+  env:
+    NODE_ENV: production
+    NODE_VERBOSE: true
+  command: npm start
+  buildpack: https://github.com/heroku/heroku-buildpack-nodejs
+  path: ./
   services:
-  - cis-mongo
+  - cis-mongodb
