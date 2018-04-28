@@ -20,6 +20,7 @@ router.get('/user', (req, res) => {
   console.log(`${req.session.user.firstName} logged in`); // eslint-disable-line no-console
 });
 
+
 // serve angular app files from the '/app' route
 router.use('/', express.static('app'));
 module.exports = router;

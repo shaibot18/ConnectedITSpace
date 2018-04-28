@@ -4,8 +4,9 @@ const http = require('http');
 const moment = require('moment');
 
 const timeDiff = 8 * 60 * 60 * 1000;
-const hostname = 'localhost';
+// const hostname = 'localhost';
 // const hostname = 'https://cis.apps.sg1.bosch-iot-cloud.com';
+const hostname = '54.223.122.184';
 // const SN = 'AAAAAAAA';
 const SN = 'FB8A8E16';
 // const SN = 'JFKD1101';
@@ -49,7 +50,7 @@ const testData = {
 const postData = JSON.stringify(testData);
 const options = {
   hostname,
-  port: 3000,
+  // port: 80,
   path: '/api/roomdata',
   method: 'POST',
   headers: {

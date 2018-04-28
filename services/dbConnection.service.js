@@ -15,10 +15,10 @@ const connectionOptions = {
 };
 
 mongoose.connect(connectionString, connectionOptions, (err) => {
-  console.error.bind(console, `connection error: ${err}`);
+  console.error.bind(console, `connection error: ${err}`); // eslint-disable-line no-console
 });
 
 const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
+db.on('error', console.error.bind(console, 'connection error:')); // eslint-disable-line no-console
 mongoose.Promise = global.Promise;
 module.exports = mongoose;

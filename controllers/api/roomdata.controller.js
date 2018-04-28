@@ -20,7 +20,7 @@ const uploadPeriod = padLeft((0).toString(16).toUpperCase()); // default 120, 0 
 
 router.get('/:RoomId', getByTimeRange);
 router.get('/adjust/:dir/:amount', adjustTimeZone);
-router.get('/remove', removeDuplicates); // TODO: not exposed to external
+router.get('/removeDuplicate', removeDuplicates); // TODO: not exposed to external
 router.get('/all/:RoomId', getAllById);
 router.get('/allnum/:RoomId', UpdateAllNum);
 router.post('/', handlePost);
