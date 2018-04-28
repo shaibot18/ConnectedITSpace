@@ -3,7 +3,6 @@ const moment = require('moment');
 const chalk = require('chalk');
 const RoomService = require('services/room.service');
 const RoomDataService = require('services/roomdata.service');
-const RoomStatService = require('services/room.stat.service');
 const DbService = require('services/db.service');
 const UtilService = require('services/util.service');
 const RawDataService = require('services/rawdata.service');
@@ -20,9 +19,10 @@ const uploadPeriod = padLeft((0).toString(16).toUpperCase()); // default 120, 0 
 
 router.get('/:RoomId', getByTimeRange);
 router.get('/adjust/:dir/:amount', adjustTimeZone);
-router.get('/removeDuplicate', removeDuplicates); // TODO: not exposed to external
+// router.get('/removeduplicate', removeDuplicates); 
 router.get('/all/:RoomId', getAllById);
 router.get('/allnum/:RoomId', UpdateAllNum);
+router.post('/aggregated', getAggreGateRoomData);
 router.post('/', handlePost);
 module.exports = router;
 
@@ -70,6 +70,35 @@ function getAllById(req, res) {
   if (req.params.RoomId) {
     const _RoomId = req.params.RoomId;
     RoomDataService.getAllById(_RoomId)
+      .then((roomdataList) => {
+        if (roomdataList) {
+          res.send(roomdataList);
+        } else {
+          res.sendStatus(404);
+        }
+      })
+      .catch((err) => {
+        res.status(400).send(err);
+      });
+  }
+}
+
+/**
+ *
+ * @param {obj} request object
+ * {
+ * cmd: 'query',
+ * roomId: 'id',
+ * startDate: '2018-04-08',
+ * endDate: '2018-04-10'
+ * }
+ */
+function getAggreGateRoomData(req, res) {
+  console.log(req.body);
+  if (req.body.roomId) {
+    const startDate = req.body.startDate ? req.body.startDate : moment();
+    const endDate = req.body.endDate ? req.body.endDate : moment();
+    RoomDataService.getAggRoomData(req.body.roomId, startDate, endDate)
       .then((roomdataList) => {
         if (roomdataList) {
           res.send(roomdataList);
@@ -131,6 +160,7 @@ function handlePost(req, res) {
   switch (cmd) {
     case 'getsetting': {
       data = _parseSetting(req.body.data);
+      console.log(req.body.data);
       const SN = data.SN;
       RoomService.GetRoomBySN(SN)
         .then((room) => {
@@ -208,6 +238,7 @@ function handlePost(req, res) {
               In: parseInt(cur.slice(14, 22).match(/[\w]{2}/g).reverse().join(''), 16),
               Out: parseInt(cur.slice(22, 30).match(/[\w]{2}/g).reverse().join(''), 16),
             };
+            console.log(chalk.yellow(JSON.stringify(dataObj)));
             RoomDataService.add(dataObj)
               .then((doc) => {
                 const roomId = doc._RoomId;
@@ -215,7 +246,7 @@ function handlePost(req, res) {
 
                 RoomService.updateBatteryLevel(roomId, parseInt(data.status.battery, 10))
                   .then((updatedDoc) => {
-                    console.log(chalk.green(`BATTERY Updated => ${updatedDoc._id}.`));
+                    console.log(chalk.green(`Battery update => ${updatedDoc._id}.`));
                   });
               })
               .catch((err) => {

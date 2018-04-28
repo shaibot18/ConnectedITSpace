@@ -42,7 +42,8 @@ dbclient.connect(url, (err, client) => {
   const db = client.db("cis_clean");
   const collection = db.collection("rawdatas");
 
-  const query = { "Time": { $gte: moment('2018-04-23') } };
+  // const query = { "Time": { $gte: moment('2018-04-23') } };
+  const query = {};
   const limit = 0;
 
   const cursor = collection.find(query).limit(limit).toArray((err, items) => {

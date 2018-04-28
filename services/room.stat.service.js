@@ -43,7 +43,7 @@ service.deleteRoomStatsEntry = deleteRoomStatsEntry;
 service.deleteRoomStatsEntryByDateRange = deleteRoomStatsEntryByDateRange;
 service.createOrUpdateRoomStatEntry = createOrUpdateRoomStatEntry;
 // service.updateStatByIdAndDate = updateStatByIdAndDate;
-service.roomStatHouseKeep = roomStatHouseKeep;
+service.roomStatHouseKeep = _roomStatAggregate;
 module.exports = service;
 
 function getAllStatsById(_roomId) {
@@ -92,6 +92,28 @@ function createRoomStatEntry(obj) {
     if (err) deferred.reject(`${err.name} : ${err.message}`);
     deferred.resolve(doc);
   });
+  return deferred.promise;
+}
+
+function newRoomStatEntry(obj) {
+  const deferred = Q.defer();
+
+  RoomStat.find({
+    _roomId: obj._roomId,
+    recordDate: obj.recordDate
+  }, (err, res) => {
+    if (err) console.log(`${err.name}: ${err.message}`);
+    if (res.length > 0) {
+      console.log(`ROOM STAT SERVICE: record EXISTS. Lengh: ${res.length}, ignoring...`);
+    } else {
+      createRoomStatEntry(obj)
+        .then((rData) => {
+          console.log(chalk.green(`ROOM STAT SERVICE: stat SAVED. Stats:${JSON.stringify(rData.stats)}`));
+          deferred.resolve(rData);
+        });
+    }
+  });
+
   return deferred.promise;
 }
 
@@ -182,7 +204,7 @@ function roomStatHouseKeep() {
   RoomDataService.RoomData.find({}, (err, docs) => {
     if (err) deferred.reject(err);
     else {
-      console.log('Starting housekeeping...'); // eslint-disable-line no-console
+      console.log('ROOMSTAT Service: Starting housekeeping...'); // eslint-disable-line no-console
       let uniqDocs = _.uniq(_.sortBy(docs, '_RoomId'), true);
       uniqDocs = _.map(uniqDocs, (e) => {
         return {
@@ -257,7 +279,91 @@ function roomStatHouseKeep() {
 }
 
 // run house keeper every hour
-setInterval(_roomStatHouseKeepByHour, 3600 * 1000);
+// setInterval(_roomStatHouseKeepByHour, 3600 * 1000);
+setInterval(_roomStatAggregate, 3600 * 1000);
+
+function _roomStatAggregate() {
+  const deferred = Q.defer();
+
+  console.log(chalk.red('ROOM STAT SERVICE: Start house keeping...')); // eslint-disable-line no-console
+
+  const aggPipeline = [
+    {
+      $group: {
+        _id: {
+          index: { $substr: ['$Time', 0, 13] },
+          _roomId: '$_RoomId',
+          sn: '$SN'
+        },
+        room: { $first: '$_RoomId' },
+        sn: { $first: '$SN' },
+        time: { $first: '$Time' },
+        totalIn: { $sum: '$In' },
+        totalOut: { $sum: '$Out' }
+      }
+    },
+    {
+      $addFields: {
+        stats: {
+          hourRange: '$time',
+          in: '$totalIn',
+          out: '$totalOut'
+        }
+      }
+    },
+    {
+      $project: {
+        room: 1,
+        sn: 1,
+        time: 1,
+        stats: 1
+      }
+    },
+    {
+      $group: {
+        _id: {
+          day: { $substr: ['$time', 0, 10] },
+          _roomId: '$_RoomId',
+          sn: '$SN'
+        },
+        room: { $first: '$room' },
+        sn: { $first: '$sn' },
+        time: { $first: '$time' },
+        stats: { $addToSet: '$stats' },
+      }
+    }
+  ];
+
+  let countTotal = 0;
+
+  RoomDataService.RoomData.aggregate(aggPipeline, (err, documents) => {
+    if (err) deferred.reject(`Error in aggregation: ${err}`);
+    documents.forEach((doc) => {
+      const rEntry = {
+        _roomId: doc.room,
+        recordDate: moment(doc.time).format('YYYY-MM-DD'),
+        stats: doc.stats.map((e) => {
+          return {
+            hourRange: moment(e.hourRange).hours(),
+            in: e.in,
+            out: e.out
+          };
+        })
+      };
+
+      newRoomStatEntry(rEntry)
+        .then(() => countTotal++)
+        .catch((entryerr) => {
+          if (entryerr) deferred.reject(`Error in saving entry: ${entryerr}`);
+        });
+    });
+
+    deferred.resolve(documents);
+    console.log(chalk.red('ROOM STAT SERVICE: DONE house keeping.')); // eslint-disable-line no-console
+  });
+
+  return deferred.promise;
+}
 
 function _roomStatHouseKeepByHour() {
   const curHr = moment().format('hh');

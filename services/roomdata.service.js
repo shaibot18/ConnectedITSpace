@@ -35,6 +35,7 @@ service.UpdateAvg = UpdateAvg;
 service.getAllById = getAllById;
 service.getByTimeRange = getByTimeRange;
 service.DeleteRoomData = DeleteRoomData;
+service.getAggRoomData = getAggRoomData;
 
 module.exports = service;
 
@@ -145,13 +146,48 @@ function getAllById(_RoomId) {
   return deferred.promise;
 }
 
+function getAggRoomData(roomId, start, end) {
+  const deferred = Q.defer();
+  
+  const aggPipeline = [
+    {
+      $match: {
+        _RoomId: roomId,
+        Time: { $gte: start, $lt: end }
+      }
+    },
+    {
+      $group: {
+        _id: {
+          index: { $substr: ['$Time', 0, 10] },
+          _roomId: '$_RoomId'
+        },
+        room: { $first: '$_RoomId' },
+        time: { $first: '$Time' },
+        totalIn: { $sum: '$In' },
+        totalOut: { $sum: '$Out' }
+      }
+    }
+  ];
+
+  Roomdata.aggregate(aggPipeline, (err, docs) => {
+    if (err) {
+      if (err) deferred.reject(`Error in aggregation: ${err}`);
+    } else {
+      deferred.resolve(docs);
+    }
+  });
+
+  return deferred.promise;
+}
+
 function _createOrUpdateRoomData(roomData) {
   const deferred = Q.defer();
   Roomdata.findOneAndUpdate(
     {
       _RoomId: roomData._RoomId,
-      In: roomData.in,
-      Out: roomData.out,
+      In: roomData.In,
+      Out: roomData.Out,
       Time: roomData.Time
     },
     roomData,
@@ -178,14 +214,36 @@ function add(roomdataParams) {
       } else {
         roomdataParams._RoomId = room[0]._id;
         // timezone defaults to +0800
-        _createOrUpdateRoomData(roomdataParams)
-          .then((rData) => {
-            console.log(chalk.green(`SAVED Time=${rData.Time}, In=${rData.In} Out=${rData.Out}`));
-            deferred.resolve(rData);
-          });
+        Roomdata.find({
+          _RoomId: roomdataParams._RoomId,
+          In: roomdataParams.In,
+          Out: roomdataParams.Out,
+          Time: roomdataParams.Time
+        }, (err, res) => {
+          if (err) console.log(`${err.name}: ${err.message}`);
+          if (res.length > 0) {
+            console.log(`ROOMDATA SERVICE: record EXISTS. Lengh: ${res.length}, ignoring...`);
+          } else {
+            _newDataRecord(roomdataParams)
+              .then((rData) => {
+                console.log(chalk.green(`ROOMDATA SERVICE: record SAVED. Time:${rData.Time}, In:${rData.In} Out:${rData.Out}`));
+                deferred.resolve(rData);
+              });
+          }
+        });
       }
     })
     .catch((err) => { deferred.reject(`${err.name}: ${err.message}`); });
+  return deferred.promise;
+}
+
+function _newDataRecord(data) {
+  const deferred = Q.defer();
+  const record = new Roomdata(data);
+  record.save((err, doc) => {
+    if (err) deferred.reject(`${err.name}: ${err.message}`);
+    deferred.resolve(doc);
+  });
   return deferred.promise;
 }
 

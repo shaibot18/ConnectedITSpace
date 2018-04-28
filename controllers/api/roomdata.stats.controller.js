@@ -2,6 +2,7 @@ const express = require('express');
 const moment = require('moment');
 const RoomStatService = require('services/room.stat.service');
 const mongoose = require('services/dbConnection.service');
+const RoomDataService = require('services/roomdata.service');
 const chalk = require('chalk');
 
 const router = express.Router();
@@ -187,23 +188,33 @@ function _injectRoomStatHandler(req, res) {
  * }
  */
 function _generateRoomStatHandler(req, res) {
-  mongoose.connection.db.dropCollection('roomstats', (dberr) => {
-    if (dberr) {
-      console.log(chalk.red(`Error dropping collection, no housekeeping done. \n ${dberr}`)); // eslint-disable-line no-console
-    } else {
-      RoomStatService.roomStatHouseKeep()
-        .then((roomstats) => {
-          if (roomstats) {
-            res.sendStatus(200).send({ code: 200, msg: 'House clean' });
-          } else {
-            res.sendStatus(200).send({ code: 404, msg: 'No records injected' });
-          }
-        })
-        .catch((err) => {
-          res.status(400).send(err);
-        });
-    }
-  });
+
+  if (req.body.force === 'f') {
+    mongoose.connection.db.dropCollection('roomstats', (dberr) => {
+      if (dberr) {
+        console.log(chalk.red(`Error dropping collection, no housekeeping done. \n ${dberr}`)); // eslint-disable-line no-console
+      } else {
+        _runHouseKeep(res);
+      }
+    });
+  }
+  else {
+    _runHouseKeep(res);
+  }
+}
+
+function _runHouseKeep(res) {
+  RoomStatService.roomStatHouseKeep()
+    .then((roomstats) => {
+      if (roomstats) {
+        res.sendStatus(200).send({ code: 200, msg: 'House clean' });
+      } else {
+        res.sendStatus(200).send({ code: 404, msg: 'No records injected' });
+      }
+    })
+    .catch((err) => {
+      res.status(400).send(err);
+    });
 }
 
 /**
