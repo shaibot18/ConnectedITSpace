@@ -159,8 +159,10 @@ function handlePost(req, res) {
   let data;
   switch (cmd) {
     case 'getsetting': {
-      data = _parseSetting(req.body.data);
-      console.log(req.body.data);
+      // data = _parseSetting(req.body.data);
+      // console.log(req.body.data);
+      const d = req.body.data;
+      data = _parseSetting(d[0]);
       const SN = data.SN;
       RoomService.GetRoomBySN(SN)
         .then((room) => {
