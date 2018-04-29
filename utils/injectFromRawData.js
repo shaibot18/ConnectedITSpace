@@ -44,7 +44,7 @@ dbclient.connect(url, (err, client) => {
 
   // const query = { "Time": { $gte: moment('2018-04-23') } };
   const query = {};
-  const limit = 0;
+  const limit = 2;
 
   const cursor = collection.find(query).limit(limit).toArray((err, items) => {
     if(err){

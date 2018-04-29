@@ -204,11 +204,15 @@ function _generateRoomStatHandler(req, res) {
 }
 
 function _runHouseKeep(res) {
+  console.log(chalk.red('ROOM STAT SERVICE: Start house keeping...')); // eslint-disable-line no-console
   RoomStatService.roomStatHouseKeep()
     .then((roomstats) => {
+      // console.log(JSON.stringify(roomstats));
       if (roomstats) {
+        console.log(chalk.red('ROOM STAT SERVICE: DONE house keeping.')); // eslint-disable-line no-console
         res.sendStatus(200).send({ code: 200, msg: 'House clean' });
       } else {
+        console.log(chalk.red('ROOM STAT SERVICE: DONE house keeping.')); // eslint-disable-line no-console
         res.sendStatus(200).send({ code: 404, msg: 'No records injected' });
       }
     })

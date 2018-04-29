@@ -148,7 +148,7 @@ function getAllById(_RoomId) {
 
 function getAggRoomData(roomId, start, end) {
   const deferred = Q.defer();
-  
+
   const aggPipeline = [
     {
       $match: {
