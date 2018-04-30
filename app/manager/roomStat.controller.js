@@ -143,7 +143,7 @@ function RoomStatController(UserService, RoomService, FlashService, RoomStatServ
 
     $scope.renderDailyBarPlot($scope.dailyPlotDate);
     $scope.renderWeeklyPlot($scope.weekPlotDate); // renders both stack and bar negative charts
-    $scope.renderCurrentMonthPlot(); // renders both stack and bar negative charts
+    $scope.renderCurrentMonthPlot(); // renders current month summary plot
   };
 
   $scope.renderDailyBarPlot = function (dailyPlotDate) {
@@ -294,39 +294,36 @@ function RoomStatController(UserService, RoomService, FlashService, RoomStatServ
   function _updateCurrentMonthPlot(result) {
     const rawMonthData = []; // raw data to store clean data, format as [[in,out,d,h],[],...]
     const dailyMonthSumData = []; // summed data (summarized to one day) [in, out, delta, d]
-    // generate empty rawdata matrix, [in,out,d,h]
+    // generate empty rawdata matrix, [in,out,delta,day]
     for (let i = 0; i < moment().daysInMonth(); i++) {
-      for (let j = 0; j < 24; j++) {
-        rawMonthData.push([0, 0, i, j]);
-      }
+      rawMonthData.push([0, 0, 0, i]);
     }
 
     result.forEach((e) => {
       // iso weekday as the index in data array, need to reduce by 1
-      const wd = moment(e.recordDate).isoWeekday() - 1;
       let dIn = 0;
       let dOut = 0;
+      const md = moment(e.recordDate).date() - 1; // day of month
       e.stats.forEach((ele) => {
-        rawMonthData[moment(e.recordDate).date()] = [ele.in, ele.out, wd, ele.hourRange];
         dIn += ele.in;
         $scope.totalInbound += ele.in;
         dOut += ele.out;
         $scope.totalOutbound += ele.out;
       });
-      dailyMonthSumData.push([dIn, dOut, dIn - dOut, wd]);
+      rawMonthData[md] = [dIn, dOut, dIn - dOut, md];
     });
 
     $scope.avgInbound = $scope.totalInbound / (moment().date() - $scope.numberOfWeekEndsToDate);
     $scope.avgOutbound = $scope.totalOutbound / (moment().date() - $scope.numberOfWeekEndsToDate);
 
-    console.log(dailyMonthSumData);
+    console.log(rawMonthData);
 
     // Inbound & outbound visitor
     $scope.currentMonthStats.setOption({
       series: [
-        { name: 'Inbound', type: 'line', smooth: true, data: dailyMonthSumData.map(item => item[0]) },
-        { name: 'Outbound', type: 'line', smooth: true, data: dailyMonthSumData.map(item => item[1]) },
-        { name: 'Delta', type: 'line', smooth: true, data: dailyMonthSumData.map(item => item[2]) },
+        { name: 'Inbound', type: 'line', smooth: true, data: rawMonthData.map(item => item[0]) },
+        { name: 'Outbound', type: 'line', smooth: true, data: rawMonthData.map(item => item[1]) },
+        { name: 'Delta', type: 'line', smooth: true, data: rawMonthData.map(item => item[2]) },
       ]
     });
   }
