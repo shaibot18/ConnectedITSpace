@@ -15,7 +15,7 @@ const openTime = padLeft((0).toString(16).toUpperCase()) +
 const closeTime = padLeft((23).toString(16).toUpperCase()) +
   padLeft((0).toString(16).toUpperCase());
 const recordPeriod = padLeft((0).toString(16).toUpperCase()); // default 10, 0 for real-time
-const uploadPeriod = padLeft((0).toString(16).toUpperCase()); // default 120, 0 for real-time
+const uploadPeriod = padLeft((0).toString(16).toUpperCase()); // real-time upload
 
 router.get('/:RoomId', getByTimeRange);
 router.get('/adjust/:dir/:amount', adjustTimeZone);
@@ -147,7 +147,7 @@ function convertTimeZone(timeZone) {
 
 function handlePost(req, res) {
   console.log(chalk.yellow('INCOMING ROOM DATA ...'));
-  // console.log(req.body);
+  console.log(req.body);
   res.set('Content-Type', 'application/x-www-form-urlencoded');
 
   RawDataService.add(req.body); // persist raw data
@@ -178,8 +178,9 @@ function handlePost(req, res) {
             data.timeZone = room[0].timeZone;
           }
           timeDiff = data.timeZone ? convertTimeZone(data.timeZone) : 0;
-          data.timeCheck = Math.abs(moment().valueOf() + timeDiff -
-            data.systemTime.valueOf()) < 60000;
+          // data.timeCheck = Math.abs(moment().valueOf() + timeDiff -
+          //   data.systemTime.valueOf()) < 60000;
+          data.timeCheck = true; // TODO: only for dev test
           if (data.crcCheck) {
             console.log('CrcCheck successful');
             if (data.timeCheck) {
@@ -194,7 +195,7 @@ function handlePost(req, res) {
               .concat(recordPeriod).concat(uploadPeriod)
               .concat('0000000000000000000002000000000000000000000000000000000000000000')
               .concat(`${systemTimeWeek}${openTime}${closeTime}0000`);
-            res.status(200).send(`result=${resultString}${UtilService.crcEncrypt(resultString)}`);
+              res.status(200).send(`result=${resultString}${UtilService.crcEncrypt(resultString)}`);
             res.end();
           }
         })
@@ -212,11 +213,18 @@ function handlePost(req, res) {
         res.end();
         break;
       }
-      // TODO: only the last entry should be injected?
+
       const dataList = (typeof body.data === 'string') ? [body.data] : body.data;
       const SN = data.status.SN;
       RoomService.GetRoomBySN(SN)
         .then((room) => {
+
+          // update battery level
+          RoomService.updateBatteryLevel(room._id, parseInt(data.status.battery, 10))
+            .then((updatedDoc) => {
+              console.log(chalk.green(`Battery update => ${updatedDoc._id}.`));
+            });
+
           const timeZone = room[0].timeZone;
           const resType = '01'; // data uploading check successful
           cmdType = '03'; // check both system time and open/close time
@@ -243,13 +251,7 @@ function handlePost(req, res) {
             console.log(chalk.yellow(JSON.stringify(dataObj)));
             RoomDataService.add(dataObj)
               .then((doc) => {
-                const roomId = doc._RoomId;
-                const eventDate = moment(doc.Time);
-
-                RoomService.updateBatteryLevel(roomId, parseInt(data.status.battery, 10))
-                  .then((updatedDoc) => {
-                    console.log(chalk.green(`Battery update => ${updatedDoc._id}.`));
-                  });
+                console.log('ROOMDATA CONTROLLER: Add data entry done.');
               })
               .catch((err) => {
                 console.log(err);
@@ -258,7 +260,7 @@ function handlePost(req, res) {
 
           const systemTimeWeek = genTimeString(new Date(Date.now() + timeDiff)).concat('00');
           const resultString = `${resType}${resFlag}${cmdType}${systemTimeWeek}${openTime}${closeTime}`;
-          res.status(200).send(`result${resultString} ${UtilService.crcEncrypt(resultString)} `);
+          res.status(200).send(`result=${resultString}${UtilService.crcEncrypt(resultString)} `);
           res.end();
         })
         .catch((err) => {

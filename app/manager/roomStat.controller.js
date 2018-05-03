@@ -316,8 +316,6 @@ function RoomStatController(UserService, RoomService, FlashService, RoomStatServ
     $scope.avgInbound = $scope.totalInbound / (moment().date() - $scope.numberOfWeekEndsToDate);
     $scope.avgOutbound = $scope.totalOutbound / (moment().date() - $scope.numberOfWeekEndsToDate);
 
-    console.log(rawMonthData);
-
     // Inbound & outbound visitor
     $scope.currentMonthStats.setOption({
       series: [

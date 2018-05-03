@@ -46,7 +46,17 @@ const testData = {
   Tend: 'nnnnnnnnnnnnnnnnnnT'
 };
 
+const testDataSetting = {
+  cmd : "getsetting", 
+  flag : "0410", 
+  data : [
+      "168E8AFB03000000000000000000000000000284BE52B4CECBE6FC64BA5819E6E274A34AA28C75DC1204110004100500001700EB3D"
+  ]
+};
+
+// const postData = JSON.stringify(testDataSetting);
 const postData = JSON.stringify(testData);
+
 const options = {
   hostname,
   port: 3000,

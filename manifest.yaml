@@ -1,9 +1,9 @@
 ---
 applications:
-- name: CIS.R1.2.1
+- name: CIS.R1.2.2-BLUE
   memory: 1024M
   instances: 1
-  host: cis-r121
+  host: cis-r122-blue
   env:
     NODE_ENV: production
     NODE_VERBOSE: true
@@ -11,4 +11,4 @@ applications:
   buildpack: https://github.com/heroku/heroku-buildpack-nodejs
   path: ./
   services:
-  - cis-mongodb
+  - cis-r1-mongodb

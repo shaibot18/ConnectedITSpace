@@ -10,8 +10,8 @@ if (process.env.VCAP_SERVICES) {
 }
 
 const connectionOptions = {
-  useMongoClient: true,
-  autoIndex: false
+  // useMongoClient: true,
+  // autoIndex: false
 };
 
 mongoose.connect(connectionString, connectionOptions, (err) => {

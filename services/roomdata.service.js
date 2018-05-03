@@ -223,6 +223,7 @@ function add(roomdataParams) {
           if (err) console.log(`${err.name}: ${err.message}`);
           if (res.length > 0) {
             console.log(`ROOMDATA SERVICE: record EXISTS. Lengh: ${res.length}, ignoring...`);
+            deferred.resolve(res[0]);
           } else {
             _newDataRecord(roomdataParams)
               .then((rData) => {
