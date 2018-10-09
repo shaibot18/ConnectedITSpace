@@ -1,9 +1,9 @@
 ---
 applications:
-- name: CIS.R1.2.2-BLUE
+- name: CIS.R1.2.3
   memory: 1024M
   instances: 1
-  host: cis-r122-blue
+  host: cis-r123
   env:
     NODE_ENV: production
     NODE_VERBOSE: true
